@@ -47,10 +47,14 @@ export async function getPostData(id: string) {
   const fullPath = path.join(postsDirectory, `${id}.md`);
   const fileContents = readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
+  
+  // Use remark with html option to disable sanitization
   const processedContent = await remark()
-    .use(html)
+    .use(html, { sanitize: false })
     .process(matterResult.content);
+    
   const contentHtml = processedContent.toString();
+  
   return {
     id,
     contentHtml,
@@ -58,7 +62,7 @@ export async function getPostData(id: string) {
       date: string;
       title: string;
       description: string;
-      image?: string; // Make image optional
+      image?: string;
     }),
   };
 }

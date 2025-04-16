@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 // Define the Post type based on getSortedPostsData return type
@@ -21,16 +21,29 @@ interface BlogClientProps {
 export default function BlogClient({ posts }: BlogClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(posts);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
+
+  // Mock categories - you can replace with real categories from your posts
+  const categories = ["All", "Machine Learning", "Neural Networks", "Computer Vision", "NLP"];
 
   useEffect(() => {
-    setFilteredPosts(
-      posts.filter(
-        (post) =>
-          post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    const filtered = posts.filter(
+      (post) =>
+        (selectedCategory === "All" || post.title.includes(selectedCategory)) &&
+        (post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [searchTerm, posts]);
+    setFilteredPosts(filtered);
+  }, [searchTerm, selectedCategory, posts]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -49,25 +62,66 @@ export default function BlogClient({ posts }: BlogClientProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <section className="relative h-96 overflow-hidden">
-        <div className="absolute inset-0 bg-blue-600 dark:bg-blue-800">
-          <div className="absolute inset-0 opacity-20 bg-[url('/hero-pattern.svg')] bg-repeat"></div>
-        </div>
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+      {/* Hero Section with Parallax Effect */}
+      <section ref={heroRef} className="relative h-[80vh] overflow-hidden">
+        <motion.div 
+          style={{ opacity, scale, y }}
+          className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800"
+        >
+          <div className="absolute inset-0 opacity-20 bg-[url('/hero-pattern.svg')] bg-repeat mix-blend-overlay"></div>
+          
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full bg-white/10"
+                style={{
+                  width: Math.random() * 100 + 50,
+                  height: Math.random() * 100 + 50,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [0, Math.random() * 100 - 50],
+                  opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                  duration: Math.random() * 10 + 10,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+              />
+            ))}
+          </div>
+        </motion.div>
+        
+        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, type: "spring" }}
+            className="mb-6"
+          >
+            <div className="inline-block text-6xl bg-white dark:bg-gray-800 rounded-full p-4 shadow-lg">
+              🧠
+            </div>
+          </motion.div>
+          
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl md:text-6xl font-extrabold text-white mb-4"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl md:text-7xl font-extrabold text-white mb-4 tracking-tight"
           >
-            <span className="inline-block">🧠</span> AI-Powered Insights
+            AI-Powered <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-500">Insights</span>
           </motion.h1>
+          
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-xl text-white/90 max-w-2xl"
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="text-xl text-white/90 max-w-2xl font-light"
           >
             Exploring the cutting edge of artificial intelligence and its impact on our world
           </motion.p>
@@ -76,87 +130,178 @@ export default function BlogClient({ posts }: BlogClientProps) {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="mt-8 w-full max-w-md"
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="mt-10 w-full max-w-md"
           >
-            <div className="relative">
+            <div className="relative group">
               <input
                 type="text"
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-5 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+                className="w-full px-6 py-4 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg bg-white/90 backdrop-blur-sm transition-all duration-300 group-hover:shadow-xl"
               />
-              <div className="absolute right-3 top-3 text-gray-400">
+              <div className="absolute right-4 top-4 text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
               </div>
+            </div>
+          </motion.div>
+          
+          {/* Scroll indicator */}
+          <motion.div 
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <div className="text-white/70">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </div>
           </motion.div>
         </div>
       </section>
 
+      {/* Category Filter */}
+      <div className="bg-white dark:bg-gray-800 sticky top-0 z-20 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex overflow-x-auto pb-2 scrollbar-hide space-x-2">
+            {categories.map((category) => (
+              <motion.button
+                key={category}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  selectedCategory === category
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                {category}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Latest Articles</h2>
-        
-        {filteredPosts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">No articles found matching your search.</p>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Latest Articles
+            <div className="h-1 w-20 bg-blue-600 mt-2 rounded-full"></div>
+          </h2>
+          <div className="text-gray-500 dark:text-gray-400">
+            {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''}
           </div>
-        ) : (
-          <motion.div 
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {filteredPosts.map((post) => (
-              <motion.div 
-                key={post.id} 
-                variants={item}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+        </div>
+        
+        <AnimatePresence mode="wait">
+          {filteredPosts.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-20"
+            >
+              <div className="inline-block text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">No articles found</h3>
+              <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or category filter</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All");
+                }}
+                className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
               >
-                <Link href={`/posts/${post.id}`} className="block h-full">
-                  <div className="h-48 bg-gray-200 dark:bg-gray-700 relative">
-                    {post.image ? (
-                      <Image
-                        src={post.image}
-                        alt={post.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-4xl">
-                        🧠
+                Reset filters
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div 
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredPosts.map((post) => (
+                <motion.div 
+                  key={post.id} 
+                  variants={item}
+                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group"
+                >
+                  <Link href={`/posts/${post.id}`} className="block h-full">
+                    <div className="h-56 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                      {post.image ? (
+                        <Image
+                          src={post.image}
+                          alt={post.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-6xl bg-gradient-to-br from-blue-500 to-purple-600">
+                          🧠
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <div className="p-6">
+                      <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full mb-3">
+                        {post.date}
                       </div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                      {post.date}
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                        {post.description}
+                      </p>
+                      <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium group-hover:translate-x-2 transition-transform duration-300">
+                        Read more
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                      {post.description}
-                    </p>
-                    <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium">
-                      Read more
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
+      
+      {/* Footer with scroll to top button */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-6 md:mb-0">
+              <div className="text-2xl font-bold">AI Blog</div>
+              <p className="text-gray-400 mt-2">Exploring the future of technology</p>
+            </div>
+            
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </motion.button>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            © {new Date().getFullYear()} AI Blog. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
