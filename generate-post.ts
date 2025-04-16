@@ -62,25 +62,26 @@ async function main() {
   const content = contentMatch[1].trim();
 
   // Define directory paths
-  const postsDir = path.join("posts");
-  const imagesDir = path.join(postsDir, "images");
+  const postsDir = path.join(process.cwd(), "posts"); // Use process.cwd() for consistency
+  const publicDir = path.join(process.cwd(), "public"); // Define public directory
+  const imagesDir = path.join(publicDir, "images"); // Images should go inside public/images
 
   // Ensure posts directory exists
   if (!fs.existsSync(postsDir)) {
-    fs.mkdirSync(postsDir);
+    fs.mkdirSync(postsDir, { recursive: true }); // Add recursive just in case
     console.log(`✅ Created directory: ${postsDir}`);
   }
 
-  // Ensure images directory exists
+  // Ensure public/images directory exists
   if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir, { recursive: true }); // Use recursive to create parent if needed
+    fs.mkdirSync(imagesDir, { recursive: true }); // Use recursive to create public and images if needed
     console.log(`✅ Created directory: ${imagesDir}`);
   }
 
   const fileName = generateFileName(title);
   const imageFileName = fileName.replace(".md", ".png");
   const filePath = path.join(postsDir, fileName);
-  const imagePath = path.join(imagesDir, imageFileName);
+  const imagePath = path.join(imagesDir, imageFileName); // Correct image path for saving
 
   // Generate image
   const imageResponse = await genAI.models.generateContent({
@@ -93,32 +94,47 @@ async function main() {
 
   // Generate and save image with error handling
   let imageGenerated = false; // Flag to track if image was saved
-  for (const part of imageResponse.candidates?.[0].content?.parts ?? []) {
-    if (part.text) {
-      console.log(part.text); // Log any text part from image generation
-    } else if (part.inlineData) {
-      const imageData = part.inlineData.data ?? "";
-      const buffer = Buffer.from(imageData, "base64");
-      fs.writeFileSync(imagePath, buffer);
-      console.log(`✅ Generated image: ${imagePath}`);
-      imageGenerated = true; // Set flag to true
+  try { // Add try-catch for image generation/saving
+    const imageResponse = await genAI.models.generateContent({
+      model: "gemini-2.0-flash-exp-image-generation", // Ensure this model is available/correct
+      contents: `Generate an image for: ${imageDescription}`,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
+      },
+    });
+
+    for (const part of imageResponse.candidates?.[0].content?.parts ?? []) {
+      if (part.text) {
+        console.log(`Image generation model text response: ${part.text}`); // Log any text part from image generation
+      } else if (part.inlineData) {
+        const imageData = part.inlineData.data ?? "";
+        const buffer = Buffer.from(imageData, "base64");
+        fs.writeFileSync(imagePath, buffer); // Save to public/images/imageFileName.png
+        console.log(`✅ Generated image: ${imagePath}`);
+        imageGenerated = true; // Set flag to true
+        break; // Exit loop once image is saved
+      }
     }
+  } catch (error) {
+    console.error("❌ Error during image generation or saving:", error);
   }
 
+
   if (!imageGenerated) {
-    console.warn("⚠️ Failed to generate or save image");
+    console.warn("⚠️ Failed to generate or save image. Skipping image inclusion in post.");
   }
 
   // Include image path in markdown frontmatter only if generated
+  // The path used here ("/images/...") is correct for web access via the public dir
   const markdown = `---
 title: "${title}"
 date: "${dateStr}"
 description: "${description}"
-${imageGenerated ? `image: "/images/${imageFileName}"` : ""}
+${imageGenerated ? `image: "/images/${imageFileName}"` : ""} 
 ---
 
 ${
-  imageGenerated ? `![${title}](/images/${imageFileName})\n\n` : ""
+  imageGenerated ? `![${title}](/images/${imageFileName})\n\n` : "" // Path is correct for web access
 }${content.trim()}
 `;
 

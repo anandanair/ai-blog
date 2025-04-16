@@ -1,14 +1,14 @@
-import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { remark } from "remark";
 import html from "remark-html";
+import { readdirSync, readFileSync } from "fs";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 
 export function getSortedPostsData() {
   // Get all files in the posts directory
-  const fileNames = fs.readdirSync(postsDirectory);
+  const fileNames = readdirSync(postsDirectory);
 
   // Filter only markdown files and process them
   const allPostsData = fileNames
@@ -16,7 +16,7 @@ export function getSortedPostsData() {
     .map((fileName) => {
       const id = fileName.replace(/\.md$/, "");
       const fullPath = path.join(postsDirectory, fileName);
-      const fileContents = fs.readFileSync(fullPath, "utf8");
+      const fileContents = readFileSync(fullPath, "utf8");
       const matterResult = matter(fileContents);
       return {
         id,
@@ -33,7 +33,7 @@ export function getSortedPostsData() {
 }
 
 export function getAllPostIds() {
-  const fileNames = fs.readdirSync(postsDirectory);
+  const fileNames = readdirSync(postsDirectory);
   return fileNames
     .filter((fileName) => fileName.endsWith(".md"))
     .map((fileName) => ({
@@ -45,7 +45,7 @@ export function getAllPostIds() {
 
 export async function getPostData(id: string) {
   const fullPath = path.join(postsDirectory, `${id}.md`);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
+  const fileContents = readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
   const processedContent = await remark()
     .use(html)
