@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
 import { GoogleGenAI, Modality } from "@google/genai";
 import dotenv from "dotenv";
 dotenv.config();
@@ -62,12 +61,28 @@ async function main() {
   const imageDescription = imageDescMatch[1].trim();
   const content = contentMatch[1].trim();
 
+  // Define directory paths
+  const postsDir = path.join("posts");
+  const imagesDir = path.join(postsDir, "images");
+
+  // Ensure posts directory exists
+  if (!fs.existsSync(postsDir)) {
+    fs.mkdirSync(postsDir);
+    console.log(`✅ Created directory: ${postsDir}`);
+  }
+
+  // Ensure images directory exists
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir, { recursive: true }); // Use recursive to create parent if needed
+    console.log(`✅ Created directory: ${imagesDir}`);
+  }
+
   const fileName = generateFileName(title);
   const imageFileName = fileName.replace(".md", ".png");
-  const filePath = path.join("posts", fileName);
-  const imagePath = path.join("posts", "images", imageFileName);
+  const filePath = path.join(postsDir, fileName);
+  const imagePath = path.join(imagesDir, imageFileName);
 
-  //Genereate image
+  // Generate image
   const imageResponse = await genAI.models.generateContent({
     model: "gemini-2.0-flash-exp-image-generation",
     contents: `Generate an image for: ${imageDescription}`,
@@ -77,28 +92,38 @@ async function main() {
   });
 
   // Generate and save image with error handling
+  let imageGenerated = false; // Flag to track if image was saved
   for (const part of imageResponse.candidates?.[0].content?.parts ?? []) {
     if (part.text) {
-      console.log(part.text);
+      console.log(part.text); // Log any text part from image generation
     } else if (part.inlineData) {
       const imageData = part.inlineData.data ?? "";
       const buffer = Buffer.from(imageData, "base64");
       fs.writeFileSync(imagePath, buffer);
       console.log(`✅ Generated image: ${imagePath}`);
+      imageGenerated = true; // Set flag to true
     }
   }
 
+  if (!imageGenerated) {
+    console.warn("⚠️ Failed to generate or save image");
+  }
+
+  // Include image path in markdown frontmatter only if generated
   const markdown = `---
 title: "${title}"
 date: "${dateStr}"
 description: "${description}"
+${imageGenerated ? `image: "/images/${imageFileName}"` : ""}
 ---
 
-${content.trim()}
+${
+  imageGenerated ? `![${title}](/images/${imageFileName})\n\n` : ""
+}${content.trim()}
 `;
 
   fs.writeFileSync(filePath, markdown);
-  console.log(`✅ Generated blog post: posts/${fileName}`);
+  console.log(`✅ Generated blog post: ${filePath}`);
 }
 
-main();
+main().catch(console.error); // Added catch for the main async function
