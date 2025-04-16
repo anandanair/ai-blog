@@ -7,32 +7,40 @@ import html from "remark-html";
 const postsDirectory = path.join(process.cwd(), "posts");
 
 export function getSortedPostsData() {
+  // Get all files in the posts directory
   const fileNames = fs.readdirSync(postsDirectory);
-  const allPostsData = fileNames.map((fileName) => {
-    const id = fileName.replace(/\.md$/, "");
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, "utf8");
-    const matterResult = matter(fileContents);
-    return {
-      id,
-      ...(matterResult.data as {
-        date: string;
-        title: string;
-        description: string;
-      }),
-    };
-  });
+
+  // Filter only markdown files and process them
+  const allPostsData = fileNames
+    .filter((fileName) => fileName.endsWith(".md"))
+    .map((fileName) => {
+      const id = fileName.replace(/\.md$/, "");
+      const fullPath = path.join(postsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, "utf8");
+      const matterResult = matter(fileContents);
+      return {
+        id,
+        ...(matterResult.data as {
+          date: string;
+          title: string;
+          description: string;
+          image?: string;
+        }),
+      };
+    });
 
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 export function getAllPostIds() {
   const fileNames = fs.readdirSync(postsDirectory);
-  return fileNames.map((fileName) => ({
-    params: {
-      id: fileName.replace(/\.md$/, ""),
-    },
-  }));
+  return fileNames
+    .filter((fileName) => fileName.endsWith(".md"))
+    .map((fileName) => ({
+      params: {
+        id: fileName.replace(/\.md$/, ""),
+      },
+    }));
 }
 
 export async function getPostData(id: string) {
@@ -50,6 +58,7 @@ export async function getPostData(id: string) {
       date: string;
       title: string;
       description: string;
+      image?: string; // Make image optional
     }),
   };
 }
