@@ -17,15 +17,6 @@ async function getCurrentTechContext(): Promise<string> {
     techContext += "\n\nTrending topics from Reddit tech communities:\n";
     techContext += redditTopics;
 
-    // // Part 3: Add evergreen categories as fallback
-    // techContext += "\n\nEvergreen tech categories:\n";
-    // techContext += "- Artificial Intelligence and Machine Learning\n";
-    // techContext += "- Web Development (Frontend and Backend)\n";
-    // techContext += "- Mobile App Development\n";
-    // techContext += "- Cybersecurity\n";
-    // techContext += "- Cloud Computing\n";
-    // techContext += "- DevOps and Infrastructure\n";
-
     return techContext;
   } catch (error) {
     console.error("Error fetching current tech context:", error);
@@ -165,6 +156,307 @@ async function getRedditTopics(): Promise<string> {
   }
 }
 
+// New helper function to analyze topic category coverage
+async function getTopicCategoryCoverage(
+  supabase: SupabaseClient
+): Promise<string> {
+  try {
+    // Define main tech categories
+    const categories = [
+      "AI and Machine Learning",
+      "Web Development",
+      "Mobile Development",
+      "DevOps and Cloud",
+      "Cybersecurity",
+      "Data Science and Analytics",
+      "Programming Languages",
+      "Blockchain and Cryptocurrency",
+      "IoT and Hardware",
+      "AR/VR and Metaverse",
+      "Tech Ethics and Society",
+      "Productivity and Tools",
+    ];
+
+    // Get all posts with their titles and tags
+    const { data, error } = await supabase
+      .from("posts")
+      .select("title, tags")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error("Error fetching posts for category analysis:", error);
+      return "Unable to analyze category coverage.";
+    }
+
+    // Count posts per category
+    const categoryCounts: Record<string, number> = {};
+    categories.forEach((category) => (categoryCounts[category] = 0));
+
+    // Simple keyword matching to categorize posts
+    const categoryKeywords: Record<string, string[]> = {
+      "AI and Machine Learning": [
+        "ai",
+        "artificial intelligence",
+        "machine learning",
+        "ml",
+        "deep learning",
+        "neural",
+        "llm",
+        "gpt",
+        "gemini",
+      ],
+      "Web Development": [
+        "web",
+        "frontend",
+        "backend",
+        "javascript",
+        "html",
+        "css",
+        "react",
+        "vue",
+        "angular",
+        "node",
+      ],
+      "Mobile Development": [
+        "mobile",
+        "ios",
+        "android",
+        "app",
+        "flutter",
+        "react native",
+        "swift",
+        "kotlin",
+      ],
+      "DevOps and Cloud": [
+        "devops",
+        "cloud",
+        "aws",
+        "azure",
+        "gcp",
+        "kubernetes",
+        "docker",
+        "ci/cd",
+        "pipeline",
+        "serverless",
+      ],
+      Cybersecurity: [
+        "security",
+        "cyber",
+        "hack",
+        "vulnerability",
+        "encryption",
+        "privacy",
+        "authentication",
+      ],
+      "Data Science and Analytics": [
+        "data",
+        "analytics",
+        "visualization",
+        "dashboard",
+        "statistics",
+        "pandas",
+        "jupyter",
+        "tableau",
+      ],
+      "Programming Languages": [
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "c++",
+        "go",
+        "rust",
+        "programming language",
+      ],
+      "Blockchain and Cryptocurrency": [
+        "blockchain",
+        "crypto",
+        "bitcoin",
+        "ethereum",
+        "web3",
+        "nft",
+        "token",
+        "defi",
+      ],
+      "IoT and Hardware": [
+        "iot",
+        "hardware",
+        "raspberry pi",
+        "arduino",
+        "sensor",
+        "embedded",
+        "device",
+      ],
+      "AR/VR and Metaverse": [
+        "ar",
+        "vr",
+        "augmented reality",
+        "virtual reality",
+        "metaverse",
+        "spatial",
+      ],
+      "Tech Ethics and Society": [
+        "ethics",
+        "society",
+        "bias",
+        "fairness",
+        "regulation",
+        "policy",
+        "impact",
+      ],
+      "Productivity and Tools": [
+        "productivity",
+        "tool",
+        "workflow",
+        "automation",
+        "efficiency",
+        "software",
+      ],
+    };
+
+    // Categorize each post
+    data.forEach((post) => {
+      const postText = (post.title + " " + (post.tags || "")).toLowerCase();
+
+      for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some((keyword) => postText.includes(keyword))) {
+          categoryCounts[category]++;
+          break; // Assign to first matching category
+        }
+      }
+    });
+
+    // Format the results
+    let result =
+      "Here's the distribution of our recent blog posts by category:\n";
+
+    // Sort categories by coverage (ascending)
+    const sortedCategories = categories.sort(
+      (a, b) => categoryCounts[a] - categoryCounts[b]
+    );
+
+    for (const category of sortedCategories) {
+      const count = categoryCounts[category];
+      const percentage =
+        data.length > 0 ? Math.round((count / data.length) * 100) : 0;
+
+      // Add emoji indicators for coverage
+      let coverageIndicator = "🟢 Well covered";
+      if (percentage === 0) coverageIndicator = "⚪ No coverage (priority)";
+      else if (percentage < 10)
+        coverageIndicator = "🔴 Very low coverage (high priority)";
+      else if (percentage < 20)
+        coverageIndicator = "🟠 Low coverage (medium priority)";
+
+      result += `- ${category}: ${count} posts (${percentage}%) - ${coverageIndicator}\n`;
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error in getTopicCategoryCoverage:", error);
+    return "Unable to analyze category coverage.";
+  }
+}
+
+// New helper function to get seasonal tech events
+function getCurrentSeasonalTechEvents(): string {
+  const now = new Date();
+  const month = now.getMonth();
+  const day = now.getDate();
+
+  let events = "Current seasonal tech relevance:\n";
+
+  // Annual tech events by month
+  switch (month) {
+    case 0: // January
+      events +=
+        "- CES (Consumer Electronics Show) just happened or is happening\n";
+      events += "- New Year's tech resolutions and predictions are relevant\n";
+      events += "- Q1 tech planning and trends for the new year\n";
+      break;
+    case 1: // February
+      events +=
+        "- Mobile World Congress (MWC) is approaching or just happened\n";
+      events +=
+        "- Valentine's Day tech gift guides or relationship apps could be relevant\n";
+      break;
+    case 2: // March
+      events += "- SXSW (South by Southwest) tech discussions\n";
+      events += "- Game Developers Conference (GDC)\n";
+      events += "- End of Q1 tech assessments\n";
+      break;
+    case 3: // April
+      events += "- Tax season tech tools (in the US)\n";
+      events += "- Earth Day and sustainable tech\n";
+      events += "- Q2 begins - new tech quarterly releases\n";
+      break;
+    case 4: // May
+      events += "- Google I/O developer conference\n";
+      events += "- Microsoft Build developer conference\n";
+      events += "- Graduation season tech gifts and tools\n";
+      break;
+    case 5: // June
+      events += "- Apple WWDC developer conference\n";
+      events += "- E3 gaming expo\n";
+      events += "- Mid-year tech review and trends\n";
+      break;
+    case 6: // July
+      events += "- Summer tech gadgets and tools\n";
+      events += "- Q3 begins - tech industry shifts\n";
+      events += "- Amazon Prime Day tech deals\n";
+      break;
+    case 7: // August
+      events += "- Back to school tech\n";
+      events += "- Samsung Unpacked event\n";
+      events += "- Late summer tech releases\n";
+      break;
+    case 8: // September
+      events += "- Apple iPhone event\n";
+      events += "- IFA Berlin tech conference\n";
+      events += "- Q4 preparation and tech planning\n";
+      break;
+    case 9: // October
+      events += "- Google Pixel event\n";
+      events += "- Cybersecurity awareness month\n";
+      events += "- Halloween tech and smart home\n";
+      break;
+    case 10: // November
+      events += "- Black Friday and holiday tech shopping\n";
+      events += "- Web Summit conference\n";
+      events += "- Gaming console releases and updates\n";
+      break;
+    case 11: // December
+      events += "- End of year tech reviews and roundups\n";
+      events += "- Tech predictions for next year\n";
+      events += "- Holiday tech gift guides\n";
+      break;
+  }
+
+  // Add current tech lifecycle context
+  events += "\nTech lifecycle context:\n";
+
+  // These are approximate and should be updated yearly
+  if (month >= 8 || month <= 1) {
+    // Sept to Feb
+    events += "- New iPhone cycle (released in September)\n";
+  }
+  if (month >= 9 || month <= 2) {
+    // Oct to March
+    events += "- New Android flagship phones being announced\n";
+  }
+  if (month >= 5 && month <= 8) {
+    // June to Sept
+    events += "- Beta testing period for iOS and macOS\n";
+  }
+  if (month >= 3 && month <= 5) {
+    // April to June
+    events += "- Major developer conferences and platform announcements\n";
+  }
+
+  return events;
+}
+
 // First, let's modify the generateGeneralPost function to use a two-stage approach
 
 export async function generateGeneralPost(
@@ -184,6 +476,12 @@ export async function generateGeneralPost(
   console.log("Fetching existing post titles...");
   const existingTitles = await getExistingPostTitles(supabase);
 
+  // Get topic categories and their coverage
+  const topicCategoryCoverage = await getTopicCategoryCoverage(supabase);
+
+  // Get seasonal tech events
+  const seasonalEvents = getCurrentSeasonalTechEvents();
+
   const existingTopicsContext =
     existingTitles.length > 0
       ? `\nAVOID these topics as they've been covered recently:\n${existingTitles
@@ -191,24 +489,36 @@ export async function generateGeneralPost(
           .join("\n")}\n`
       : "";
 
-  console.log("Tech context:", techContext); // Log the tech context to the console
-
   // Stage 1 prompt: Select a topic only
   const topicSelectionPrompt = `
     You are an AI blog topic selector. Your job is to choose an interesting, relevant tech topic for a blog post.
     
     Here is some current context about technology trends to help you choose:
     ${techContext}
+
     ${existingTopicsContext}
+
+    TOPIC CATEGORY COVERAGE:
+    ${topicCategoryCoverage}
+
+    CURRENT TECH EVENTS AND SEASONAL RELEVANCE:
+    ${seasonalEvents}
     
-    1. Choose a specific tech-related or productivity topic that would be relevant today.
+    SELECTION CRITERIA:
+    1. Choose a specific tech-related topic that would be relevant today.
     2. IMPORTANT: Choose a topic that is NOT similar to any of the existing post titles listed above.
-    3. Be specific - don't just say "AI" but rather something like "Using AI for Personal Task Management"
-    4. Return ONLY the topic title and a brief 1-2 sentence description in this format:
+    3. Prioritize topics from categories that are underrepresented in our blog (see Topic Category Coverage).
+    4. Consider seasonal relevance and current tech events when appropriate.
+    5. Be specific - don't just say "AI" but rather something like "Using AI for Personal Task Management"
+    6. Choose topics that would be valuable to tech professionals, developers, or tech enthusiasts.
+    7. Prioritize topics that have practical applications or insights rather than just news.
+    
+    Return ONLY the topic title, description, and search terms in this format:
 
     TOPIC: Your Topic Here
     DESCRIPTION: Brief description of what the blog post will cover
     SEARCH_TERMS: 3-5 specific search terms that would help find detailed information about this topic
+    CATEGORY: The main category this topic belongs to (AI, Web Development, Mobile, DevOps, Cybersecurity, Data Science, etc.)
     `;
 
   try {
@@ -226,6 +536,7 @@ export async function generateGeneralPost(
     const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
     const descriptionMatch = topicText.match(/DESCRIPTION:\s*(.*?)(?:\n|$)/);
     const searchTermsMatch = topicText.match(/SEARCH_TERMS:\s*(.*?)(?:\n|$)/);
+    const categoryMatch = topicText.match(/CATEGORY:\s*(.*?)(?:\n|$)/);
 
     if (!topicMatch || !descriptionMatch || !searchTermsMatch) {
       console.error("❌ Failed to parse topic selection");
@@ -235,10 +546,12 @@ export async function generateGeneralPost(
     const selectedTopic = topicMatch[1].trim();
     const topicDescription = descriptionMatch[1].trim();
     const searchTerms = searchTermsMatch[1].trim();
+    const category = categoryMatch ? categoryMatch[1].trim() : "Technology";
 
     console.log(`Selected topic: ${selectedTopic}`);
     console.log(`Topic description: ${topicDescription}`);
     console.log(`Search terms: ${searchTerms}`);
+    console.log(`Category: ${category}`);
 
     // STAGE 2: Gather detailed information about the selected topic
     console.log("Stage 2: Gathering detailed information about the topic...");
