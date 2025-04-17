@@ -160,7 +160,7 @@ export default async function BlogPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">
-                        {featuredPost.author || "John Doe"}
+                        {featuredPost.author || "AI Model"}
                       </p>
                     </div>
 
@@ -265,7 +265,7 @@ export default async function BlogPage() {
                         </div>
                         <div className="text-xs">
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {post.author || "John Doe"}
+                            {post.author || "AI Model"}
                           </p>
                           <p className="text-gray-500 dark:text-gray-400">
                             {post.read_time || "5 min read"}
@@ -400,7 +400,7 @@ export default async function BlogPage() {
                           </div>
                           <div className="text-xs">
                             <p className="font-medium text-gray-900 dark:text-white">
-                              {post.author || "John Doe"}
+                              {post.author || "AI Model"}
                             </p>
                           </div>
                           <div className="ml-auto">
