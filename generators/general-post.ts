@@ -4,65 +4,23 @@ import { parsePostResponse, generateAndUploadImage } from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import axios from "axios";
 
-// Function to get current tech trends using free APIs
 async function getCurrentTechContext(): Promise<string> {
+  let techContext = "Current trending tech topics:\n\n";
+
   try {
-    // Using HackerNews API to get trending tech stories (completely free)
-    const topStoriesResponse = await axios.get(
-      "https://hacker-news.firebaseio.com/v0/topstories.json"
-    );
+    // Part 1: Get HackerNews trending stories
+    const hackerNewsTopics = await getHackerNewsTopics();
+    techContext += hackerNewsTopics;
 
-    // Get the IDs of the top 5 stories
-    const topStoryIds = topStoriesResponse.data.slice(0, 5);
+    // Part 2: Get Reddit trending topics
+    const redditTopics = await getRedditTopics();
+    techContext += "\n\nTrending topics from Reddit tech communities:\n";
+    techContext += redditTopics;
 
-    // Fetch details for each story
-    let techContext = "Current trending tech topics:\n\n";
+    console.log("Tech context:", techContext); // Log the tech context to the console
 
-    for (const storyId of topStoryIds) {
-      const storyResponse = await axios.get(
-        `https://hacker-news.firebaseio.com/v0/item/${storyId}.json`
-      );
-
-      const story = storyResponse.data;
-      if (story && story.title) {
-        techContext += `Topic: ${story.title}\n`;
-        if (story.url) {
-          // Fetch a small snippet from the URL if possible
-          try {
-            const urlResponse = await axios.get(story.url, {
-              timeout: 3000,
-              headers: { "User-Agent": "Mozilla/5.0" },
-            });
-
-            // Extract a simple description from the HTML
-            const htmlContent = urlResponse.data.toString();
-            const descriptionMatch =
-              htmlContent.match(
-                /<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i
-              ) ||
-              htmlContent.match(
-                /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["'][^>]*>/i
-              );
-
-            if (descriptionMatch && descriptionMatch[1]) {
-              techContext += `- ${descriptionMatch[1].trim()}\n`;
-            }
-          } catch (error) {
-            // If we can't fetch the URL, just continue
-          }
-        }
-
-        // Add comments count as an indicator of popularity
-        if (story.descendants) {
-          techContext += `- Discussion points: ${story.descendants}\n`;
-        }
-
-        techContext += "\n";
-      }
-    }
-
-    // As a backup, also add some general tech categories that are always relevant
-    techContext += "\nEvergreen tech categories:\n";
+    // Part 3: Add evergreen categories as fallback
+    techContext += "\n\nEvergreen tech categories:\n";
     techContext += "- Artificial Intelligence and Machine Learning\n";
     techContext += "- Web Development (Frontend and Backend)\n";
     techContext += "- Mobile App Development\n";
@@ -84,6 +42,128 @@ async function getCurrentTechContext(): Promise<string> {
       - Cloud Computing
       - DevOps and Infrastructure
     `;
+  }
+}
+
+// Helper function to get HackerNews topics
+async function getHackerNewsTopics(): Promise<string> {
+  try {
+    const topStoriesResponse = await axios.get(
+      "https://hacker-news.firebaseio.com/v0/topstories.json"
+    );
+
+    // Get the IDs of the top 5 stories
+    const topStoryIds = topStoriesResponse.data.slice(0, 5);
+
+    // Fetch details for each story
+    let hackerNewsContext = "From HackerNews:\n";
+
+    for (const storyId of topStoryIds) {
+      const storyResponse = await axios.get(
+        `https://hacker-news.firebaseio.com/v0/item/${storyId}.json`
+      );
+
+      const story = storyResponse.data;
+      if (story && story.title) {
+        hackerNewsContext += `Topic: ${story.title}\n`;
+        if (story.url) {
+          // Fetch a small snippet from the URL if possible
+          try {
+            const urlResponse = await axios.get(story.url, {
+              timeout: 3000,
+              headers: { "User-Agent": "Mozilla/5.0" },
+            });
+
+            // Extract a simple description from the HTML
+            const htmlContent = urlResponse.data.toString();
+            const descriptionMatch =
+              htmlContent.match(
+                /<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i
+              ) ||
+              htmlContent.match(
+                /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["'][^>]*>/i
+              );
+
+            if (descriptionMatch && descriptionMatch[1]) {
+              hackerNewsContext += `- ${descriptionMatch[1].trim()}\n`;
+            }
+          } catch (error) {
+            // If we can't fetch the URL, just continue
+          }
+        }
+
+        // Add comments count as an indicator of popularity
+        if (story.descendants) {
+          hackerNewsContext += `- Discussion points: ${story.descendants}\n`;
+        }
+
+        hackerNewsContext += "\n";
+      }
+    }
+
+    return hackerNewsContext;
+  } catch (error) {
+    console.error("Error fetching HackerNews topics:", error);
+    return "";
+  }
+}
+
+// Helper function to get Reddit topics
+async function getRedditTopics(): Promise<string> {
+  try {
+    // List of tech subreddits to fetch from
+    const techSubreddits = [
+      "programming",
+      "technology",
+      "webdev",
+      "MachineLearning",
+      "datascience",
+    ];
+
+    let redditContext = "";
+
+    // Get top posts from each subreddit
+    for (const subreddit of techSubreddits) {
+      try {
+        // Reddit API requires a User-Agent header
+        const response = await axios.get(
+          `https://www.reddit.com/r/${subreddit}/top.json?limit=3&t=week`,
+          {
+            headers: {
+              "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)", // Replace with your Reddit username
+            },
+          }
+        );
+
+        const posts = response.data.data.children;
+        if (posts && posts.length > 0) {
+          redditContext += `From r/${subreddit}:\n`;
+
+          for (const post of posts) {
+            const { title, score, num_comments, selftext } = post.data;
+            redditContext += `- ${title}\n`;
+            redditContext += `  Upvotes: ${score}, Comments: ${num_comments}\n`;
+
+            // Add a snippet of the post content if available (and not too long)
+            if (selftext && selftext.length > 0 && selftext.length < 300) {
+              redditContext += `  Summary: ${selftext
+                .substring(0, 200)
+                .replace(/\n/g, " ")}...\n`;
+            }
+
+            redditContext += "\n";
+          }
+        }
+      } catch (subredditError) {
+        console.error(`Error fetching from r/${subreddit}:`, subredditError);
+        // Continue with other subreddits if one fails
+      }
+    }
+
+    return redditContext;
+  } catch (error) {
+    console.error("Error fetching Reddit topics:", error);
+    return "";
   }
 }
 
@@ -145,7 +225,6 @@ export async function generateGeneralPost(
   }
 }
 
-// The rest of your code remains unchanged
 async function processGeneralPost(
   genAI: GoogleGenAI,
   supabase: SupabaseClient,
