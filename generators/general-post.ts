@@ -93,9 +93,6 @@ export async function generateGeneralPost(
       searchTerms
     );
 
-    console.log("Topic:", selectedTopic);
-    console.log("Detailed information:", detailedInfo);
-
     // Stage 2 prompt: Generate full blog post with detailed information
     const blogGenerationPrompt = `
       You are a helpful AI blogger. Write a creative, useful and engaging blog post about the following topic:
