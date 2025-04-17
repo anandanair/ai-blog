@@ -354,7 +354,7 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     transition={{ delay: 0.5 }}
                   >
                     {/* Use motion component directly with Link */}
-                    <Link href={`/posts/ai-tools-of-the-day/${latestTool.id}`}>
+                    <Link href={`/ai-tools/${latestTool.id}`}>
                       <motion.div
                         whileHover={{
                           scale: 1.05,

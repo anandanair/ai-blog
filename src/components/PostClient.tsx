@@ -4,15 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-
-type PostData = {
-  id: string;
-  title: string;
-  date: string;
-  contentHtml: string;
-  description?: string;
-  image?: string;
-};
+import { PostData } from "@/types"; // Import the PostData type
 
 interface PostClientProps {
   postData: PostData;
@@ -35,7 +27,7 @@ export default function PostClient({ postData }: PostClientProps) {
   const headerScale = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
 
   // Estimate reading time (average reading speed: 200 words per minute)
-  const wordCount = postData.contentHtml
+  const wordCount = (postData.contentHtml || "")
     .replace(/<[^>]*>/g, "")
     .split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
@@ -62,10 +54,10 @@ export default function PostClient({ postData }: PostClientProps) {
         transition={{ duration: 0.5 }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600">
-          {postData.image ? (
+          {postData.image_url ? ( // Use image_url from PostData
             <div className="absolute inset-0">
               <Image
-                src={postData.image}
+                src={postData.image_url} // Use image_url from PostData
                 alt={postData.title}
                 fill
                 className="object-cover opacity-40"
@@ -122,7 +114,9 @@ export default function PostClient({ postData }: PostClientProps) {
             animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <time dateTime={postData.date} className="flex items-center">
+            <time dateTime={postData.created_at} className="flex items-center">
+              {" "}
+              {/* Use created_at from PostData */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 mr-1"
@@ -137,7 +131,7 @@ export default function PostClient({ postData }: PostClientProps) {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {postData.date}
+              {postData.created_at} {/* Use created_at from PostData */}
             </time>
             <span className="w-1 h-1 rounded-full bg-gray-400"></span>
             <span className="flex items-center">
@@ -204,7 +198,7 @@ export default function PostClient({ postData }: PostClientProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
+            dangerouslySetInnerHTML={{ __html: postData.contentHtml || "" }}
           />
         </div>
 
