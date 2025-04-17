@@ -79,6 +79,37 @@ export async function getDetailedTopicInformation(
 }
 
 /**
+ * Helper function to get Reddit OAuth2 access token
+ */
+async function getRedditAccessToken(): Promise<string> {
+  const clientId = process.env.REDDIT_CLIENT_ID;
+  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+  const username = process.env.REDDIT_USERNAME;
+  const password = process.env.REDDIT_PASSWORD;
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const params = new URLSearchParams();
+  params.append("grant_type", "password");
+  params.append("username", username!);
+  params.append("password", password!);
+
+  const response = await axios.post(
+    "https://www.reddit.com/api/v1/access_token",
+    params,
+    {
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  return response.data.access_token;
+}
+
+/**
  * Helper function to get Reddit information about a specific topic
  */
 export async function getRedditInfoForTopic(
@@ -92,19 +123,23 @@ export async function getRedditInfoForTopic(
       searchTermsArray.push(topic);
     }
 
+    // Get OAuth2 access token
+    const accessToken = await getRedditAccessToken();
+
     let redditInfo = "";
 
     // Try each search term
     for (const term of searchTermsArray) {
       try {
-        // Search Reddit for posts about this term
+        // Search Reddit for posts about this term using OAuth2 API
         const response = await axios.get(
-          `https://www.reddit.com/search.json?q=${encodeURIComponent(
+          `https://oauth.reddit.com/search?q=${encodeURIComponent(
             term
           )}&sort=relevance&t=month&limit=3`,
           {
             headers: {
-              "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)", // Replace with your Reddit username
+              "Authorization": `Bearer ${accessToken}`,
+              "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
             },
           }
         );
@@ -114,13 +149,12 @@ export async function getRedditInfoForTopic(
           redditInfo += `Results for "${term}":\n`;
 
           for (const post of posts) {
-            const { title, selftext, subreddit, score, num_comments, url } =
+            const { title, selftext, subreddit, score, num_comments, url, id } =
               post.data;
             redditInfo += `- Post from r/${subreddit}: ${title}\n`;
 
             // Add the post content if available
             if (selftext && selftext.length > 0) {
-              // Get a more substantial chunk of text, up to 500 chars
               const textSummary =
                 selftext.length > 500
                   ? selftext.substring(0, 500) + "..."
@@ -131,11 +165,11 @@ export async function getRedditInfoForTopic(
             // Try to get comments for more context
             try {
               const commentsResponse = await axios.get(
-                `${url.replace(/\/$/, "")}.json?limit=3`,
+                `https://oauth.reddit.com/comments/${id}?limit=3`,
                 {
                   headers: {
-                    "User-Agent":
-                      "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
+                    "Authorization": `Bearer ${accessToken}`,
+                    "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
                   },
                 }
               );
@@ -149,8 +183,7 @@ export async function getRedditInfoForTopic(
                 redditInfo += "  Top comments:\n";
 
                 for (const comment of comments) {
-                  if (comment.data.body) {
-                    // Limit comment length
+                  if (comment.data && comment.data.body) {
                     const commentText =
                       comment.data.body.length > 200
                         ? comment.data.body.substring(0, 200) + "..."

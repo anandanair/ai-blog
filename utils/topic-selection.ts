@@ -122,9 +122,37 @@ export async function getHackerNewsTopics(): Promise<string> {
 /**
  * Helper function to get Reddit topics
  */
+async function getRedditAccessToken(): Promise<string> {
+  const clientId = process.env.REDDIT_CLIENT_ID;
+  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+  const username = process.env.REDDIT_USERNAME;
+  const password = process.env.REDDIT_PASSWORD;
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const params = new URLSearchParams();
+  params.append("grant_type", "password");
+  params.append("username", username!);
+  params.append("password", password!);
+
+  const response = await axios.post(
+    "https://www.reddit.com/api/v1/access_token",
+    params,
+    {
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  return response.data.access_token;
+}
+
 export async function getRedditTopics(): Promise<string> {
   try {
-    // List of tech subreddits to fetch from
+    const accessToken = await getRedditAccessToken();
     const techSubreddits = [
       "programming",
       "technology",
@@ -135,15 +163,14 @@ export async function getRedditTopics(): Promise<string> {
 
     let redditContext = "";
 
-    // Get top posts from each subreddit
     for (const subreddit of techSubreddits) {
       try {
-        // Reddit API requires a User-Agent header
         const response = await axios.get(
-          `https://www.reddit.com/r/${subreddit}/top.json?limit=3&t=week`,
+          `https://oauth.reddit.com/r/${subreddit}/top.json?limit=3&t=week`,
           {
             headers: {
-              "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)", // Replace with your Reddit username
+              "Authorization": `Bearer ${accessToken}`,
+              "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
             },
           }
         );

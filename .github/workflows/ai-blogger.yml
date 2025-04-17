@@ -28,11 +28,8 @@ jobs:
           # Add your Supabase environment variables here
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-      # Remove the commit and push step as it's no longer needed
-      # - name: Commit and push
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: 🤖 New AI blog post
-      #     # Update file_pattern to include both posts and images
-      #     file_pattern: posts/*.md public/images/*.png
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
