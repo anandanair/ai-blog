@@ -75,9 +75,13 @@ function loadUsedTools(): string[] {
 }
 
 function saveUsedTools(tools: string[]): void {
-  // Added return type
   try {
-    fs.writeFileSync(USED_TOOLS_PATH, JSON.stringify(tools, null, 2));
+    // Ensure the tools array has unique values before saving
+    const uniqueTools = [...new Set(tools)];
+    fs.writeFileSync(USED_TOOLS_PATH, JSON.stringify(uniqueTools, null, 2));
+    console.log(
+      `✅ Updated used-ai-tools.json with ${uniqueTools.length} tools`
+    );
   } catch (error) {
     console.error("Error saving used tools file:", error);
   }
@@ -125,6 +129,7 @@ async function generateAiToolPost(
   console.log("\n--- Generating AI Tool of the Day Post ---");
   const usedToolsList =
     usedTools.length > 0 ? usedTools.join(", ") : "None yet";
+  console.log(`Previously used tools: ${usedToolsList}`);
   const prompt = `
     You are an AI blogger specializing in AI tools. Your goal is to feature a specific "AI Tool of the Day".
     1. Using your knowledge base, select a specific, interesting AI tool (could be for productivity, creativity, development, etc.). Prioritize real tools people can find and use.
@@ -347,6 +352,9 @@ async function processAndSavePost(
   }
 
   // Return the tool name if it was a tool post and successfully processed
+  if (type === "tool" && toolName) {
+    console.log(`✅ Successfully generated post for AI tool: "${toolName}"`);
+  }
   return toolName ?? null;
 }
 
@@ -355,6 +363,8 @@ async function main() {
   // Supabase client (supabaseAdmin) is already initialized above
   const genAIInstance = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   const usedTools = loadUsedTools();
+
+  console.log(`Loaded ${usedTools.length} previously used AI tools`);
 
   // Generate both posts, passing the initialized Supabase client
   await generateGeneralPost(genAIInstance, supabaseAdmin);
