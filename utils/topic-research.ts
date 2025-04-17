@@ -7,7 +7,6 @@ export async function getDetailedTopicInformation(
   topic: string,
   searchTerms: string
 ): Promise<string> {
-  console.log(`Getting detailed information about: ${topic}`);
   let detailedInfo = `Detailed information about "${topic}":\n\n`;
 
   try {

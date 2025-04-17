@@ -67,7 +67,6 @@ export async function generateGeneralPost(
 
     const topicText =
       topicResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    console.log("Topic selection response:", topicText);
 
     // Parse the topic selection
     const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
@@ -95,7 +94,6 @@ export async function generateGeneralPost(
     );
 
     console.log("Topic:", selectedTopic);
-    console.log("Description:", topicDescription);
     console.log("Detailed information:", detailedInfo);
 
     // Stage 2 prompt: Generate full blog post with detailed information
