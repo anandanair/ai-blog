@@ -67,11 +67,15 @@ async function generateGeneralPost(
     1. Choose a tech-related or productivity topic yourself.
     2. Generate a catchy title, short description, and the full blog content.
     3. Also provide an image description that represents your blog post's main theme.
-    4. Return it in this format:
+    4. Estimate the read time in minutes for your content.
+    5. Provide 3-5 relevant tags for the post (single words or short phrases).
+    6. Return it in this format:
 
     TITLE: Your Title Here
     DESCRIPTION: Short 1-liner summary here
     IMAGE_DESCRIPTION: A detailed description for image generation
+    READ_TIME: Estimated read time in minutes (just the number)
+    TAGS: tag1, tag2, tag3, tag4, tag5
     CONTENT:
     Your markdown content goes here. Add some structure like headings, bullet points, code blocks if needed.
     `;
@@ -119,13 +123,17 @@ async function generateAiToolPost(
     3. Generate a catchy title for the blog post about this tool. The title MUST clearly mention the tool's name.
     4. Write a short, engaging description (1-2 sentences).
     5. Provide a detailed description for generating a relevant image (e.g., the tool's logo, UI, or a conceptual representation).
-    6. Explain what the tool does, its key features, potential use cases, and if possible, mention its website or how to find it (do not make up links). Use headings, lists, etc., for structure.
-    7. Return the response strictly in this format:
+    6. Estimate the read time in minutes for your content.
+    7. Provide 3-5 relevant tags for the post (single words or short phrases).
+    8. Explain what the tool does, its key features, potential use cases, and if possible, mention its website or how to find it (do not make up links). Use headings, lists, etc., for structure.
+    9. Return the response strictly in this format:
 
     TOOL_NAME: Name Of The AI Tool Featured
     TITLE: Your Title Here (Must include the tool name)
     DESCRIPTION: Short 1-liner summary here
     IMAGE_DESCRIPTION: A detailed description for image generation
+    READ_TIME: Estimated read time in minutes (just the number)
+    TAGS: tag1, tag2, tag3, tag4, tag5
     CONTENT:
     Your markdown content goes here. Add some structure like headings, bullet points, code blocks if needed.
     `;
@@ -144,7 +152,6 @@ async function generateAiToolPost(
 }
 
 // --- Refactored Function to Process Response and Save Post ---
-// Returns the extracted tool name if applicable, otherwise null
 async function processAndSavePost(
   supabase: SupabaseClient,
   response: GenerateContentResponse,
@@ -160,9 +167,11 @@ async function processAndSavePost(
   const titleMatch = text.match(/TITLE:\s*(.*?)(?=\n|$)/);
   const descMatch = text.match(/DESCRIPTION:\s*(.*?)(?=\n|$)/);
   const imageDescMatch = text.match(/IMAGE_DESCRIPTION:\s*(.*?)(?=\n|$)/);
+  const readTimeMatch = text.match(/READ_TIME:\s*(\d+)(?=\n|$)/);
+  const tagsMatch = text.match(/TAGS:\s*(.*?)(?=\n|$)/);
   // Adjusted content regex to be less greedy and stop before potential metadata
   const contentMatch = text.match(
-    /CONTENT:\s*([\s\S]*?)(?=\n(?:TOOL_NAME:|TITLE:|DESCRIPTION:|IMAGE_DESCRIPTION:)|$)/
+    /CONTENT:\s*([\s\S]*?)(?=\n(?:TOOL_NAME:|TITLE:|DESCRIPTION:|IMAGE_DESCRIPTION:|READ_TIME:|TAGS:)|$)/
   );
 
   // Basic validation
@@ -187,6 +196,36 @@ async function processAndSavePost(
   const description = descMatch[1].trim();
   const imageDescription = imageDescMatch[1].trim();
   let content = contentMatch[1].trim();
+
+  // Parse read time or default to a calculated value if not provided
+  let readTime = 3; // Default read time in minutes
+  if (readTimeMatch && readTimeMatch[1]) {
+    const parsedReadTime = parseInt(readTimeMatch[1], 10);
+    if (!isNaN(parsedReadTime) && parsedReadTime > 0) {
+      readTime = parsedReadTime;
+    } else {
+      console.warn("⚠️ Invalid read time provided, using default value.");
+    }
+  } else {
+    console.warn("⚠️ No read time provided, using default value.");
+  }
+
+  // Parse tags or use empty array if not provided
+  let tags: string[] = [];
+  if (tagsMatch && tagsMatch[1]) {
+    tags = tagsMatch[1]
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    if (tags.length > 0) {
+      console.log(`✅ Parsed ${tags.length} tags: ${tags.join(", ")}`);
+    } else {
+      console.warn("⚠️ Tags were provided but none were valid.");
+    }
+  } else {
+    console.warn("⚠️ No tags provided, using empty array.");
+  }
 
   // Clean up the content by removing the title if it appears at the beginning
   // This prevents duplicate titles when displaying the post
@@ -301,8 +340,10 @@ async function processAndSavePost(
           category: category,
           image_url: publicImageUrl,
           tool_name: toolName,
-          // status: 'published', // Optionally set status here if you don't want the default 'draft'
-          // tags: [], // Optionally add tags here if generated
+          author: "Gemini", // Add the author field (model name)
+          read_time: readTime, // Add the read time from the AI model
+          tags: tags, // Add the parsed tags array
+          status: "published", // Optionally set status here if you don't want the default 'draft'
           // published_at: new Date().toISOString(), // Optionally set publish time
         },
       ])
