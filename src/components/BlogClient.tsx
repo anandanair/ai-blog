@@ -9,30 +9,7 @@ import {
   AnimatePresence,
 } from "framer-motion";
 import Image from "next/image";
-
-// Define the Post type based on getSortedPostsData return type
-type Post = {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  image?: string;
-};
-
-// Define the AI Tool type
-type AiTool = {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  category: string; // Added category
-  image?: string;
-};
-
-interface BlogClientProps {
-  posts: Post[];
-  latestTool: AiTool | null; // Add the latest tool prop (can be null if none)
-}
+import { BlogClientProps } from "@/types";
 
 export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   // Destructure latestTool
@@ -48,31 +25,40 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  
+
   // Add dark mode toggle state
   const [darkMode, setDarkMode] = useState(false);
 
   // Mock categories - you can replace with real categories from your posts
-  const categories = [
-    "All",
-    "Machine Learning",
-    "Neural Networks",
-    "Computer Vision",
-    "NLP",
-  ];
+  const categories = ["All", "AI Tool of the Day"];
 
   useEffect(() => {
-    const filtered = posts.filter(
-      (post) =>
-        (selectedCategory === "All" || post.title.includes(selectedCategory)) &&
-        (post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-    // If 'AI Tool of the Day' is selected, maybe only show the latestTool?
-    // This part needs refinement based on how you want categories to work with tools vs posts.
-    // For now, it just includes posts matching the title search.
+    const filtered = posts.filter((post) => {
+      // Basic title/description search (remains the same)
+      const matchesSearch =
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (post.description &&
+          post.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      // Category filtering (adjust if needed)
+      // Currently, this filters general posts based on title inclusion, which might not be intended.
+      // You might want to filter based on the actual `post.category` field if you add more categories.
+      const matchesCategory =
+        selectedCategory === "All" ||
+        (selectedCategory === "AI Tool of the Day" && !post.category) || // Show general posts if 'AI Tool' selected? Or hide?
+        (selectedCategory !== "AI Tool of the Day" &&
+          post.title.includes(selectedCategory)); // Example: filter by title inclusion for other categories
+
+      // If you want strict category matching:
+      // const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
+
+      return matchesSearch; // && matchesCategory; // Combine search and category logic as needed
+    });
+
+    // Decide how/if to include the latestTool in the main list based on filters
+    // For simplicity, the main list currently only shows items from the `posts` prop (general posts)
     setFilteredPosts(filtered);
-  }, [searchTerm, selectedCategory, posts]); // Removed latestTool from dependency array for now
+  }, [searchTerm, selectedCategory, posts]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -90,7 +76,11 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800`}>
+    <div
+      className={`min-h-screen ${
+        darkMode ? "dark" : ""
+      } bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800`}
+    >
       {/* Dark Mode Toggle */}
       <div className="fixed top-4 right-4 z-50">
         <motion.button
@@ -101,12 +91,34 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
           aria-label="Toggle dark mode"
         >
           {darkMode ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-yellow-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-gray-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              />
             </svg>
           )}
         </motion.button>
@@ -124,12 +136,12 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
           <div className="absolute inset-0 overflow-hidden">
             {Array.from({ length: 12 }).map((_, i) => {
               const seed = i / 12;
-              const size = 80 + (seed * 150);
+              const size = 80 + seed * 150;
               const left = `${(i % 4) * 25}%`;
               const top = `${Math.floor(i / 4) * 33}%`;
               const yOffset = (i % 3) * 40 - 40;
               const duration = 15 + (i % 5) * 4;
-              
+
               return (
                 <motion.div
                   key={i}
@@ -208,8 +220,19 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                 className="w-full px-6 py-4 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg bg-white/90 backdrop-blur-sm transition-all duration-300 group-hover:shadow-xl pl-12"
               />
               <div className="absolute left-4 top-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
             </div>
@@ -295,14 +318,14 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
               className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden p-6 md:p-8 border border-white/20"
             >
               <div className="md:flex md:items-center md:space-x-8">
-                {latestTool.image && (
+                {latestTool.image_url && (
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 1 }}
                     transition={{ type: "spring", stiffness: 300 }}
                     className="md:w-1/3 mb-6 md:mb-0"
                   >
                     <Image
-                      src={latestTool.image}
+                      src={latestTool.image_url}
                       alt={latestTool.title}
                       width={400}
                       height={300}
@@ -310,10 +333,10 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     />
                   </motion.div>
                 )}
-                <div className={latestTool.image ? "md:w-2/3" : "w-full"}>
+                <div className={latestTool.image_url ? "md:w-2/3" : "w-full"}>
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-sm text-purple-300 font-medium">
-                      {latestTool.date}
+                      {latestTool.created_at}
                     </span>
                     <span className="px-3 py-1 bg-purple-500/50 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-purple-400/30">
                       {latestTool.category}
@@ -331,32 +354,32 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     transition={{ delay: 0.5 }}
                   >
                     {/* Use motion component directly with Link */}
-                                      <Link href={`/posts/ai-tools-of-the-day/${latestTool.id}`}>
-                                        <motion.div
-                                          whileHover={{
-                                            scale: 1.05,
-                                            boxShadow: "0px 10px 20px rgba(0,0,0,0.2)",
-                                          }}
-                                          whileTap={{ scale: 0.95 }}
-                                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-pink-600 hover:to-orange-600 transition-all duration-300 cursor-pointer"
-                                        >
-                                          Learn More
-                                          <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-5 w-5 ml-2"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M17 8l4 4m0 0l-4 4m4-4H3"
-                                            />
-                                          </svg>
-                                        </motion.div>
-                                      </Link>
+                    <Link href={`/posts/ai-tools-of-the-day/${latestTool.id}`}>
+                      <motion.div
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: "0px 10px 20px rgba(0,0,0,0.2)",
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-pink-600 hover:to-orange-600 transition-all duration-300 cursor-pointer"
+                      >
+                        Learn More
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 ml-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"
+                          />
+                        </svg>
+                      </motion.div>
+                    </Link>
                   </motion.div>
                 </div>
               </div>
@@ -399,22 +422,33 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-             <div className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-               {filteredPosts.length} article
-               {filteredPosts.length !== 1 ? "s" : ""}
-             </div>
-             <Link href="/ai-tools">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors cursor-pointer"
+            <div className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
+              {filteredPosts.length} article
+              {filteredPosts.length !== 1 ? "s" : ""}
+            </div>
+            <Link href="/ai-tools">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors cursor-pointer"
+              >
+                View AI Tools Archive
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 ml-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  View AI Tools Archive
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </motion.div>
-             </Link>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </motion.div>
+            </Link>
           </div>
         </div>
 
@@ -461,9 +495,9 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                 >
                   <Link href={`/posts/${post.id}`} className="block h-full">
                     <div className="h-56 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
-                      {post.image ? (
+                      {post.image_url ? (
                         <Image
-                          src={post.image}
+                          src={post.image_url}
                           alt={post.title}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -477,7 +511,7 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     </div>
                     <div className="p-6">
                       <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full mb-3">
-                        {post.date}
+                        {post.created_at}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {post.title}
@@ -516,7 +550,9 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">AI Blog</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                AI Blog
+              </div>
               <p className="text-gray-400 mt-2">
                 Exploring the future of technology
               </p>
@@ -524,22 +560,34 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
 
             <div className="flex space-x-4">
               {/* Social media icons */}
-              <motion.a 
-                href="#" 
+              <motion.a
+                href="#"
                 whileHover={{ scale: 1.1, y: -5 }}
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="h-6 w-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
                 </svg>
               </motion.a>
-              <motion.a 
-                href="#" 
+              <motion.a
+                href="#"
                 whileHover={{ scale: 1.1, y: -5 }}
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                <svg
+                  className="h-6 w-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </motion.a>
             </div>

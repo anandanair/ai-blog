@@ -2,6 +2,10 @@ import fs from "fs";
 import path from "path";
 import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai"; // Added GenerateContentResponse
 import dotenv from "dotenv";
+// Import SupabaseClient type and createClient function directly
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+// Remove the import from server.ts
+// import { createSupabaseServiceRoleClient } from "@/utils/supabase/server";
 dotenv.config();
 
 // Load your Gemini API key from env
@@ -10,6 +14,24 @@ if (!GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY environment variable is not set");
 }
 const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+// --- Supabase Setup ---
+// Get Supabase credentials from environment variables
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Validate Supabase credentials
+if (!SUPABASE_URL) {
+  throw new Error("Missing environment variable: SUPABASE_URL");
+}
+if (!SUPABASE_SERVICE_KEY) {
+  throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+}
+
+// Initialize Supabase client directly - NO top-level await needed here
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// --- End Supabase Setup ---
+
 // Get today's date
 const today = new Date();
 const dateStr = today.toISOString().split("T")[0];
@@ -27,6 +49,18 @@ function generateFileName(title: string): string {
       .replace(/^-|-$/g, "") + `.md` // Remove leading/trailing hyphens
   );
 }
+
+// Add this new function to generate slugs
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "") // Remove non-alphanumeric characters (except spaces)
+    .trim() // Trim leading/trailing whitespace
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
 
 // --- Helper Functions for Tool Tracking ---
 function loadUsedTools(): string[] {
@@ -51,7 +85,10 @@ function saveUsedTools(tools: string[]): void {
 }
 
 // --- Function to Generate General Post ---
-async function generateGeneralPost(genAIInstance: GoogleGenAI) {
+async function generateGeneralPost(
+  genAIInstance: GoogleGenAI,
+  supabase: SupabaseClient
+) {
   // Pass genAI instance
   console.log("\n--- Generating General Post ---");
   const prompt = `
@@ -73,7 +110,7 @@ async function generateGeneralPost(genAIInstance: GoogleGenAI) {
       model: "gemini-2.0-flash", // Using flash for general post
       contents: prompt,
     });
-    await processAndSavePost(response, "general", null); // Pass type and null category
+    await processAndSavePost(supabase, response, "general", null); // Pass type and null category
   } catch (error) {
     console.error("❌ Error generating general post:", error);
   }
@@ -82,6 +119,7 @@ async function generateGeneralPost(genAIInstance: GoogleGenAI) {
 // --- Function to Generate AI Tool Post ---
 async function generateAiToolPost(
   genAIInstance: GoogleGenAI,
+  supabase: SupabaseClient,
   usedTools: string[]
 ) {
   // Pass genAI and usedTools
@@ -118,6 +156,7 @@ async function generateAiToolPost(
       // Consider adding safetySettings if needed
     });
     const newToolName = await processAndSavePost(
+      supabase,
       response,
       "tool",
       "AI Tool of the Day"
@@ -137,6 +176,7 @@ async function generateAiToolPost(
 // --- Refactored Function to Process Response and Save Post ---
 // Returns the extracted tool name if applicable, otherwise null
 async function processAndSavePost(
+  supabase: SupabaseClient, // Function already accepts the client
   response: GenerateContentResponse,
   type: "general" | "tool",
   category: string | null
@@ -178,33 +218,17 @@ async function processAndSavePost(
   const imageDescription = imageDescMatch[1].trim();
   const content = contentMatch[1].trim();
 
-  // Define directory paths based on type
-  const basePostsDir = path.join(process.cwd(), "posts");
-  const publicDir = path.join(process.cwd(), "public");
-  const imagesDir = path.join(publicDir, "images");
-  const outputDir =
-    type === "tool"
-      ? path.join(basePostsDir, "ai-tools-of-the-day")
-      : basePostsDir;
+  // Generate the slug from the title
+  const slug = generateSlug(title);
 
-  // Ensure directories exist
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-    console.log(`✅ Created directory: ${outputDir}`);
-  }
-  if (!fs.existsSync(imagesDir)) {
-    // Ensure images dir exists too
-    fs.mkdirSync(imagesDir, { recursive: true });
-    console.log(`✅ Created directory: ${imagesDir}`);
-  }
+  // --- Image Generation ---
+  let publicImageUrl: string | null = null;
+  const baseImageFileName = generateFileName(title); // Generate a base name from title
+  const imageFileName = `${baseImageFileName}-${Date.now()}.png`; // Add timestamp for uniqueness
+  const imageBucket = "blogs"; // *** Your bucket name ***
+  // Define the full path within the bucket, including the filename
+  const imagePathInBucket = `${imageFileName}`; // Use just the filename as the path within the bucket
 
-  const fileName = generateFileName(title);
-  const imageFileName = fileName.replace(".md", ".png");
-  const filePath = path.join(outputDir, fileName);
-  const imagePath = path.join(imagesDir, imageFileName);
-
-  // --- Image Generation --- (Moved inside this function)
-  let imageGenerated = false;
   if (imageDescription) {
     // Only try if description exists
     console.log(`⏳ Generating image for: "${imageDescription}"`);
@@ -225,9 +249,36 @@ async function processAndSavePost(
       if (imagePart?.inlineData?.data) {
         const imageData = imagePart.inlineData.data;
         const buffer = Buffer.from(imageData, "base64");
-        fs.writeFileSync(imagePath, buffer);
-        console.log(`✅ Generated image: ${imagePath}`);
-        imageGenerated = true;
+
+        // Use the correct path for uploading
+        console.log(
+          `⏳ Uploading image to Supabase Storage: ${imageBucket}/${imagePathInBucket}`
+        );
+
+        // Upload to Supabase Storage using the bucket name and the desired path/filename
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from(imageBucket) // Specify the bucket
+          .upload(imagePathInBucket, buffer, {
+            // Specify the path/filename within the bucket
+            contentType: "image/png",
+            upsert: true, // Overwrite if exists (optional)
+          });
+
+        if (uploadError) {
+          throw uploadError; // Throw error to be caught below
+        }
+
+        // Get public URL using the correct path/filename
+        const { data: urlData } = supabase.storage
+          .from(imageBucket) // Specify the bucket
+          .getPublicUrl(imagePathInBucket); // Specify the path/filename within the bucket
+
+        if (urlData?.publicUrl) {
+          publicImageUrl = urlData.publicUrl;
+          console.log(`✅ Image uploaded: ${publicImageUrl}`);
+        } else {
+          console.warn("⚠️ Could not get public URL for the uploaded image.");
+        }
       } else {
         console.warn(
           "⚠️ Image generation response did not contain image data."
@@ -249,48 +300,62 @@ async function processAndSavePost(
     );
   }
 
-  if (!imageGenerated) {
-    console.warn(
-      "⚠️ Failed to generate or save image. Skipping image inclusion in post."
-    );
+  // --- Save Post to Supabase Database ---
+  console.log(`⏳ Saving post "${title}" (slug: ${slug}) to Supabase database...`); // Log slug too
+  try {
+    // Add the 'slug' field to the insert object
+    // 'status' will default to 'draft' in the database
+    const { data, error } = await supabase
+      .from("posts") // Your table name
+      .insert([
+        {
+          title: title,
+          slug: slug, // Add the generated slug here
+          description: description,
+          content: content,
+          category: category,
+          image_url: publicImageUrl,
+          tool_name: toolName,
+          // status: 'published', // Optionally set status here if you don't want the default 'draft'
+          // tags: [], // Optionally add tags here if generated
+          // published_at: new Date().toISOString(), // Optionally set publish time
+        },
+      ])
+      .select(); // Optionally select the inserted data
+
+    if (error) {
+      // Check for unique constraint violation on slug specifically
+      if (error.code === '23505' && error.message.includes('posts_slug_key')) {
+         console.error(`❌ Error saving post: Slug "${slug}" already exists. Post "${title}" not saved.`);
+         // Decide how to handle duplicate slugs (e.g., skip, retry with modified slug)
+         return null; // Indicate failure due to duplicate slug
+      }
+      throw error; // Throw other errors
+    }
+
+    console.log(`✅ Post saved successfully to Supabase.`);
+    if (data) {
+      // console.log("Inserted data:", data); // Optional: log inserted data
+    }
+  } catch (error) {
+    // Catch block might need adjustment based on the error handling above
+    console.error(`❌ Error saving post "${title}" to Supabase:`, error);
+    return null; // Indicate failure if database insert fails
   }
 
-  // --- Generate Markdown ---
-  const frontmatter = [
-    `title: "${title.replace(/"/g, '\\"')}"`, // Escape quotes in title
-    `date: "${dateStr}"`,
-    `description: "${description.replace(/"/g, '\\"')}"`, // Escape quotes in description
-    category ? `category: "${category}"` : null, // Add category if present
-    imageGenerated ? `image: "/images/${imageFileName}"` : null, // Add image if generated
-  ]
-    .filter(Boolean)
-    .join("\n"); // Filter out null lines and join
-
-  const markdown = `---
-${frontmatter}
----
-
-${
-  imageGenerated
-    ? `![${title.replace(/"/g, '\\"')}](/images/${imageFileName})\n\n`
-    : ""
-}${content}
-`;
-
-  fs.writeFileSync(filePath, markdown);
-  console.log(`✅ Generated blog post: ${filePath}`);
-
-  return toolName ?? ""; // Return the extracted tool name (or null)
+  // Return the tool name if it was a tool post and successfully processed
+  return toolName ?? null;
 }
 
 // --- Main Execution ---
 async function main() {
-  const genAIInstance = new GoogleGenAI({ apiKey: GEMINI_API_KEY }); // Create instance once
+  // Supabase client (supabaseAdmin) is already initialized above
+  const genAIInstance = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   const usedTools = loadUsedTools();
 
-  // Generate both posts
-  await generateGeneralPost(genAIInstance);
-  await generateAiToolPost(genAIInstance, usedTools); // Pass the loaded list
+  // Generate both posts, passing the initialized Supabase client
+  await generateGeneralPost(genAIInstance, supabaseAdmin);
+  await generateAiToolPost(genAIInstance, supabaseAdmin, usedTools);
 
   console.log("\n--- Script Finished ---");
 }

@@ -1,163 +1,263 @@
-import path from "path";
-import matter from "gray-matter";
 import { remark } from "remark";
 import html from "remark-html";
-import { readdirSync, readFileSync, statSync } from "fs"; // Added statSync
+import { createSupabaseServerClient } from "@/utils/supabase/server"; // Adjust path if necessary
 
-const postsDirectory = path.join(process.cwd(), "posts");
-const aiToolsDirectory = path.join(postsDirectory, "ai-tools-of-the-day"); // Path for AI tools
+interface PostData {
+  id: string; // This will be the 'slug'
+  title: string;
+  description?: string | null;
+  created_at: string; // Or published_at if you prefer
+  image_url?: string | null;
+  category?: string | null;
+  tool_name?: string | null;
+  contentHtml?: string; // Only included in getPostData/getAiToolData
+  // Add other fields from your table if needed (e.g., tags)
+}
 
 // --- General Posts Functions ---
 
-// Helper function to check if a path is a file
-const isFile = (source: string) => statSync(source).isFile();
+export async function getSortedPostsData(): Promise<PostData[]> {
+  const supabase = await createSupabaseServerClient();
 
-// Helper function to get files from a directory (non-recursive)
-const getFilesInDirectory = (source: string) => {
-  if (!readdirSync(source, { withFileTypes: true })) return []; // Handle case where directory might not exist yet
-  return readdirSync(source, { withFileTypes: true })
-    .filter(dirent => dirent.isFile()) // Ensure it's a file, not a directory
-    .map(dirent => dirent.name);
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug, title, description, created_at, image_url, category")
+    .is("category", null)
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching sorted posts:", error);
+    return [];
+  }
+
+  console.log("Fetched Posts Data:", data); // Log the fetched data
+
+  if (!data) {
+    return [];
+  }
+
+  return data.map((post) => ({
+    id: post.slug,
+    title: post.title,
+    description: post.description,
+    created_at: post.created_at,
+    image_url: post.image_url,
+    category: post.category,
+  }));
 }
 
-export function getSortedPostsData() {
-  // Get only files directly in the posts directory
-  const fileNames = getFilesInDirectory(postsDirectory);
+export async function getAllPostIds() {
+  const supabase = await createSupabaseServerClient();
 
-  const allPostsData = fileNames
-    .filter((fileName) => fileName.endsWith(".md"))
-    .map((fileName) => {
-      const id = fileName.replace(/\.md$/, "");
-      const fullPath = path.join(postsDirectory, fileName); // Read from main posts dir
-      const fileContents = readFileSync(fullPath, "utf8");
-      const matterResult = matter(fileContents);
-      return {
-        id,
-        ...(matterResult.data as {
-          date: string;
-          title: string;
-          description: string;
-          image?: string;
-          // General posts might not have a category, or you could add one
-        }),
-      };
-    });
+  // Fetch slugs for general posts
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug") // Select only the slug
+    .is("category", null) // Match the filter in getSortedPostsData
+    .eq("status", "published");
 
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+  if (error) {
+    console.error("Error fetching post IDs:", error);
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Map slugs to the format expected by getStaticPaths
+  return data.map((post) => ({
+    params: {
+      id: post.slug, // The route parameter is the slug
+    },
+  }));
 }
 
-export function getAllPostIds() {
-  // Get only files directly in the posts directory
-  const fileNames = getFilesInDirectory(postsDirectory);
-  return fileNames
-    .filter((fileName) => fileName.endsWith(".md"))
-    .map((fileName) => ({
-      params: {
-        id: fileName.replace(/\.md$/, ""),
-      },
-    }));
-}
+export async function getPostData(id: string): Promise<PostData | null> {
+  // id is the slug
+  const supabase = await createSupabaseServerClient();
 
-export async function getPostData(id: string) {
-  const fullPath = path.join(postsDirectory, `${id}.md`); // Read from main posts dir
-  const fileContents = readFileSync(fullPath, "utf8");
-  const matterResult = matter(fileContents);
+  // Fetch a single general post by its slug
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, content, created_at, image_url, category"
+    ) // Select all needed fields including content
+    .eq("slug", id) // Filter by slug
+    .is("category", null) // Ensure it's a general post
+    .eq("status", "published")
+    .maybeSingle(); // Fetch one or null
 
-  // Use remark with html option to disable sanitization
+  if (error) {
+    console.error(`Error fetching post data for slug ${id}:`, error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  // Process markdown content to HTML
   const processedContent = await remark()
-    .use(html, { sanitize: false })
-    .process(matterResult.content);
+    .use(html, { sanitize: false }) // Assuming content is trusted or sanitized elsewhere if needed
+    .process(data.content || ""); // Process markdown content, handle null case
 
   const contentHtml = processedContent.toString();
 
+  // Return the combined data
   return {
-    id,
+    id: data.slug, // Use slug as id
     contentHtml,
-    ...(matterResult.data as {
-      date: string;
-      title: string;
-      description: string;
-      image?: string;
-    }),
+    title: data.title,
+    description: data.description,
+    created_at: data.created_at,
+    image_url: data.image_url,
+    category: data.category,
   };
 }
 
-
 // --- AI Tool of the Day Functions ---
 
-export function getSortedAiToolsData() {
-  // Get files from the ai-tools-of-the-day subdirectory
-  const fileNames = getFilesInDirectory(aiToolsDirectory);
+export async function getSortedAiToolsData(): Promise<PostData[]> {
+  const supabase = await createSupabaseServerClient();
 
-  const allToolsData = fileNames
-    .filter((fileName) => fileName.endsWith(".md"))
-    .map((fileName) => {
-      const id = fileName.replace(/\.md$/, "");
-      // Construct the full path to the tool's markdown file
-      const fullPath = path.join(aiToolsDirectory, fileName);
-      const fileContents = readFileSync(fullPath, "utf8");
-      const matterResult = matter(fileContents);
-      return {
-        id,
-        ...(matterResult.data as {
-          date: string;
-          title: string;
-          description: string;
-          category: string; // Expecting category for tools
-          image?: string;
-        }),
-      };
-    });
+  // Fetch posts specifically marked as 'AI Tool of the Day'
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, created_at, image_url, category, tool_name"
+    ) // Select tool-specific fields
+    .eq("category", "AI Tool of the Day") // Filter by the specific category
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
 
-  // Sort tools by date, most recent first
-  return allToolsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+  if (error) {
+    console.error("Error fetching sorted AI tools:", error);
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Map Supabase data
+  return data.map((tool) => ({
+    id: tool.slug,
+    title: tool.title,
+    description: tool.description,
+    created_at: tool.created_at,
+    image_url: tool.image_url,
+    category: tool.category,
+    tool_name: tool.tool_name,
+  }));
 }
 
 /**
  * Gets the data for the most recent AI Tool post.
  */
-export function getLatestAiToolData() {
-    const sortedTools = getSortedAiToolsData();
-    return sortedTools.length > 0 ? sortedTools[0] : null; // Return the first item or null if empty
+export async function getLatestAiToolData(): Promise<PostData | null> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, created_at, image_url, category, tool_name"
+    )
+    .eq("category", "AI Tool of the Day")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching latest AI tool:", error);
+    return null;
+  }
+
+  console.log("Fetched Latest AI Tool Data:", data); // Log the fetched data
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.slug,
+    title: data.title,
+    description: data.description,
+    created_at: data.created_at,
+    image_url: data.image_url,
+    category: data.category,
+    tool_name: data.tool_name,
+  };
 }
 
+export async function getAllAiToolIds() {
+  const supabase = await createSupabaseServerClient();
 
-export function getAllAiToolIds() {
-  // Get files from the ai-tools-of-the-day subdirectory
-  const fileNames = getFilesInDirectory(aiToolsDirectory);
-  return fileNames
-    .filter((fileName) => fileName.endsWith(".md"))
-    .map((fileName) => ({
-      params: {
-        // The id should probably reflect the subdirectory structure if needed for routing,
-        // but for simplicity here we just use the filename base.
-        // Adjust if your routing needs '/ai-tools-of-the-day/tool-id'
-        id: fileName.replace(/\.md$/, ""),
-      },
-    }));
+  // Fetch slugs for AI tool posts
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("category", "AI Tool of the Day")
+    .eq("status", "published");
+
+  if (error) {
+    console.error("Error fetching AI tool IDs:", error);
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Map slugs to the params format
+  return data.map((tool) => ({
+    params: {
+      id: tool.slug,
+    },
+  }));
 }
 
-export async function getAiToolData(id: string) {
-  // Construct the full path to the specific tool's markdown file
-  const fullPath = path.join(aiToolsDirectory, `${id}.md`);
-  const fileContents = readFileSync(fullPath, "utf8");
-  const matterResult = matter(fileContents);
+export async function getAiToolData(id: string): Promise<PostData | null> {
+  // id is the slug
+  const supabase = await createSupabaseServerClient();
+
+  // Fetch a single AI tool post by its slug
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, content, created_at, image_url, category, tool_name"
+    )
+    .eq("slug", id)
+    .eq("category", "AI Tool of the Day") // Ensure it's an AI tool post
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Error fetching AI tool data for slug ${id}:`, error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
 
   // Process markdown content to HTML
   const processedContent = await remark()
     .use(html, { sanitize: false })
-    .process(matterResult.content);
+    .process(data.content || "");
   const contentHtml = processedContent.toString();
 
+  // Return the combined data
   return {
-    id,
+    id: data.slug,
     contentHtml,
-    ...(matterResult.data as {
-      date: string;
-      title: string;
-      description: string;
-      category: string; // Expecting category
-      image?: string;
-    }),
+    title: data.title,
+    description: data.description,
+    created_at: data.created_at,
+    image_url: data.image_url,
+    category: data.category,
+    tool_name: data.tool_name,
   };
 }
