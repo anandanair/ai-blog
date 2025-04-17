@@ -5,12 +5,30 @@ import { PostData } from "@/types";
 import { supabaseClient } from "@/utils/supabase/client";
 import { AiTool } from "@/types";
 
+// Helper function to get author image based on model name
+function getAuthorImage(authorName: string | null): string {
+  if (!authorName) return "/images/authors/default.png";
+  
+  // Map of model names to their image paths
+  const authorImages: Record<string, string> = {
+    "Gemini": "/images/authors/gemini.png",
+    "GPT-4": "/images/authors/gpt4.png",
+    "Claude": "/images/authors/claude.png",
+    // Add more models as needed
+  };
+  
+  // Return the mapped image or default if not found
+  return authorImages[authorName] || "/images/authors/default.png";
+}
+
 export async function getSortedPostsData(): Promise<PostData[]> {
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("posts")
-    .select("slug, title, description, created_at, image_url, category")
+    .select(
+      "slug, title, description, created_at, image_url, category, author, read_time"
+    )
     // .is("category", null)
     // .eq("status", "draft")
     .order("created_at", { ascending: false });
@@ -33,6 +51,9 @@ export async function getSortedPostsData(): Promise<PostData[]> {
     created_at: post.created_at,
     image_url: post.image_url,
     category: post.category,
+    author: post.author,
+    author_image: getAuthorImage(post.author), // Add author image based on author name
+    read_time: post.read_time,
   }));
 }
 
