@@ -7,6 +7,9 @@ export interface PostData {
   category?: string | null;
   tool_name?: string | null;
   contentHtml?: string;
+  author?: string | null;
+  author_image?: string | null;
+  read_time?: number | null;
 }
 
 export type AiTool = PostData; // Assuming AiTool has the same structure as PostData
