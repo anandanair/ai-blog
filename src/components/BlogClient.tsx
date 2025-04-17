@@ -2,50 +2,37 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { motion, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { BlogClientProps } from "@/types";
-import { formatDate } from "@/utils/helpers"; // Import the helper function
+import { formatDate } from "@/utils/helpers";
 
 export default function BlogClient({ posts, latestTool }: BlogClientProps) {
-  // Destructure latestTool
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(posts);
-  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Add dark mode toggle state
   const [darkMode, setDarkMode] = useState(false);
 
-  // Mock categories - you can replace with real categories from your posts
-  const categories = ["All", "AI Tool of the Day"];
-
   useEffect(() => {
-    const filtered = posts.filter((post) => {
-      // Basic title/description search (remains the same)
+    // Filter out AI Tool posts from the main posts list
+    const normalPosts = posts.filter(
+      (post) => post.category !== "AI Tool of the Day"
+    );
+
+    // Apply search filter to the normal posts
+    const filtered = normalPosts.filter((post) => {
+      // Basic title/description search
       const matchesSearch =
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (post.description &&
           post.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      // Category filtering (adjust if needed)
-      // Currently, this filters general posts based on title inclusion, which might not be intended.
-      // You might want to filter based on the actual `post.category` field if you add more categories.
-      const matchesCategory =
-        selectedCategory === "All" ||
-        (selectedCategory === "AI Tool of the Day" && !post.category) || // Show general posts if 'AI Tool' selected? Or hide?
-        (selectedCategory !== "AI Tool of the Day" &&
-          post.title.includes(selectedCategory)); // Example: filter by title inclusion for other categories
-
-      // If you want strict category matching:
-      // const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
-
-      return matchesSearch; // && matchesCategory; // Combine search and category logic as needed
+      return matchesSearch;
     });
 
-    // Decide how/if to include the latestTool in the main list based on filters
-    // For simplicity, the main list currently only shows items from the `posts` prop (general posts)
     setFilteredPosts(filtered);
-  }, [searchTerm, selectedCategory, posts]);
+  }, [searchTerm, posts]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -66,7 +53,7 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
     <div
       className={`min-h-screen ${
         darkMode ? "dark" : ""
-      } bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800`}
+      } bg-gray-50 dark:bg-gray-900`}
     >
       {/* Dark Mode Toggle */}
       <div className="fixed top-4 right-4 z-50">
@@ -111,176 +98,323 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
         </motion.button>
       </div>
 
-      {/* AI Tool of the Day Section - Updated with glass morphism */}
-      {latestTool && (
-        <section className="py-16 md:py-24 bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900 overflow-hidden relative">
-          <div className="absolute inset-0 opacity-10 bg-[url('/circuit-pattern.svg')] bg-repeat"></div>
-          {/* Animated background shapes */}
-          <motion.div
-            className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full filter blur-3xl opacity-50"
-            animate={{ x: [-100, 100, -100], y: [-50, 50, -50] }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute bottom-0 right-0 w-80 h-80 bg-blue-400/5 rounded-full filter blur-3xl opacity-40"
-            animate={{ x: [100, -100, 100], y: [50, -50, 50] }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-          />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.8, type: "spring", stiffness: 50 }}
-              className="text-center mb-12"
-            >
-              <span className="inline-block px-4 py-1 bg-white/10 backdrop-blur-sm text-purple-200 rounded-full text-sm font-semibold tracking-wider mb-4 border border-white/20">
-                ✨ AI Tool of the Day ✨
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                AI Blog
               </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                Featured Tool: {latestTool.title}
-              </h2>
-              <p className="mt-4 text-lg text-purple-200 max-w-3xl mx-auto">
-                {latestTool.description}
-              </p>
-            </motion.div>
+            </h1>
 
-            {/* Updated card with glass morphism */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden p-6 md:p-8 border border-white/20"
-            >
-              <div className="md:flex md:items-center md:space-x-8">
-                {latestTool.image_url && (
-                  <motion.div
-                    whileHover={{ scale: 1.05, rotate: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="md:w-1/3 mb-6 md:mb-0"
+            {/* Search Bar */}
+            <div className="mt-4 md:mt-0 w-full md:w-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="absolute left-3 top-2.5 text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <Image
-                      src={latestTool.image_url}
-                      alt={latestTool.title}
-                      width={400}
-                      height={300}
-                      className="rounded-lg object-cover shadow-lg w-full border border-white/20"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
-                  </motion.div>
-                )}
-                <div className={latestTool.image_url ? "md:w-2/3" : "w-full"}>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-purple-300 font-medium">
-                      {formatDate(latestTool.created_at)}{" "}
-                      {/* Uses imported function */}
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/50 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-purple-400/30">
-                      {latestTool.category}
-                    </span>
-                  </div>
-                  {/* You might want to fetch and display the actual contentHtml here */}
-                  {/* For now, just showing description again */}
-                  <p className="text-purple-100 mb-6">
-                    {latestTool.description}{" "}
-                    {/* Placeholder - Ideally show snippet of contentHtml */}
-                  </p>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    {/* Use motion component directly with Link */}
-                    <Link href={`/ai-tools/${latestTool.id}`}>
-                      <motion.div
-                        whileHover={{
-                          scale: 1.05,
-                          boxShadow: "0px 10px 20px rgba(0,0,0,0.2)",
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-pink-600 hover:to-orange-600 transition-all duration-300 cursor-pointer"
-                      >
-                        Learn More
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 ml-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"
-                          />
-                        </svg>
-                      </motion.div>
-                    </Link>
-                  </motion.div>
+                  </svg>
                 </div>
               </div>
-            </motion.div>
-          </div>
-        </section>
-      )}
-
-      {/* Category Filter - Updated with sticky animation */}
-      <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-md sticky top-0 z-20 shadow-md transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex overflow-x-auto pb-2 scrollbar-hide space-x-2">
-            {categories.map((category) => (
-              <motion.button
-                key={category}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === category
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-100/80 backdrop-blur-sm dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
-                }`}
-              >
-                {category}
-              </motion.button>
-            ))}
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Content - Updated card design */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex-grow">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Latest Articles
-              <div className="h-1 w-20 bg-blue-600 mt-2 rounded-full"></div>
-            </h2>
-          </div>
+      {/* AI Tool of the Day - Compact Banner */}
+      {latestTool && (
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="flex items-center mb-4 md:mb-0">
+                <div className="bg-white/20 rounded-full p-2 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-purple-200 text-sm font-medium">
+                    AI Tool of the Day
+                  </div>
+                  <h3 className="text-white font-bold">{latestTool.title}</h3>
+                </div>
+              </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-              {filteredPosts.length} article
-              {filteredPosts.length !== 1 ? "s" : ""}
+              <Link href={`/ai-tools/${latestTool.id}`}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-lg border border-white/20 flex items-center text-sm font-medium cursor-pointer"
+                >
+                  Check it out
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 ml-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </motion.div>
+              </Link>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Featured Post (First Post) */}
+        {filteredPosts.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center">
+              <span className="mr-2">Featured Post</span>
+              <div className="h-px flex-grow bg-gradient-to-r from-blue-600 to-transparent ml-4"></div>
+            </h2>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+              <div className="md:flex">
+                <div className="md:w-1/2">
+                  <div className="h-64 md:h-full relative">
+                    {filteredPosts[0].image_url ? (
+                      <Image
+                        src={filteredPosts[0].image_url}
+                        alt={filteredPosts[0].title}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <span className="text-6xl">🧠</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="md:w-1/2 p-6 md:p-8">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {formatDate(filteredPosts[0].created_at)}
+                  </div>
+
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    {filteredPosts[0].title}
+                  </h3>
+
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3">
+                    {filteredPosts[0].description}
+                  </p>
+
+                  <Link href={`/posts/${filteredPosts[0].id}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors cursor-pointer"
+                    >
+                      Read Full Article
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 ml-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        />
+                      </svg>
+                    </motion.div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Posts */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center">
+            <span className="mr-2">Recent Articles</span>
+            <div className="h-px flex-grow bg-gradient-to-r from-blue-600 to-transparent ml-4"></div>
+          </h2>
+
+          <AnimatePresence mode="wait">
+            {filteredPosts.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl shadow"
+              >
+                <div className="inline-block text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  No articles found
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Try adjusting your search
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSearchTerm("")}
+                  className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Reset search
+                </motion.button>
+              </motion.div>
+            ) : (
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+              >
+                {/* Skip the first post if it's shown as featured */}
+                {filteredPosts.slice(1).map((post) => (
+                  <motion.article
+                    key={post.id}
+                    variants={item}
+                    whileHover={{ y: -5 }}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700"
+                  >
+                    <Link
+                      href={`/posts/${post.id}`}
+                      className="block flex-grow"
+                    >
+                      <div className="h-48 relative">
+                        {post.image_url ? (
+                          <Image
+                            src={post.image_url}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <span className="text-4xl">🧠</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5">
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          {formatDate(post.created_at)}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                          {post.description}
+                        </p>
+                      </div>
+                    </Link>
+                    <div className="px-5 pb-5 mt-auto">
+                      <Link href={`/posts/${post.id}`}>
+                        <span className="text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center">
+                          Read more
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 ml-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
+                          </svg>
+                        </span>
+                      </Link>
+                    </div>
+                  </motion.article>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* AI Tools Section */}
+        <div className="mt-16 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 md:p-8 shadow-md">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 md:mb-0">
+              Explore AI Tools
+            </h2>
             <Link href="/ai-tools">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors cursor-pointer"
               >
-                View AI Tools Archive
+                View All AI Tools
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 ml-2"
@@ -292,108 +426,20 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
               </motion.div>
             </Link>
           </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-2">
+            Discover the latest AI tools to enhance your productivity and
+            creativity.
+          </p>
         </div>
-
-        <AnimatePresence mode="wait">
-          {filteredPosts.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-20"
-            >
-              <div className="inline-block text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
-                No articles found
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Try adjusting your search or category filter
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedCategory("All");
-                }}
-                className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
-              >
-                Reset filters
-              </motion.button>
-            </motion.div>
-          ) : (
-            <motion.div
-              variants={container}
-              initial="hidden"
-              animate="show"
-              className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-            >
-              {filteredPosts.map((post) => (
-                <motion.div
-                  key={post.id}
-                  variants={item}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-gray-200 dark:border-gray-700"
-                >
-                  <Link href={`/posts/${post.id}`} className="block h-full">
-                    <div className="h-56 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
-                      {post.image_url ? (
-                        <Image
-                          src={post.image_url}
-                          alt={post.title}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-6xl bg-gradient-to-br from-blue-500 to-purple-600">
-                          🧠
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <div className="p-6">
-                      <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full mb-3">
-                        {formatDate(post.created_at)} {/* Format date here */}
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {post.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                        {post.description}
-                      </p>
-                      <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium group-hover:translate-x-2 transition-transform duration-300">
-                        Read more
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 ml-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
 
-      {/* Footer with scroll to top button - Updated with modern design */}
+      {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">

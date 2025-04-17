@@ -61,7 +61,6 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
-
 // --- Helper Functions for Tool Tracking ---
 function loadUsedTools(): string[] {
   try {
@@ -133,7 +132,7 @@ async function generateAiToolPost(
     3. Generate a catchy title for the blog post about this tool. The title MUST clearly mention the tool's name.
     4. Write a short, engaging description (1-2 sentences).
     5. Provide a detailed description for generating a relevant image (e.g., the tool's logo, UI, or a conceptual representation).
-    6. Write the full blog content in markdown format. Explain what the tool does, its key features, potential use cases, and if possible, mention its website or how to find it (do not make up links). Use headings, lists, etc., for structure.
+    6. Explain what the tool does, its key features, potential use cases, and if possible, mention its website or how to find it (do not make up links). Use headings, lists, etc., for structure.
     7. Return the response strictly in this format:
 
     TOOL_NAME: Name Of The AI Tool Featured
@@ -141,7 +140,7 @@ async function generateAiToolPost(
     DESCRIPTION: Short 1-liner summary here
     IMAGE_DESCRIPTION: A detailed description for image generation
     CONTENT:
-    Your markdown content goes here.
+    Your markdown content goes here. Add some structure like headings, bullet points, code blocks if needed.
     `;
   // NOTE: For true internet search, this is where you'd implement a multi-step process:
   // 1. Ask Gemini for search queries based on the prompt and usedTools.
@@ -301,7 +300,9 @@ async function processAndSavePost(
   }
 
   // --- Save Post to Supabase Database ---
-  console.log(`⏳ Saving post "${title}" (slug: ${slug}) to Supabase database...`); // Log slug too
+  console.log(
+    `⏳ Saving post "${title}" (slug: ${slug}) to Supabase database...`
+  ); // Log slug too
   try {
     // Add the 'slug' field to the insert object
     // 'status' will default to 'draft' in the database
@@ -325,10 +326,12 @@ async function processAndSavePost(
 
     if (error) {
       // Check for unique constraint violation on slug specifically
-      if (error.code === '23505' && error.message.includes('posts_slug_key')) {
-         console.error(`❌ Error saving post: Slug "${slug}" already exists. Post "${title}" not saved.`);
-         // Decide how to handle duplicate slugs (e.g., skip, retry with modified slug)
-         return null; // Indicate failure due to duplicate slug
+      if (error.code === "23505" && error.message.includes("posts_slug_key")) {
+        console.error(
+          `❌ Error saving post: Slug "${slug}" already exists. Post "${title}" not saved.`
+        );
+        // Decide how to handle duplicate slugs (e.g., skip, retry with modified slug)
+        return null; // Indicate failure due to duplicate slug
       }
       throw error; // Throw other errors
     }
