@@ -310,9 +310,7 @@ async function getDetailedTopicInformation(
 
     // 3. As a fallback, we could add some general information about the topic category
     if (!redditInfo && !hackerNewsInfo) {
-      detailedInfo +=
-        "No specific information found. Here are some general points about this topic category:\n";
-      detailedInfo += await getGeneralTopicInformation(topic);
+      detailedInfo += "No specific information found.";
     }
 
     return detailedInfo;
@@ -541,64 +539,6 @@ async function getHackerNewsInfoForTopic(
   } catch (error) {
     console.error("Error getting HackerNews information for topic:", error);
     return null;
-  }
-}
-
-// Helper function to get general information about a topic category
-async function getGeneralTopicInformation(topic: string): Promise<string> {
-  // This is a fallback when we can't find specific information
-  // You could expand this with more topic categories or even use a simple knowledge base
-
-  const topicLower = topic.toLowerCase();
-
-  if (
-    topicLower.includes("ai") ||
-    topicLower.includes("artificial intelligence") ||
-    topicLower.includes("machine learning")
-  ) {
-    return `
-      - AI and Machine Learning are rapidly evolving fields with new models and applications emerging regularly
-      - Large language models like GPT-4, Claude, and Gemini are pushing the boundaries of what's possible
-      - Practical applications include content generation, code assistance, data analysis, and automation
-      - Ethical considerations include bias, privacy concerns, and potential job displacement
-      - Current trends include multimodal models, smaller specialized models, and AI safety research
-    `;
-  } else if (
-    topicLower.includes("web") ||
-    topicLower.includes("frontend") ||
-    topicLower.includes("backend")
-  ) {
-    return `
-      - Modern web development encompasses both frontend and backend technologies
-      - Frontend frameworks like React, Vue, and Angular continue to evolve with new features
-      - Backend technologies include Node.js, Python frameworks, and serverless architectures
-      - Full-stack development often involves JavaScript/TypeScript across the entire stack
-      - Current trends include edge computing, Web Assembly, and improved developer experience
-    `;
-  } else if (topicLower.includes("mobile") || topicLower.includes("app")) {
-    return `
-      - Mobile app development spans native (iOS/Android) and cross-platform approaches
-      - React Native and Flutter are popular for cross-platform development
-      - Progressive Web Apps (PWAs) bridge the gap between web and mobile experiences
-      - App Store optimization and monetization strategies are crucial for success
-      - Current trends include AR features, on-device AI, and improved performance optimization
-    `;
-  } else if (topicLower.includes("security") || topicLower.includes("cyber")) {
-    return `
-      - Cybersecurity is increasingly important as digital threats evolve
-      - Common concerns include data breaches, ransomware, and social engineering
-      - Zero-trust architecture is becoming the standard security approach
-      - DevSecOps integrates security into the development lifecycle
-      - Current trends include AI-powered threat detection and quantum-resistant cryptography
-    `;
-  } else {
-    return `
-      - Technology continues to evolve at a rapid pace across all domains
-      - Integration of different technologies often leads to innovative solutions
-      - User experience and accessibility remain fundamental considerations
-      - Open source collaboration drives many technological advancements
-      - Staying current with industry trends requires continuous learning
-    `;
   }
 }
 
