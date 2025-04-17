@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { PostData } from "@/types"; // Import the PostData type
+import { formatDate } from "@/utils/helpers";
 
 interface PostClientProps {
   postData: PostData;
@@ -131,7 +132,8 @@ export default function PostClient({ postData }: PostClientProps) {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {postData.created_at} {/* Use created_at from PostData */}
+              {formatDate(postData.created_at)}{" "}
+              {/* Use created_at from PostData */}
             </time>
             <span className="w-1 h-1 rounded-full bg-gray-400"></span>
             <span className="flex items-center">

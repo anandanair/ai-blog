@@ -1,30 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  AnimatePresence,
-} from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { BlogClientProps } from "@/types";
+import { formatDate } from "@/utils/helpers"; // Import the helper function
 
 export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   // Destructure latestTool
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(posts);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
 
   // Add dark mode toggle state
   const [darkMode, setDarkMode] = useState(false);
@@ -124,146 +111,6 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
         </motion.button>
       </div>
 
-      {/* Hero Section with Parallax Effect - Updated for modern look */}
-      <section ref={heroRef} className="relative h-[80vh] overflow-hidden">
-        <motion.div
-          style={{ opacity, scale, y }}
-          className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800"
-        >
-          <div className="absolute inset-0 opacity-20 bg-[url('/hero-pattern.svg')] bg-repeat mix-blend-overlay"></div>
-
-          {/* Animated background elements - Modernized with glass morphism */}
-          <div className="absolute inset-0 overflow-hidden">
-            {Array.from({ length: 12 }).map((_, i) => {
-              const seed = i / 12;
-              const size = 80 + seed * 150;
-              const left = `${(i % 4) * 25}%`;
-              const top = `${Math.floor(i / 4) * 33}%`;
-              const yOffset = (i % 3) * 40 - 40;
-              const duration = 15 + (i % 5) * 4;
-
-              return (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full bg-white/10 backdrop-blur-md border border-white/20"
-                  style={{
-                    width: size,
-                    height: size,
-                    left,
-                    top,
-                  }}
-                  animate={{
-                    y: [0, yOffset],
-                    opacity: [0.1, 0.3, 0.1],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                  }}
-                />
-              );
-            })}
-          </div>
-        </motion.div>
-
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, type: "spring" }}
-            className="mb-6"
-          >
-            <div className="inline-block text-6xl bg-white/20 dark:bg-gray-800/30 backdrop-blur-lg rounded-full p-6 shadow-lg border border-white/30 dark:border-gray-700/30">
-              🧠
-            </div>
-          </motion.div>
-
-          {/* Updated typography for modern look */}
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-4xl md:text-7xl font-extrabold text-white mb-4 tracking-tight"
-          >
-            AI-Powered{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-500">
-              Insights
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-xl text-white/90 max-w-2xl font-light"
-          >
-            Exploring the cutting edge of artificial intelligence and its impact
-            on our world
-          </motion.p>
-
-          {/* Modernized Search Bar with animation */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="mt-10 w-full max-w-md"
-          >
-            <div className="relative group">
-              <input
-                type="text"
-                placeholder="Search articles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-6 py-4 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg bg-white/90 backdrop-blur-sm transition-all duration-300 group-hover:shadow-xl pl-12"
-              />
-              <div className="absolute left-4 top-4 text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Scroll indicator - Updated for better visibility */}
-          <motion.div
-            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <div className="text-white bg-white/10 backdrop-blur-sm p-3 rounded-full">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                />
-              </svg>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* AI Tool of the Day Section - Updated with glass morphism */}
       {latestTool && (
         <section className="py-16 md:py-24 bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900 overflow-hidden relative">
@@ -336,7 +183,8 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                 <div className={latestTool.image_url ? "md:w-2/3" : "w-full"}>
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-sm text-purple-300 font-medium">
-                      {latestTool.created_at}
+                      {formatDate(latestTool.created_at)}{" "}
+                      {/* Uses imported function */}
                     </span>
                     <span className="px-3 py-1 bg-purple-500/50 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-purple-400/30">
                       {latestTool.category}
@@ -511,7 +359,7 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
                     </div>
                     <div className="p-6">
                       <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full mb-3">
-                        {post.created_at}
+                        {formatDate(post.created_at)} {/* Format date here */}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {post.title}

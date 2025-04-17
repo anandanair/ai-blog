@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { AiTool } from "@/types";
+import { formatDate } from "@/utils/helpers";
 
 export const metadata: Metadata = {
   title: "AI Tools Archive | AI Blog",
@@ -92,7 +93,7 @@ export default async function AiToolsArchivePage() {
                     <div className="p-6">
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
-                          {tool.created_at}
+                          {formatDate(tool.created_at)}
                         </span>
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
