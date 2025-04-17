@@ -93,3 +93,26 @@ export async function getPreviouslyUsedTools(
 
   return previousTools.map((post) => post.tool_name).filter(Boolean);
 }
+
+// Add this function to fetch existing post titles from Supabase
+export async function getExistingPostTitles(
+  supabase: SupabaseClient
+): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from("posts") // Replace with your actual table name if different
+      .select("title")
+      .order("created_at", { ascending: false })
+      .limit(50); // Get the most recent 50 posts
+
+    if (error) {
+      console.error("Error fetching existing posts:", error);
+      return [];
+    }
+
+    return data.map((post) => post.title);
+  } catch (error) {
+    console.error("Error in getExistingPostTitles:", error);
+    return [];
+  }
+}

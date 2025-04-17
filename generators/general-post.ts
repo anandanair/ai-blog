@@ -1,7 +1,7 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { parsePostResponse, generateAndUploadImage } from "../utils/helpers";
-import { savePostToDatabase } from "../utils/database";
+import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import axios from "axios";
 
 // Function to get current tech trends using free APIs
@@ -87,27 +87,6 @@ async function getCurrentTechContext(): Promise<string> {
   }
 }
 
-// Add this function to fetch existing post titles from Supabase
-async function getExistingPostTitles(supabase: SupabaseClient): Promise<string[]> {
-  try {
-    const { data, error } = await supabase
-      .from('posts')  // Replace with your actual table name if different
-      .select('title')
-      .order('created_at', { ascending: false })
-      .limit(50);  // Get the most recent 50 posts
-    
-    if (error) {
-      console.error("Error fetching existing posts:", error);
-      return [];
-    }
-    
-    return data.map(post => post.title);
-  } catch (error) {
-    console.error("Error in getExistingPostTitles:", error);
-    return [];
-  }
-}
-
 export async function generateGeneralPost(
   genAI: GoogleGenAI,
   supabase: SupabaseClient
@@ -117,14 +96,17 @@ export async function generateGeneralPost(
   // Get current tech context
   console.log("Fetching current tech context...");
   const techContext = await getCurrentTechContext();
-  
+
   // Get existing post titles to avoid duplication
   console.log("Fetching existing post titles...");
   const existingTitles = await getExistingPostTitles(supabase);
-  
-  const existingTopicsContext = existingTitles.length > 0 
-    ? `\nAVOID these topics as they've been covered recently:\n${existingTitles.map(title => `- ${title}`).join('\n')}\n`
-    : '';
+
+  const existingTopicsContext =
+    existingTitles.length > 0
+      ? `\nAVOID these topics as they've been covered recently:\n${existingTitles
+          .map((title) => `- ${title}`)
+          .join("\n")}\n`
+      : "";
 
   const prompt = `
     You are a helpful AI blogger. Write a creative, useful and engaging blog post.
