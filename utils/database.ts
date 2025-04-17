@@ -32,10 +32,8 @@ export async function savePostToDatabase(
     tags: string[];
   }
 ): Promise<boolean> {
-  console.log(
-    `⏳ Saving post "${postData.title}" (slug: ${postData.slug}) to Supabase database...`
-  );
-  
+  console.log(`⏳ Saving post ${postData.slug} to Supabase database...`);
+
   try {
     const { data, error } = await supabase
       .from("posts")
@@ -70,7 +68,10 @@ export async function savePostToDatabase(
     console.log(`✅ Post saved successfully to Supabase.`);
     return true;
   } catch (error) {
-    console.error(`❌ Error saving post "${postData.title}" to Supabase:`, error);
+    console.error(
+      `❌ Error saving post "${postData.title}" to Supabase:`,
+      error
+    );
     return false;
   }
 }
