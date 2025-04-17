@@ -32,11 +32,6 @@ if (!SUPABASE_SERVICE_KEY) {
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 // --- End Supabase Setup ---
 
-// Get today's date
-const today = new Date();
-const dateStr = today.toISOString().split("T")[0];
-const USED_TOOLS_PATH = path.join(process.cwd(), "used-ai-tools.json"); // Path for tracking used tools
-
 function generateFileName(title: string): string {
   // Added return type
   return (
@@ -60,33 +55,6 @@ function generateSlug(title: string): string {
     .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
-
-// --- Helper Functions for Tool Tracking ---
-function loadUsedTools(): string[] {
-  try {
-    if (fs.existsSync(USED_TOOLS_PATH)) {
-      const data = fs.readFileSync(USED_TOOLS_PATH, "utf-8");
-      return JSON.parse(data);
-    }
-  } catch (error) {
-    console.error("Error loading used tools file:", error);
-  }
-  return []; // Return empty array if file doesn't exist or error occurs
-}
-
-function saveUsedTools(tools: string[]): void {
-  try {
-    // Ensure the tools array has unique values before saving
-    const uniqueTools = [...new Set(tools)];
-    fs.writeFileSync(USED_TOOLS_PATH, JSON.stringify(uniqueTools, null, 2));
-    console.log(
-      `✅ Updated used-ai-tools.json with ${uniqueTools.length} tools`
-    );
-  } catch (error) {
-    console.error("Error saving used tools file:", error);
-  }
-}
-
 // --- Function to Generate General Post ---
 async function generateGeneralPost(
   genAIInstance: GoogleGenAI,
@@ -122,14 +90,28 @@ async function generateGeneralPost(
 // --- Function to Generate AI Tool Post ---
 async function generateAiToolPost(
   genAIInstance: GoogleGenAI,
-  supabase: SupabaseClient,
-  usedTools: string[]
+  supabase: SupabaseClient
 ) {
-  // Pass genAI and usedTools
   console.log("\n--- Generating AI Tool of the Day Post ---");
+
+  // Query previously used tools from Supabase instead of using the JSON file
+  const { data: previousTools, error: toolsError } = await supabase
+    .from("posts")
+    .select("tool_name")
+    .eq("category", "AI Tool of the Day")
+    .not("tool_name", "is", null);
+
+  if (toolsError) {
+    console.error("❌ Error fetching previously used tools:", toolsError);
+    return;
+  }
+
+  // Extract tool names from the query result
+  const usedTools = previousTools.map((post) => post.tool_name).filter(Boolean);
   const usedToolsList =
     usedTools.length > 0 ? usedTools.join(", ") : "None yet";
-  console.log(`Previously used tools: ${usedToolsList}`);
+
+  console.log(`Previously used tools (from database): ${usedToolsList}`);
   const prompt = `
     You are an AI blogger specializing in AI tools. Your goal is to feature a specific "AI Tool of the Day".
     1. Using your knowledge base, select a specific, interesting AI tool (could be for productivity, creativity, development, etc.). Prioritize real tools people can find and use.
@@ -147,31 +129,15 @@ async function generateAiToolPost(
     CONTENT:
     Your markdown content goes here. Add some structure like headings, bullet points, code blocks if needed.
     `;
-  // NOTE: For true internet search, this is where you'd implement a multi-step process:
-  // 1. Ask Gemini for search queries based on the prompt and usedTools.
-  // 2. Execute search using an external API (e.g., SerpApi, Google Search API).
-  // 3. Feed search results back into a new prompt for Gemini.
-  // 4. Ask Gemini to select ONE tool from the results (checking against usedTools again) and generate the post.
 
   try {
     const response = await genAIInstance.models.generateContent({
-      model: "gemini-2.0-flash", // Using Pro potentially gives better adherence to instructions and knowledge
+      model: "gemini-2.0-flash",
       contents: prompt,
-      // Consider adding safetySettings if needed
     });
-    const newToolName = await processAndSavePost(
-      supabase,
-      response,
-      "tool",
-      "AI Tool of the Day"
-    ); // Pass type and category
 
-    // If post generation was successful and we got a tool name, add it to the list
-    if (newToolName) {
-      usedTools.push(newToolName);
-      saveUsedTools(usedTools);
-      console.log(`✅ Added "${newToolName}" to used tools list.`);
-    }
+    // No need to update the JSON file anymore, just process and save the post
+    await processAndSavePost(supabase, response, "tool", "AI Tool of the Day");
   } catch (error) {
     console.error("❌ Error generating AI tool post:", error);
   }
@@ -180,7 +146,7 @@ async function generateAiToolPost(
 // --- Refactored Function to Process Response and Save Post ---
 // Returns the extracted tool name if applicable, otherwise null
 async function processAndSavePost(
-  supabase: SupabaseClient, // Function already accepts the client
+  supabase: SupabaseClient,
   response: GenerateContentResponse,
   type: "general" | "tool",
   category: string | null
@@ -220,7 +186,20 @@ async function processAndSavePost(
   const title = titleMatch[1].trim();
   const description = descMatch[1].trim();
   const imageDescription = imageDescMatch[1].trim();
-  const content = contentMatch[1].trim();
+  let content = contentMatch[1].trim();
+
+  // Clean up the content by removing the title if it appears at the beginning
+  // This prevents duplicate titles when displaying the post
+  if (content.startsWith(`# ${title}`) || content.startsWith(`## ${title}`)) {
+    // Remove the title line and any blank lines that follow
+    content = content.replace(
+      new RegExp(
+        `^(?:#+\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\n+)`,
+        "i"
+      ),
+      ""
+    );
+  }
 
   // Generate the slug from the title
   const slug = generateSlug(title);
@@ -362,13 +341,13 @@ async function processAndSavePost(
 async function main() {
   // Supabase client (supabaseAdmin) is already initialized above
   const genAIInstance = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  const usedTools = loadUsedTools();
 
-  console.log(`Loaded ${usedTools.length} previously used AI tools`);
+  // No need to load used tools from JSON file anymore
+  console.log("Fetching AI tool data from Supabase...");
 
   // Generate both posts, passing the initialized Supabase client
   await generateGeneralPost(genAIInstance, supabaseAdmin);
-  await generateAiToolPost(genAIInstance, supabaseAdmin, usedTools);
+  await generateAiToolPost(genAIInstance, supabaseAdmin);
 
   console.log("\n--- Script Finished ---");
 }

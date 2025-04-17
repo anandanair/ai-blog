@@ -38,25 +38,6 @@ export default function AiToolClient({ aiTool }: AiToolClientProps) {
                 <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                   {aiTool.title}
                 </h1>
-                <Link
-                  href="/ai-tools"
-                  className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors duration-200"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  Back to AI Tools
-                </Link>
               </div>
 
               <div className="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-6 mb-10">
