@@ -63,7 +63,8 @@ export async function generateAndUploadImage(
       const buffer = Buffer.from(imageData, "base64");
 
       console.log(
-        `⏳ Uploading image to Supabase Storage: ${imageBucket}/${imagePathInBucket}`
+        `⏳ Uploading image to Supabase Storage`
+        // `⏳ Uploading image to Supabase Storage: ${imageBucket}/${imagePathInBucket}`
       );
 
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -83,7 +84,8 @@ export async function generateAndUploadImage(
 
       if (urlData?.publicUrl) {
         publicImageUrl = urlData.publicUrl;
-        console.log(`✅ Image uploaded: ${publicImageUrl}`);
+        console.log(`✅ Image uploaded`);
+        // console.log(`✅ Image uploaded: ${publicImageUrl}`);
       } else {
         console.warn("⚠️ Could not get public URL for the uploaded image.");
       }
