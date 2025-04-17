@@ -44,7 +44,8 @@ export async function generateAndUploadImage(
     return null;
   }
 
-  console.log(`⏳ Generating image for: "${imageDescription}"`);
+  console.log(`⏳ Generating image`);
+  // console.log(`⏳ Generating image for: "${imageDescription}"`);
   try {
     const imageGenResponse = await genAI.models.generateContent({
       model: "gemini-2.0-flash-exp-image-generation",
