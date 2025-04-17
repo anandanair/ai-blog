@@ -8,15 +8,15 @@ import { AiTool } from "@/types";
 // Helper function to get author image based on model name
 function getAuthorImage(authorName: string | null): string {
   if (!authorName) return "/images/authors/default.png";
-  
+
   // Map of model names to their image paths
   const authorImages: Record<string, string> = {
-    "Gemini": "/images/authors/gemini.png",
+    Gemini: "/images/authors/gemini.png",
     "GPT-4": "/images/authors/gpt4.png",
-    "Claude": "/images/authors/claude.png",
+    Claude: "/images/authors/claude.png",
     // Add more models as needed
   };
-  
+
   // Return the mapped image or default if not found
   return authorImages[authorName] || "/images/authors/default.png";
 }
@@ -29,8 +29,8 @@ export async function getSortedPostsData(): Promise<PostData[]> {
     .select(
       "slug, title, description, created_at, image_url, category, author, read_time"
     )
-    // .is("category", null)
-    // .eq("status", "draft")
+    .is("category", null)
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -66,7 +66,7 @@ export async function getLatestAiToolData(): Promise<PostData | null> {
       "slug, title, description, created_at, image_url, category, tool_name"
     )
     .eq("category", "AI Tool of the Day")
-    .eq("status", "draft")
+    .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -101,7 +101,7 @@ export async function getAllAiToolIds() {
     .from("posts")
     .select("slug")
     .eq("category", "AI Tool of the Day")
-    .eq("status", "draft");
+    .eq("status", "published");
 
   if (error) {
     console.error("Error fetching AI tool IDs:", error);
@@ -132,7 +132,7 @@ export async function getAiToolData(id: string): Promise<PostData | null> {
     )
     .eq("slug", id)
     .eq("category", "AI Tool of the Day") // Ensure it's an AI tool post
-    .eq("status", "draft")
+    .eq("status", "published")
     .maybeSingle();
 
   if (error) {
@@ -173,7 +173,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
       "slug, title, description, content, created_at, image_url, category"
     )
     .eq("slug", id)
-    .eq("status", "draft") // Adjust status as needed
+    .eq("status", "published") // Adjust status as needed
     .maybeSingle();
 
   if (error) {
@@ -210,7 +210,7 @@ export async function getAllPostIds() {
   const { data, error } = await supabase
     .from("posts")
     .select("slug")
-    .eq("status", "draft"); // Adjust status as needed
+    .eq("status", "published"); // Adjust status as needed
 
   if (error) {
     console.error("Error fetching post IDs:", error);
@@ -236,7 +236,7 @@ export async function getSortedAiToolsData(): Promise<AiTool[]> {
     .from("posts")
     .select("slug, title, description, created_at, image_url, category")
     .eq("category", "AI Tool of the Day")
-    .eq("status", "draft")
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   if (error) {
