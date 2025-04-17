@@ -13,6 +13,7 @@
     "@google/generative-ai": "^0.24.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
+    "axios": "^1.8.4",
     "dotenv": "^16.5.0",
     "framer-motion": "^12.7.3",
     "gray-matter": "^4.0.3",
