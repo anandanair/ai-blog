@@ -111,9 +111,9 @@ export async function polishBlogPost(
       });
       const evaluationText = evaluationResponse.text ?? "";
 
-      console.log(
-        "Evaluation response received, extracting satisfaction score..."
-      );
+      // console.log(
+      //   "Evaluation response received, extracting satisfaction score..."
+      // );
 
       // Parse evaluation results with improved regex and logging
       const satisfactionMatch = evaluationText.match(
@@ -121,10 +121,10 @@ export async function polishBlogPost(
       );
 
       // Log a snippet of the evaluation text to debug
-      console.log(
-        "Evaluation text snippet:",
-        evaluationText.substring(0, 200) + "..."
-      );
+      // console.log(
+      //   "Evaluation text snippet:",
+      //   evaluationText.substring(0, 200) + "..."
+      // );
 
       let currentSatisfactionScore = 0;
       if (satisfactionMatch) {
