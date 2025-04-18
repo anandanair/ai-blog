@@ -1,6 +1,10 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { parsePostResponse, generateAndUploadImage } from "../utils/helpers";
+import {
+  parsePostResponse,
+  generateAndUploadImage,
+  normalizeMarkdown,
+} from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
 import { getDetailedTopicInformation } from "../utils/topic-research";
@@ -126,13 +130,13 @@ export async function generateGeneralPost(
       model: "gemini-2.0-flash",
       contents: blogGenerationPrompt,
     });
-    
+
     return await processGeneralPost(
-      genAI, 
-      supabase, 
-      blogResponse, 
-      selectedTopic, 
-      topicDescription, 
+      genAI,
+      supabase,
+      blogResponse,
+      selectedTopic,
+      topicDescription,
       detailedInfo
     );
   } catch (error) {
@@ -160,18 +164,15 @@ async function processGeneralPost(
   let { title, description, imageDescription, content, readTime, tags, slug } =
     parsedData;
 
+  content = normalizeMarkdown(content);
+
   // STAGE 3: Polish and improve the blog post
   console.log("Stage 3: Polishing and improving the blog post...");
-  const polishedContent = await polishBlogPost(
-    genAI, 
-    title, 
-    content,
-    {
-      topic: selectedTopic,
-      description: topicDescription,
-      detailedInfo: detailedInfo
-    }
-  );
+  const polishedContent = await polishBlogPost(genAI, title, content, {
+    topic: selectedTopic,
+    description: topicDescription,
+    detailedInfo: detailedInfo,
+  });
 
   // Update content with polished version if successful
   if (polishedContent) {

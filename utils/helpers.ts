@@ -189,3 +189,21 @@ export function parsePostResponse(text: string, type: "general" | "tool") {
     slug: generateSlug(title),
   };
 }
+
+export function normalizeMarkdown(markdown: string): string {
+  return (
+    markdown
+      // Remove any markdown code block delimiters
+      .replace(/^```markdown\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      // Ensure consistent heading format (space after #)
+      .replace(/^(#{1,6})([^#\s])/gm, "$1 $2")
+      // Ensure consistent list item format (space after bullet)
+      .replace(/^([*+-])([^\s])/gm, "$1 $2")
+      // Normalize line endings
+      .replace(/\r\n/g, "\n")
+      // Remove multiple consecutive blank lines
+      .replace(/\n{3,}/g, "\n\n")
+  );
+}

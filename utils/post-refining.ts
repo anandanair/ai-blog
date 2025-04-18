@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { normalizeMarkdown } from "./helpers";
 
 /**
  * Polishes a blog post through multiple iterations of evaluation and revision
@@ -227,10 +228,7 @@ export async function polishBlogPost(
         revisionResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
       // Remove markdown code block delimiters if present
-      revisedContent = revisedContent
-        .replace(/^```markdown\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "");
+      revisedContent = normalizeMarkdown(revisedContent);
 
       if (revisedContent.trim().length > 0) {
         currentContent = revisedContent;
