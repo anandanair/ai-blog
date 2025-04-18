@@ -200,25 +200,29 @@ export async function polishBlogPost(
       // Step 2: Revise the content based on evaluation
       const revisionPrompt = `
           You are an expert blog writer. Revise and improve the following blog post based on the editor's feedback.
-          
+
+          // --- Contextual Information (Do NOT include in the output) ---
           TITLE: ${title}
+          ${topicContext} // Optional: Include if relevant context for revision
+          // --- End Contextual Information ---
+
           
-          ${topicContext}
-          
-          ORIGINAL CONTENT:
+          ORIGINAL CONTENT TO REVISE:
           ${currentContent}
           
           EDITOR'S FEEDBACK:
           ${evaluationText}
           
+          // --- Instructions for Revision ---
           Please provide a revised version of the blog post that addresses the feedback.
           Keep the same overall structure but improve the content according to the suggestions.
           
-          IMPORTANT: 
-          1. DO NOT include any hyperlinks in your content. If you want to mention resources, just mention them by name without creating links.
-          2. Return ONLY the revised content in markdown format WITHOUT any code block delimiters.
-          3. DO NOT include \`\`\`markdown or \`\`\` around your response.
-          4. Just return the raw markdown content directly.
+          // --- IMPORTANT - Output Formatting Rules ---
+          1.  **DO NOT include the TITLE (provided above for context) in your response.** Start your response directly with the revised blog post body text.
+          2.  Return ONLY the revised content in markdown format.
+          3.  DO NOT include any hyperlinks. Mention resources by name only if necessary.
+          4.  DO NOT include markdown code block delimiters like \`\`\`markdown or \`\`\` around your response.
+          5.  Output only the raw revised markdown content directly.
         `;
 
       const revisionResponse = await genAI.models.generateContent({
