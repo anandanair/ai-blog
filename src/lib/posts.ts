@@ -1,5 +1,3 @@
-import { remark } from "remark";
-import html from "remark-html";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { PostData } from "@/types";
 import { supabaseClient } from "@/utils/supabase/client";
@@ -140,16 +138,9 @@ export async function getAiToolData(id: string): Promise<PostData | null> {
     return null;
   }
 
-  // Process markdown content to HTML
-  const processedContent = await remark()
-    .use(html, { sanitize: false })
-    .process(data.content || "");
-  const contentHtml = processedContent.toString();
-
-  // Return the combined data
   return {
     id: data.slug,
-    contentHtml,
+    content: data.content,
     title: data.title,
     description: data.description,
     created_at: data.created_at,
@@ -181,16 +172,10 @@ export async function getPostData(id: string): Promise<PostData | null> {
     return null;
   }
 
-  // Process markdown content to HTML
-  const processedContent = await remark()
-    .use(html, { sanitize: false })
-    .process(data.content || "");
-  const contentHtml = processedContent.toString();
-
   // Return the combined data
   return {
     id: data.slug,
-    contentHtml,
+    content: data.content,
     title: data.title,
     description: data.description,
     created_at: data.created_at,
