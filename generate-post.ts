@@ -22,7 +22,7 @@ async function main() {
 
   // Generate posts
   await generateGeneralPost(genAI, supabase);
-  await generateAiToolPost(genAI, supabase);
+  // await generateAiToolPost(genAI, supabase);
 
   console.log("\n--- Script Finished ---");
 }
