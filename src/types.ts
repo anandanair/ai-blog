@@ -6,7 +6,7 @@ export interface PostData {
   image_url?: string | null;
   category?: string | null;
   tool_name?: string | null;
-  contentHtml?: string;
+  content?: string;
   author?: string | null;
   author_image?: string | null;
   read_time?: number | null;
