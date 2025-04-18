@@ -4,8 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { PostData } from "@/types"; // Import the PostData type
 import { formatDate } from "@/utils/helpers";
+import { CodeBlock } from "./CodeBlock";
 
 interface PostClientProps {
   postData: PostData;
@@ -24,20 +27,74 @@ export default function PostClient({ postData }: PostClientProps) {
     [0, 1],
     ["0%", "100%"]
   );
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-  const headerScale = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
-
-  // Estimate reading time (average reading speed: 200 words per minute)
-  const wordCount = (postData.contentHtml || "")
-    .replace(/<[^>]*>/g, "")
-    .split(/\s+/).length;
-  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   // Set isLoaded to true after component mounts and scroll to top
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsLoaded(true);
   }, []);
+
+  // Inside PostClient.tsx
+
+  const components = {
+    // ... other components if any ...
+
+    code({ node, inline, className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || "");
+      const language = match ? match[1] : undefined;
+      const value = String(children).replace(/\n$/, ""); // Extract the code string
+
+      if (inline) {
+        // Handle inline code correctly
+        return (
+          <code
+            className="px-1 py-0.5 rounded bg-gray-800 text-gray-200 font-mono text-sm"
+            {...props}
+          >
+            {children}
+          </code>
+        );
+      }
+
+      // If it's not inline, it's a block. Render CodeBlock.
+      // No need to check for parent paragraphs here; CodeBlock handles block rendering.
+      return (
+        <CodeBlock
+          language={language}
+          value={value}
+          // Pass down other props if necessary, but avoid passing node if not needed
+          {...props}
+        />
+      );
+    },
+
+    // Optional but recommended: Ensure other block elements aren't nested in <p>
+    // If you encounter issues with other elements (like lists inside paragraphs),
+    // you might need to add overrides for them or use a rehype plugin.
+    // For now, let's focus on the code block.
+
+    // Example of a simple paragraph override to handle edge cases
+    // where a paragraph *only* contains a non-inline element.
+    // Use this if the code block simplification alone doesn't fix it.
+    /*
+  p: ({ node, children, ...props }) => {
+    // Check if this 'p' node only contains what should be a block element
+    // This is a heuristic: Check if the first child looks like our CodeBlock output
+    if (
+      node &&
+      node.children &&
+      node.children.length === 1 &&
+      node.children[0].tagName === 'code' && // It starts as a code tag from markdown
+      !node.children[0].properties?.inline // And it's not marked as inline conceptually (this property might not exist, adjust check as needed)
+    ) {
+       // Render the children directly without the <p> wrapper
+       return <>{children}</>;
+    }
+    // Otherwise, render a normal paragraph
+    return <p {...props}>{children}</p>;
+  },
+  */
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -151,7 +208,7 @@ export default function PostClient({ postData }: PostClientProps) {
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              {readingTime} min read
+              {postData.read_time} min read
             </span>
           </motion.div>
         </div>
@@ -183,10 +240,10 @@ export default function PostClient({ postData }: PostClientProps) {
         ref={articleRef}
         className="relative z-10 -mt-16 bg-white dark:bg-gray-800 rounded-t-3xl shadow-xl max-w-4xl mx-auto mb-20"
       >
-        <div className="px-4 sm:px-8 md:px-16 py-12">
+        <div className="prose prose-lg lg:prose-xl dark:prose-invert max-w-none px-4 sm:px-8 md:px-16 py-12">
           {postData.description && (
             <motion.div
-              className="text-xl text-gray-600 dark:text-gray-300 mb-8 font-light leading-relaxed border-l-4 border-blue-500 pl-4 italic"
+              className="text-xl text-gray-600 dark:text-gray-300 mb-8 font-light leading-relaxed border-l-4 border-blue-500 pl-4 italic !no-prose" // Add !no-prose if you don't want prose styles here
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: isLoaded ? 1 : 0, x: isLoaded ? 0 : -20 }}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -195,13 +252,20 @@ export default function PostClient({ postData }: PostClientProps) {
             </motion.div>
           )}
 
+          {/* Render Markdown Content */}
           <motion.div
-            className="blog-content"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            dangerouslySetInnerHTML={{ __html: postData.contentHtml || "" }}
-          />
+          >
+            {/* Remove dangerouslySetInnerHTML */}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]} // Enable GFM features
+              components={components} // Pass custom renderers
+            >
+              {postData.content || ""}
+            </ReactMarkdown>
+          </motion.div>
         </div>
 
         {/* Article footer */}
