@@ -18,7 +18,8 @@ export async function validateAndCorrectMarkdown(
 ): Promise<string> {
   try {
     console.log("Starting multi-model markdown validation process...");
-    // Step 1: Initial LLM-based formatting correction with Gemini
+
+    // Step 1: Initial validation with more capable Gemini model
     let correctedContent = await performGeminiMarkdownValidation(
       genAI,
       content,
@@ -31,7 +32,7 @@ export async function validateAndCorrectMarkdown(
       title
     );
 
-    // Step 4: Apply minimal programmatic fixes for critical issues
+    // Step 3: Apply minimal programmatic fixes for critical issues
     correctedContent = applyEssentialProgrammaticFixes(correctedContent);
 
     console.log("✅ Multi-model markdown validation completed");
@@ -103,7 +104,8 @@ async function performGeminiMarkdownValidation(
 
   try {
     const validationResponse = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-pro-preview-03-25",
+      // model: "gemini-2.0-flash",
       contents: validationPrompt,
     });
 
