@@ -57,9 +57,7 @@ async function performGeminiMarkdownValidation(
   const validationPrompt = `
     You are an expert in markdown formatting and React-compatible content. Your task is to validate and correct the markdown in this blog post,
     ensuring it will render perfectly in a React application without hydration errors.
-    
-    TITLE: ${title}
-    
+        
     CONTENT:
     ${content}
     
@@ -138,9 +136,7 @@ async function performGroqLlamaValidation(
   const validationPrompt = `
     You are an expert in markdown formatting for React applications. Your task is to validate and correct the markdown in this blog post,
     focusing specifically on ensuring proper code blocks, lists, and formatting.
-    
-    TITLE: ${title}
-    
+      
     CONTENT:
     ${content}
     
