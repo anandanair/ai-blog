@@ -9,6 +9,7 @@ import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
 import { getDetailedTopicInformation } from "../utils/topic-research";
 import { polishBlogPost } from "../utils/post-refining";
+import { validateAndCorrectMarkdown } from "../utils/post-validation";
 
 /**
  * Generates a general blog post using a two-stage approach:
@@ -99,7 +100,7 @@ export async function generateGeneralPost(
     );
 
     // Stage 2 prompt: Generate full blog post with detailed information
-      const blogGenerationPrompt = `
+    const blogGenerationPrompt = `
       You are a helpful AI blogger. Write a creative, useful and engaging blog post about the following topic:
       
       TOPIC: ${selectedTopic}
@@ -179,6 +180,14 @@ async function processGeneralPost(
   if (polishedContent) {
     content = polishedContent;
   }
+
+  // STAGE 4: Validate and correct markdown formatting
+  console.log("Stage 4: Validating and correcting markdown formatting...");
+  content = await validateAndCorrectMarkdown(
+    genAI,
+    polishedContent ?? "",
+    title
+  );
 
   // Generate and upload image
   const imageUrl = await generateAndUploadImage(

@@ -249,15 +249,7 @@ export async function polishBlogPost(
         "Reached maximum number of iterations. Using the latest version."
       );
     }
-
-    // Add a final markdown validation and correction layer
-    console.log("Performing final markdown validation and correction...");
-    const finalContent = await validateAndCorrectMarkdown(
-      genAI,
-      currentContent,
-      title
-    );
-    return finalContent;
+    return currentContent;
   } catch (error) {
     console.error("❌ Error polishing blog post:", error);
     return null;
