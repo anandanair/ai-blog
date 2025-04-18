@@ -18,7 +18,7 @@ import { validateAndCorrectMarkdown } from "../utils/post-validation";
  * 3. Detailed post generation with the research
  * 4. Post refinement and validation
  * 5. Image generation and database storage
- * 
+ *
  * @param genAI - Google Generative AI client instance
  * @param supabase - Supabase client for database operations
  * @returns Promise<boolean> - Success status of the post generation process
@@ -75,7 +75,8 @@ export async function generateGeneralPost(
   try {
     // Generate topic selection using AI
     const topicResponse = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-preview-04-17",
+      // model: "gemini-2.0-flash",
       contents: topicSelectionPrompt,
     });
 
@@ -140,7 +141,8 @@ export async function generateGeneralPost(
 
     // Generate the full blog post with detailed information
     const blogResponse = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-preview-04-17",
+      // model: "gemini-2.0-flash",
       contents: blogGenerationPrompt,
     });
 
@@ -161,7 +163,7 @@ export async function generateGeneralPost(
 
 /**
  * Processes the generated blog post response, refines it, and saves it to the database
- * 
+ *
  * @param genAI - Google Generative AI client instance
  * @param supabase - Supabase client for database operations
  * @param response - The AI-generated blog post response

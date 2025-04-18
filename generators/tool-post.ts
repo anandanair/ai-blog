@@ -11,7 +11,8 @@ export async function generateAiToolPost(
 
   // Get previously used tools
   const usedTools = await getPreviouslyUsedTools(supabase);
-  const usedToolsList = usedTools.length > 0 ? usedTools.join(", ") : "None yet";
+  const usedToolsList =
+    usedTools.length > 0 ? usedTools.join(", ") : "None yet";
 
   console.log(`Previously used tools (from database): ${usedToolsList}`);
   const prompt = `
@@ -38,7 +39,8 @@ export async function generateAiToolPost(
 
   try {
     const response = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-preview-04-17",
+      // model: "gemini-2.0-flash",
       contents: prompt,
     });
 
@@ -55,15 +57,29 @@ async function processToolPost(
   response: GenerateContentResponse
 ): Promise<boolean> {
   const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-  
+
   const parsedData = parsePostResponse(text, "tool");
   if (!parsedData) return false;
-  
-  const { toolName, title, description, imageDescription, content, readTime, tags, slug } = parsedData;
-  
+
+  const {
+    toolName,
+    title,
+    description,
+    imageDescription,
+    content,
+    readTime,
+    tags,
+    slug,
+  } = parsedData;
+
   // Generate and upload image
-  const imageUrl = await generateAndUploadImage(genAI, supabase, imageDescription, title);
-  
+  const imageUrl = await generateAndUploadImage(
+    genAI,
+    supabase,
+    imageDescription,
+    title
+  );
+
   // Save post to database
   const success = await savePostToDatabase(supabase, {
     title,
@@ -76,10 +92,10 @@ async function processToolPost(
     read_time: readTime,
     tags,
   });
-  
+
   if (success && toolName) {
     console.log(`✅ Successfully generated post for AI tool: "${toolName}"`);
   }
-  
+
   return success;
 }

@@ -37,7 +37,8 @@ export async function polishBlogPost(
 
     // Initialize conversation for the evaluation model
     const evaluationModel = genAI.chats.create({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-preview-04-17",
+      // model: "gemini-2.0-flash",
       history: [
         {
           role: "user",
@@ -226,7 +227,8 @@ export async function polishBlogPost(
         `;
 
       const revisionResponse = await genAI.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash-preview-04-17",
+        // model: "gemini-2.0-flash",
         contents: revisionPrompt,
       });
 
