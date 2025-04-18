@@ -11,9 +11,6 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(posts);
 
-  // Add dark mode toggle state
-  const [darkMode, setDarkMode] = useState(false);
-
   useEffect(() => {
     // Filter out AI Tool posts from the main posts list
     const normalPosts = posts.filter(
@@ -50,11 +47,7 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        darkMode ? "dark" : ""
-      } bg-gray-50 dark:bg-gray-900`}
-    >
+    <div className={`min-h-screen  bg-gray-50 dark:bg-gray-900`}>
       {/* AI Tool of the Day - Compact Banner */}
       {latestTool && (
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900">
