@@ -4,6 +4,7 @@ import { parsePostResponse, generateAndUploadImage } from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
 import { getDetailedTopicInformation } from "../utils/topic-research";
+import { polishBlogPost } from "../utils/post-refining";
 
 /**
  * Generates a general blog post using a two-stage approach:
@@ -120,12 +121,20 @@ export async function generateGeneralPost(
       `;
 
     // Generate the full blog post with detailed information
+    // Update the call to processGeneralPost in generateGeneralPost function
     const blogResponse = await genAI.models.generateContent({
       model: "gemini-2.0-flash",
       contents: blogGenerationPrompt,
     });
-
-    return await processGeneralPost(genAI, supabase, blogResponse);
+    
+    return await processGeneralPost(
+      genAI, 
+      supabase, 
+      blogResponse, 
+      selectedTopic, 
+      topicDescription, 
+      detailedInfo
+    );
   } catch (error) {
     console.error("❌ Error generating general post:", error);
     return false;
@@ -138,22 +147,36 @@ export async function generateGeneralPost(
 async function processGeneralPost(
   genAI: GoogleGenAI,
   supabase: SupabaseClient,
-  response: GenerateContentResponse
+  response: GenerateContentResponse,
+  selectedTopic: string,
+  topicDescription: string,
+  detailedInfo: string
 ): Promise<boolean> {
   const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
   const parsedData = parsePostResponse(text, "general");
   if (!parsedData) return false;
 
-  const {
-    title,
-    description,
-    imageDescription,
+  let { title, description, imageDescription, content, readTime, tags, slug } =
+    parsedData;
+
+  // STAGE 3: Polish and improve the blog post
+  console.log("Stage 3: Polishing and improving the blog post...");
+  const polishedContent = await polishBlogPost(
+    genAI, 
+    title, 
     content,
-    readTime,
-    tags,
-    slug,
-  } = parsedData;
+    {
+      topic: selectedTopic,
+      description: topicDescription,
+      detailedInfo: detailedInfo
+    }
+  );
+
+  // Update content with polished version if successful
+  if (polishedContent) {
+    content = polishedContent;
+  }
 
   // Generate and upload image
   const imageUrl = await generateAndUploadImage(
