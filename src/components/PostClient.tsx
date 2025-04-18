@@ -34,68 +34,6 @@ export default function PostClient({ postData }: PostClientProps) {
     setIsLoaded(true);
   }, []);
 
-  // Inside PostClient.tsx
-
-  const components = {
-    // ... other components if any ...
-
-    code({ node, inline, className, children, ...props }: any) {
-      const match = /language-(\w+)/.exec(className || "");
-      const language = match ? match[1] : undefined;
-      const value = String(children).replace(/\n$/, ""); // Extract the code string
-
-      if (inline) {
-        // Handle inline code correctly
-        return (
-          <code
-            className="px-1 py-0.5 rounded bg-gray-800 text-gray-200 font-mono text-sm"
-            {...props}
-          >
-            {children}
-          </code>
-        );
-      }
-
-      // If it's not inline, it's a block. Render CodeBlock.
-      // No need to check for parent paragraphs here; CodeBlock handles block rendering.
-      return (
-        <CodeBlock
-          language={language}
-          value={value}
-          // Pass down other props if necessary, but avoid passing node if not needed
-          {...props}
-        />
-      );
-    },
-
-    // Optional but recommended: Ensure other block elements aren't nested in <p>
-    // If you encounter issues with other elements (like lists inside paragraphs),
-    // you might need to add overrides for them or use a rehype plugin.
-    // For now, let's focus on the code block.
-
-    // Example of a simple paragraph override to handle edge cases
-    // where a paragraph *only* contains a non-inline element.
-    // Use this if the code block simplification alone doesn't fix it.
-    /*
-  p: ({ node, children, ...props }) => {
-    // Check if this 'p' node only contains what should be a block element
-    // This is a heuristic: Check if the first child looks like our CodeBlock output
-    if (
-      node &&
-      node.children &&
-      node.children.length === 1 &&
-      node.children[0].tagName === 'code' && // It starts as a code tag from markdown
-      !node.children[0].properties?.inline // And it's not marked as inline conceptually (this property might not exist, adjust check as needed)
-    ) {
-       // Render the children directly without the <p> wrapper
-       return <>{children}</>;
-    }
-    // Otherwise, render a normal paragraph
-    return <p {...props}>{children}</p>;
-  },
-  */
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Progress bar */}
@@ -261,7 +199,22 @@ export default function PostClient({ postData }: PostClientProps) {
             {/* Remove dangerouslySetInnerHTML */}
             <ReactMarkdown
               remarkPlugins={[remarkGfm]} // Enable GFM features
-              components={components} // Pass custom renderers
+              components={{
+                code(props) {
+                  const { children, className, node, ...rest } = props;
+                  const match = /language-(\w+)/.exec(className || "");
+                  const value = String(children).replace(/\n$/, ""); // Extract the code string
+
+                  return match ? (
+                    <CodeBlock language={match[1]} value={value} {...props} />
+                  ) : (
+                    <code {...rest} className={className}>
+                      {children}
+                    </code>
+                  );
+                },
+              }}
+              // components={components} // Pass custom renderers
             >
               {postData.content || ""}
             </ReactMarkdown>
