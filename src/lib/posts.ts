@@ -38,8 +38,6 @@ export async function getSortedPostsData(): Promise<PostData[]> {
     return [];
   }
 
-  console.log("Fetched Posts Data:", data); // Log the fetched data
-
   if (!data) {
     return [];
   }
@@ -75,8 +73,6 @@ export async function getLatestAiToolData(): Promise<PostData | null> {
     console.error("Error fetching latest AI tool:", error);
     return null;
   }
-
-  console.log("Fetched Latest AI Tool Data:", data); // Log the fetched data
 
   if (!data) {
     return null;

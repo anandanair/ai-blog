@@ -5,8 +5,5 @@ export default async function Home() {
   const posts = await getSortedPostsData();
   const latestTool = await getLatestAiToolData();
 
-  console.log("Fetched Posts:", posts);
-  console.log("Latest AI Tool:", latestTool);
-
   return <BlogClient posts={posts} latestTool={latestTool} />;
 }
