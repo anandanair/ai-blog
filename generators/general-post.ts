@@ -12,9 +12,16 @@ import { polishBlogPost } from "../utils/post-refining";
 import { validateAndCorrectMarkdown } from "../utils/post-validation";
 
 /**
- * Generates a general blog post using a two-stage approach:
+ * Generates a general blog post using a multi-stage approach:
  * 1. Topic selection based on current tech trends
- * 2. Detailed post generation with research
+ * 2. Research gathering on the selected topic
+ * 3. Detailed post generation with the research
+ * 4. Post refinement and validation
+ * 5. Image generation and database storage
+ * 
+ * @param genAI - Google Generative AI client instance
+ * @param supabase - Supabase client for database operations
+ * @returns Promise<boolean> - Success status of the post generation process
  */
 export async function generateGeneralPost(
   genAI: GoogleGenAI,
@@ -25,7 +32,7 @@ export async function generateGeneralPost(
   // STAGE 1: Topic Selection
   console.log("Stage 1: Selecting blog topic...");
 
-  // Get current tech context
+  // Get current tech context to inform topic selection
   console.log("Fetching current tech context...");
   const techContext = await getCurrentTechContext();
 
@@ -33,6 +40,7 @@ export async function generateGeneralPost(
   console.log("Fetching existing post titles...");
   const existingTitles = await getExistingPostTitles(supabase);
 
+  // Create a context string of existing topics to avoid in the prompt
   const existingTopicsContext =
     existingTitles.length > 0
       ? `\nAVOID these topics as they've been covered recently:\n${existingTitles
@@ -65,41 +73,45 @@ export async function generateGeneralPost(
     `;
 
   try {
-    // Stage 1: Get topic selection
+    // Generate topic selection using AI
     const topicResponse = await genAI.models.generateContent({
       model: "gemini-2.0-flash",
       contents: topicSelectionPrompt,
     });
 
+    // Extract text from the response
     const topicText =
       topicResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    // Parse the topic selection
+    // Parse the topic selection using regex to extract key components
     const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
     const descriptionMatch = topicText.match(/DESCRIPTION:\s*(.*?)(?:\n|$)/);
     const searchTermsMatch = topicText.match(/SEARCH_TERMS:\s*(.*?)(?:\n|$)/);
 
+    // Validate that all required components were extracted
     if (!topicMatch || !descriptionMatch || !searchTermsMatch) {
       console.error("❌ Failed to parse topic selection");
       return false;
     }
 
+    // Extract and clean the topic components
     const selectedTopic = topicMatch[1].trim();
     const topicDescription = descriptionMatch[1].trim();
     const searchTerms = searchTermsMatch[1].trim();
 
+    // Uncomment for debugging
     // console.log(`Selected topic: ${selectedTopic}`);
     // console.log(`Topic description: ${topicDescription}`);
     // console.log(`Search terms: ${searchTerms}`);
 
-    // STAGE 2: Gather detailed information about the selected topic
+    // STAGE 2: Research - Gather detailed information about the selected topic
     console.log("Stage 2: Gathering detailed information about the topic...");
     const detailedInfo = await getDetailedTopicInformation(
       selectedTopic,
       searchTerms
     );
 
-    // Stage 2 prompt: Generate full blog post with detailed information
+    // Create prompt for generating the full blog post with the research data
     const blogGenerationPrompt = `
       You are a helpful AI blogger. Write a creative, useful and engaging blog post about the following topic:
       
@@ -127,12 +139,12 @@ export async function generateGeneralPost(
       `;
 
     // Generate the full blog post with detailed information
-    // Update the call to processGeneralPost in generateGeneralPost function
     const blogResponse = await genAI.models.generateContent({
       model: "gemini-2.0-flash",
       contents: blogGenerationPrompt,
     });
 
+    // Process the generated blog post and save to database
     return await processGeneralPost(
       genAI,
       supabase,
@@ -148,7 +160,15 @@ export async function generateGeneralPost(
 }
 
 /**
- * Processes the generated blog post response and saves it to the database
+ * Processes the generated blog post response, refines it, and saves it to the database
+ * 
+ * @param genAI - Google Generative AI client instance
+ * @param supabase - Supabase client for database operations
+ * @param response - The AI-generated blog post response
+ * @param selectedTopic - The selected topic title
+ * @param topicDescription - Description of the selected topic
+ * @param detailedInfo - Research information about the topic
+ * @returns Promise<boolean> - Success status of the post processing
  */
 async function processGeneralPost(
   genAI: GoogleGenAI,
@@ -158,14 +178,21 @@ async function processGeneralPost(
   topicDescription: string,
   detailedInfo: string
 ): Promise<boolean> {
+  // Extract text from the AI response
   const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
+  // Parse the response into structured blog post data
   const parsedData = parsePostResponse(text, "general");
-  if (!parsedData) return false;
+  if (!parsedData) {
+    console.error("❌ Failed to parse blog post response");
+    return false;
+  }
 
+  // Destructure the parsed blog post data
   let { title, description, imageDescription, content, readTime, tags, slug } =
     parsedData;
 
+  // Normalize markdown to ensure consistent formatting
   content = normalizeMarkdown(content);
 
   // STAGE 3: Polish and improve the blog post
@@ -179,17 +206,20 @@ async function processGeneralPost(
   // Update content with polished version if successful
   if (polishedContent) {
     content = polishedContent;
+  } else {
+    console.log("⚠️ Using original content as polishing failed");
   }
 
   // STAGE 4: Validate and correct markdown formatting
   console.log("Stage 4: Validating and correcting markdown formatting...");
   content = await validateAndCorrectMarkdown(
     genAI,
-    polishedContent ?? "",
+    polishedContent ?? content,
     title
   );
 
-  // Generate and upload image
+  // STAGE 5: Generate and upload image for the blog post
+  console.log("Stage 5: Generating and uploading image...");
   const imageUrl = await generateAndUploadImage(
     genAI,
     supabase,
@@ -197,7 +227,8 @@ async function processGeneralPost(
     title
   );
 
-  // Save post to database
+  // STAGE 6: Save post to database
+  console.log("Stage 6: Saving post to database...");
   return await savePostToDatabase(supabase, {
     title,
     slug,
