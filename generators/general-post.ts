@@ -99,7 +99,7 @@ export async function generateGeneralPost(
     );
 
     // Stage 2 prompt: Generate full blog post with detailed information
-    const blogGenerationPrompt = `
+      const blogGenerationPrompt = `
       You are a helpful AI blogger. Write a creative, useful and engaging blog post about the following topic:
       
       TOPIC: ${selectedTopic}
@@ -113,7 +113,8 @@ export async function generateGeneralPost(
       3. Also provide an image description that represents your blog post's main theme.
       4. Estimate the read time in minutes for your content.
       5. Provide 3-5 relevant tags for the post (single words or short phrases).
-      6. Return it in this format:
+      6. IMPORTANT: DO NOT include any hyperlinks in your content. Instead, mention resources by name without linking to them.
+      7. Return it in this format:
 
       TITLE: Your Title Here
       DESCRIPTION: Short 1-liner summary here

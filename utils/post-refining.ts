@@ -214,9 +214,11 @@ export async function polishBlogPost(
           Please provide a revised version of the blog post that addresses the feedback.
           Keep the same overall structure but improve the content according to the suggestions.
           
-          IMPORTANT: Return ONLY the revised content in markdown format WITHOUT any code block delimiters.
-          DO NOT include \`\`\`markdown or \`\`\` around your response.
-          Just return the raw markdown content directly.
+          IMPORTANT: 
+          1. DO NOT include any hyperlinks in your content. If you want to mention resources, just mention them by name without creating links.
+          2. Return ONLY the revised content in markdown format WITHOUT any code block delimiters.
+          3. DO NOT include \`\`\`markdown or \`\`\` around your response.
+          4. Just return the raw markdown content directly.
         `;
 
       const revisionResponse = await genAI.models.generateContent({
