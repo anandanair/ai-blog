@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { normalizeMarkdown } from "./helpers";
+import { validateAndCorrectMarkdown } from "./post-validation";
 
 /**
  * Polishes a blog post through multiple iterations of evaluation and revision
@@ -260,61 +261,5 @@ export async function polishBlogPost(
   } catch (error) {
     console.error("❌ Error polishing blog post:", error);
     return null;
-  }
-}
-
-/**
- * Validates and corrects markdown formatting, especially for code blocks
- * @param genAI The Google GenAI instance
- * @param content The blog post content to validate
- * @param title The blog post title for context
- * @returns Corrected markdown content
- */
-async function validateAndCorrectMarkdown(
-  genAI: GoogleGenAI,
-  content: string,
-  title: string
-): Promise<string> {
-  try {
-    const validationPrompt = `
-      You are an expert in markdown formatting. Your task is to validate and correct the markdown in this blog post,
-      with special attention to code blocks. Ensure all code blocks have proper language identifiers and are correctly formatted.
-      
-      TITLE: ${title}
-      
-      CONTENT:
-      ${content}
-      
-      Please correct any markdown formatting issues, especially:
-      1. Ensure all code blocks use triple backticks with appropriate language identifiers (e.g. \`\`\`javascript)
-      2. Fix any broken or improperly formatted code blocks
-      3. Ensure proper heading hierarchy (h1, h2, h3, etc.)
-      4. Fix any list formatting issues
-      5. Correct any table formatting if present
-      6. Ensure proper formatting of links and images
-      
-      IMPORTANT: Return ONLY the corrected content in markdown format WITHOUT any code block delimiters.
-      DO NOT include \`\`\`markdown or \`\`\` around your entire response.
-      Just return the raw markdown content directly.
-      DO NOT add any explanations or comments about what you fixed - just return the corrected markdown.
-    `;
-
-    const validationResponse = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: validationPrompt,
-    });
-
-    let correctedContent =
-      validationResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? content;
-
-    // Remove markdown code block delimiters if present around the entire response
-    correctedContent = normalizeMarkdown(correctedContent);
-
-    console.log("✅ Markdown validation and correction completed");
-    return correctedContent;
-  } catch (error) {
-    console.error("❌ Error validating markdown:", error);
-    // Return original content if validation fails
-    return content;
   }
 }
