@@ -83,9 +83,9 @@ export async function generateGeneralPost(
     const topicDescription = descriptionMatch[1].trim();
     const searchTerms = searchTermsMatch[1].trim();
 
-    console.log(`Selected topic: ${selectedTopic}`);
-    console.log(`Topic description: ${topicDescription}`);
-    console.log(`Search terms: ${searchTerms}`);
+    // console.log(`Selected topic: ${selectedTopic}`);
+    // console.log(`Topic description: ${topicDescription}`);
+    // console.log(`Search terms: ${searchTerms}`);
 
     // STAGE 2: Gather detailed information about the selected topic
     console.log("Stage 2: Gathering detailed information about the topic...");
