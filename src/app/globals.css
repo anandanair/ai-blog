@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,11 +14,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {
@@ -25,10 +25,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
 /* Enhanced blog content styling */
 .blog-content {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   max-width: 100%;
   color: #374151;
 }
@@ -106,7 +106,7 @@ body {
   color: #60a5fa;
 }
 
-.blog-content ul, 
+.blog-content ul,
 .blog-content ol {
   margin: 1.5rem 0 2rem;
   padding-left: 2rem;
@@ -146,7 +146,8 @@ body {
   border-radius: 0.75rem;
   margin: 2.5rem auto;
   display: block;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
 }
 
@@ -232,7 +233,8 @@ body {
   padding: 0.2rem 0.4rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
 .dark .blog-content code {
@@ -244,11 +246,21 @@ body {
   margin: 3rem 0;
   border: 0;
   height: 2px;
-  background-image: linear-gradient(to right, transparent, #3b82f6, transparent);
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    #3b82f6,
+    transparent
+  );
 }
 
 .dark .blog-content hr {
-  background-image: linear-gradient(to right, transparent, #60a5fa, transparent);
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    #60a5fa,
+    transparent
+  );
 }
 
 .blog-content strong {
@@ -299,10 +311,10 @@ body {
   background-color: #111827;
 }
 
-
 /* Updating blog content styling for better readability on dark background */
 .blog-content {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   max-width: 100%;
   color: #e2e8f0; /* Lighter text color for better readability */
 }
@@ -362,7 +374,7 @@ body {
   padding: 0.1rem;
 }
 
-.blog-content ul, 
+.blog-content ul,
 .blog-content ol {
   margin: 1.5rem 0 2rem;
   padding-left: 2rem;
@@ -394,7 +406,8 @@ body {
   border-radius: 0.75rem;
   margin: 2.5rem auto;
   display: block;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
 }
 
@@ -406,7 +419,12 @@ body {
   margin: 2.5rem 0;
   padding: 1.5rem 2rem;
   border-left: 4px solid #60a5fa; /* Brighter border */
-  background-color: rgba(30, 58, 138, 0.3); /* More visible blockquote background */
+  background-color: rgba(
+    30,
+    58,
+    138,
+    0.3
+  ); /* More visible blockquote background */
   border-radius: 0 0.5rem 0.5rem 0;
   font-style: italic;
   color: #f1f5f9; /* Lighter text in blockquotes */
@@ -456,7 +474,8 @@ body {
   padding: 0.2rem 0.4rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
 .blog-content strong {
