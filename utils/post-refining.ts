@@ -1,6 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
 import { normalizeMarkdown } from "./helpers";
-import { validateAndCorrectMarkdown } from "./post-validation";
 
 /**
  * Polishes a blog post through multiple iterations of evaluation and revision
