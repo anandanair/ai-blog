@@ -108,9 +108,12 @@ export async function generateGeneralPost(
     // STAGE 2: Research - Gather detailed information about the selected topic
     console.log("Stage 2: Gathering detailed information about the topic...");
     const detailedInfo = await getDetailedTopicInformation(
+      genAI,
       selectedTopic,
       searchTerms
     );
+
+    console.log("Detailed information gathered:", detailedInfo);
 
     // Create prompt for generating the full blog post with the research data
     const blogGenerationPrompt = `
