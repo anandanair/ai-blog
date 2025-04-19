@@ -1,15 +1,20 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { fetchLatestTechNews } from "./news-helper";
 
 /**
  * Fetches current tech context from various sources
  */
 export async function getCurrentTechContext(): Promise<string> {
-  let techContext = "Current trending tech topics:\n\n";
+  let techContext = "Current top tech news:\n\n";
 
   try {
+    const techNews = await fetchLatestTechNews();
+    techContext += techNews;
+
     // Part 1: Get HackerNews trending stories
     const hackerNewsTopics = await getHackerNewsTopics();
+    techContext += "\n\nCurrent trending tech topics:\n";
     techContext += hackerNewsTopics;
 
     // Part 2: Get Reddit trending topics
@@ -21,11 +26,6 @@ export async function getCurrentTechContext(): Promise<string> {
     const githubTopics = await getGitHubTrending();
     techContext += "\n\nTrending repositories on GitHub:\n";
     techContext += githubTopics;
-
-    // Part 4: Get tech news from TechCrunch
-    const techCrunchNews = await getTechNews();
-    techContext += "\n\nLatest tech news from TechCrunch:\n";
-    techContext += techCrunchNews;
 
     // Part 5: Get developer topics from Stack Overflow
     const stackOverflowTopics = await getStackOverflowTopics();
@@ -140,7 +140,7 @@ async function getRedditAccessToken(): Promise<string> {
     params,
     {
       headers: {
-        "Authorization": `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
         "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -154,11 +154,15 @@ export async function getRedditTopics(): Promise<string> {
   try {
     const accessToken = await getRedditAccessToken();
     const techSubreddits = [
+      "technews",
       "programming",
       "technology",
       "webdev",
       "MachineLearning",
       "datascience",
+      "ArtificialInteligence",
+      "gadgets",
+      "gaming",
     ];
 
     let redditContext = "";
@@ -169,7 +173,7 @@ export async function getRedditTopics(): Promise<string> {
           `https://oauth.reddit.com/r/${subreddit}/top.json?limit=3&t=week`,
           {
             headers: {
-              "Authorization": `Bearer ${accessToken}`,
+              Authorization: `Bearer ${accessToken}`,
               "User-Agent": "web:ai-blog-generator:v1.0 (by /u/YourUsername)",
             },
           }
@@ -255,50 +259,50 @@ export async function getGitHubTrending(): Promise<string> {
 /**
  * Gets latest tech news using NewsAPI
  */
-export async function getTechNews(): Promise<string> {
-  try {
-    // Use NewsAPI to get tech news
-    const apiKey = process.env.NEWS_API_KEY; // Make sure to add this to your .env file
+// export async function getTechCrunchNews(): Promise<string> {
+//   try {
+//     // Use NewsAPI to get tech news
+//     const apiKey = process.env.NEWS_API_KEY; // Make sure to add this to your .env file
 
-    if (!apiKey) {
-      console.error("NewsAPI key not found in environment variables");
-      return "No tech news found. Please set the NEWS_API_KEY environment variable.";
-    }
+//     if (!apiKey) {
+//       console.error("NewsAPI key not found in environment variables");
+//       return "No tech news found. Please set the NEWS_API_KEY environment variable.";
+//     }
 
-    const response = await axios.get(
-      `https://newsapi.org/v2/top-headlines?category=technology&language=en&pageSize=5&apiKey=${apiKey}`
-    );
+//     const response = await axios.get(
+//       `https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=${apiKey}`
+//     );
 
-    if (
-      response.data.status !== "ok" ||
-      !response.data.articles ||
-      response.data.articles.length === 0
-    ) {
-      console.warn("NewsAPI returned no articles or error status");
-      return "No tech news found from the API.";
-    }
+//     if (
+//       response.data.status !== "ok" ||
+//       !response.data.articles ||
+//       response.data.articles.length === 0
+//     ) {
+//       console.warn("NewsAPI returned no articles or error status");
+//       return "No tech news found from the API.";
+//     }
 
-    let techNews = "";
+//     let techNews = "";
 
-    // Format the articles
-    for (const article of response.data.articles) {
-      const { title, description, source, url } = article;
+//     // Format the articles
+//     for (const article of response.data.articles) {
+//       const { title, description, source, url } = article;
 
-      if (title) {
-        techNews += `- ${title}\n`;
-        if (source && source.name) techNews += `  Source: ${source.name}\n`;
-        if (description) techNews += `  Summary: ${description}\n`;
-        if (url) techNews += `  URL: ${url}\n`;
-        techNews += "\n";
-      }
-    }
+//       if (title) {
+//         techNews += `- ${title}\n`;
+//         if (source && source.name) techNews += `  Source: ${source.name}\n`;
+//         if (description) techNews += `  Summary: ${description}\n`;
+//         if (url) techNews += `  URL: ${url}\n`;
+//         techNews += "\n";
+//       }
+//     }
 
-    return techNews || "No tech news articles found.";
-  } catch (error) {
-    console.error("Error fetching tech news from NewsAPI:", error);
-    return "Error fetching tech news. Please check your API key and network connection.";
-  }
-}
+//     return techNews || "No tech news articles found.";
+//   } catch (error) {
+//     console.error("Error fetching tech news from NewsAPI:", error);
+//     return "Error fetching tech news. Please check your API key and network connection.";
+//   }
+// }
 
 /**
  * Gets hot topics from Stack Overflow
