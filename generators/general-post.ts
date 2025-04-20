@@ -312,9 +312,12 @@ export async function generateDraft(
 
   try {
     // --- 3. Call Gemini API ---
-    console.log(
-      `   Draft Generation Prompt Length (approx chars): ${generationPrompt.length}`
-    );
+    const countTokensResponse = await genAI.models.countTokens({
+      model: "gemini-2.5-flash-preview-04-17",
+      contents: generationPrompt,
+    });
+    console.log("Tokens:", countTokensResponse);
+
     const draftResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: generationPrompt,
