@@ -30,6 +30,7 @@ export async function savePostToDatabase(
     tool_name: string | null;
     read_time: number;
     tags: string[];
+    research_details: Array<{ point: string; data: any }> | null;
   }
 ): Promise<boolean> {
   try {
@@ -48,6 +49,7 @@ export async function savePostToDatabase(
           read_time: postData.read_time,
           tags: postData.tags,
           status: "published",
+          research_details: postData.research_details,
         },
       ])
       .select();

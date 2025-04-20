@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenAI, Modality } from "@google/genai";
+import { GroundedResearchResult } from "./topic-research";
 
 const AVERAGE_WPM = 225;
 
@@ -219,4 +220,24 @@ export function calculateReadTime(text: string): number {
   const wordCount = text.split(/\s+/).filter(Boolean).length;
   const minutes = Math.ceil(wordCount / AVERAGE_WPM);
   return Math.max(1, minutes); // Ensure minimum 1 minute
+}
+
+// Helper function (can be in utils or near savePostToDatabase)
+export function formatResearchForStorage(
+  researchResults: Map<string, GroundedResearchResult>
+): Array<{ point: string; data: GroundedResearchResult }> | null {
+  if (!researchResults || researchResults.size === 0) {
+    return null; // Or return [] if you prefer an empty array
+  }
+  // Convert Map entries to an array of objects
+  return Array.from(researchResults.entries()).map(([point, data]) => ({
+    point: point, // The outline point text acts as the key
+    data: {
+      // Store the full GroundedResearchResult object
+      groundedText: data.groundedText,
+      sources: data.sources,
+      searchQueries: data.searchQueries,
+      renderedContent: data.renderedContent,
+    },
+  }));
 }

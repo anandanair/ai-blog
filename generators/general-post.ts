@@ -4,6 +4,7 @@ import {
   generateAndUploadImage,
   extractMarkdownContent,
   generateSlug,
+  formatResearchForStorage,
 } from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
@@ -224,6 +225,10 @@ ${techContext}
 
     // STAGE 11: Save to Supabase Database
     console.log("Stage 11: Saving to Supabase Database...");
+
+    // Prepare research data for storage
+    const researchDetailsForStorage = formatResearchForStorage(researchResults);
+
     return await savePostToDatabase(supabase, {
       title: blogMetadata?.title || "",
       slug: generateSlug(blogMetadata?.title || ""),
@@ -234,6 +239,7 @@ ${techContext}
       tool_name: null,
       read_time: blogMetadata?.readTimeMinutes || 0,
       tags: blogMetadata?.tags || [],
+      research_details: researchDetailsForStorage,
     });
   } catch (error) {
     return false;
