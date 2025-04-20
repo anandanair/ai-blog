@@ -32,8 +32,6 @@ export async function savePostToDatabase(
     tags: string[];
   }
 ): Promise<boolean> {
-  console.log(`⏳ Saving post ${postData.slug} to Supabase database...`);
-
   try {
     const { data, error } = await supabase
       .from("posts")
