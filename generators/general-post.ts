@@ -1,24 +1,18 @@
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
-  parsePostResponse,
   generateAndUploadImage,
-  normalizeMarkdown,
   extractMarkdownContent,
   generateSlug,
 } from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
 import {
-  getDetailedTopicInformation,
   GroundedResearchResult,
   researchTopicWithGrounding,
 } from "../utils/topic-research";
-import { polishBlogPost, refineDraft } from "../utils/post-refining";
-import {
-  validateAndCorrectMarkdown,
-  validateMarkdownSyntax,
-} from "../utils/post-validation";
+import { finalPolish, refineDraft } from "../utils/post-refining";
+import { validateMarkdownSyntax } from "../utils/post-validation";
 import { generateMetadata } from "../utils/metadata-generation";
 
 /**
@@ -192,14 +186,18 @@ ${techContext}
       selectedTopic
     );
 
+    // *** NEW STAGE 7: Final Polish ***
+    console.log("Stage 7: Performing final polish...");
+    const polishedDraft = await finalPolish(genAI, refinedBlogDraft || "");
+
     const blogMetadata = await generateMetadata(
       genAI,
-      refinedBlogDraft || "",
+      polishedDraft || "",
       selectedTopic
     );
 
     const validatedMarkdown = await validateMarkdownSyntax(
-      refinedBlogDraft || "",
+      polishedDraft || "",
       selectedTopic
     );
 
@@ -212,7 +210,7 @@ ${techContext}
       blogMetadata?.title || ""
     );
 
-    // STAGE 6: Save post to database
+    // STAGE 10: Save post to database
     console.log("Stage 6: Saving post to database...");
     return await savePostToDatabase(supabase, {
       title: blogMetadata?.title || "",
@@ -229,7 +227,6 @@ ${techContext}
     return false;
   }
 }
-
 
 /**
  * Stage 5: Generates the first draft of the blog post using the outline and research findings.
