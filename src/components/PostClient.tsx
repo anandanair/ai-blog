@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { PostData } from "@/types"; // Import the PostData type
+import { PostData, SourceInfo } from "@/types"; // Import the PostData type
 import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 
@@ -17,6 +17,8 @@ interface PostClientProps {
 export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [expandedSources, setExpandedSources] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -27,6 +29,34 @@ export default function PostClient({ postData }: PostClientProps) {
     [0, 1],
     ["0%", "100%"]
   );
+
+  // --- Process Research Details ---
+  const { uniqueSources, searchSuggestionsHtml } = useMemo(() => {
+    const sourcesMap = new Map<string, SourceInfo>();
+    const suggestions: string[] = [];
+
+    if (postData.research_details) {
+      postData.research_details.forEach((detail) => {
+        // Collect unique sources based on URI
+        if (detail.data.sources) {
+          detail.data.sources.forEach((source) => {
+            if (source.uri && !sourcesMap.has(source.uri)) {
+              sourcesMap.set(source.uri, source);
+            }
+          });
+        }
+        // Collect renderedContent HTML
+        if (detail.data.renderedContent) {
+          suggestions.push(detail.data.renderedContent);
+        }
+      });
+    }
+
+    return {
+      uniqueSources: Array.from(sourcesMap.values()),
+      searchSuggestionsHtml: suggestions,
+    };
+  }, [postData.research_details]); // Dependency array
 
   // Set isLoaded to true after component mounts and scroll to top
   useEffect(() => {
@@ -219,6 +249,259 @@ export default function PostClient({ postData }: PostClientProps) {
               {postData.content || ""}
             </ReactMarkdown>
           </motion.div>
+
+          {/* --- Display Sources and Suggestions --- */}
+          {(uniqueSources.length > 0 || searchSuggestionsHtml.length > 0) && (
+            <motion.div
+              className="mt-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isLoaded ? 1 : 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+            >
+              <div className="border-t border-gray-200 dark:border-gray-800 pt-8 space-y-10">
+                {/* Display Sources Section - with pagination for large numbers */}
+                {uniqueSources.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 flex items-center !no-prose">
+                        <span className="inline-block w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 21l-8.2-8.2c-2-2-2-5.2 0-7.2s5.2-2 7.2 0L12 6.8l1-1c2-2 5.2-2 7.2 0s2 5.2 0 7.2L12 21z"></path>
+                          </svg>
+                        </span>
+                        Sources
+                        {uniqueSources.length > 12 && (
+                          <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 font-normal">
+                            ({uniqueSources.length})
+                          </span>
+                        )}
+                      </h3>
+
+                      {/* Show expand/collapse toggle if many sources */}
+                      {uniqueSources.length > 12 && (
+                        <button
+                          onClick={() => setExpandedSources((prev) => !prev)}
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+                        >
+                          {expandedSources ? (
+                            <>
+                              <span>Show less</span>
+                              <svg
+                                className="w-4 h-4 ml-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M5 15l7-7 7 7"
+                                ></path>
+                              </svg>
+                            </>
+                          ) : (
+                            <>
+                              <span>Show all</span>
+                              <svg
+                                className="w-4 h-4 ml-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M19 9l-7 7-7-7"
+                                ></path>
+                              </svg>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Grid layout with conditional display based on expand state */}
+                    <div className="!no-prose">
+                      {uniqueSources.length <= 12 || expandedSources ? (
+                        // Full grid when expanded or fewer sources
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {uniqueSources.map((source, index) => (
+                            <a
+                              key={source.uri || index}
+                              href={source.uri}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              className="flex items-center px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-800 
+                            hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              title={source.uri}
+                            >
+                              <div className="flex-shrink-0 w-4 h-4 text-gray-400 dark:text-gray-500">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                                  <path d="M15 3h6v6"></path>
+                                  <path d="M10 14L21 3"></path>
+                                </svg>
+                              </div>
+                              <div className="ml-3 text-sm text-gray-700 dark:text-gray-300 truncate">
+                                {source.title ||
+                                  source.uri?.split("/")[2] ||
+                                  "Source Link"}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        // Show limited sources with visual indicator for more
+                        <div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {uniqueSources.slice(0, 12).map((source, index) => (
+                              <a
+                                key={source.uri || index}
+                                href={source.uri}
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                                className="flex items-center px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-800 
+                              hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                title={source.uri}
+                              >
+                                <div className="flex-shrink-0 w-4 h-4 text-gray-400 dark:text-gray-500">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                                    <path d="M15 3h6v6"></path>
+                                    <path d="M10 14L21 3"></path>
+                                  </svg>
+                                </div>
+                                <div className="ml-3 text-sm text-gray-700 dark:text-gray-300 truncate">
+                                  {source.title ||
+                                    source.uri?.split("/")[2] ||
+                                    "Source Link"}
+                                </div>
+                              </a>
+                            ))}
+                          </div>
+                          {/* Faded indicator showing there are more sources */}
+                          <div className="mt-2 pt-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                            {uniqueSources.length - 12} more sources available
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display Search Suggestions - Tabbed interface for multiple suggestions */}
+                {searchSuggestionsHtml.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 flex items-center !no-prose">
+                        <span className="inline-block w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                          </svg>
+                        </span>
+                        Related Searches
+                        {searchSuggestionsHtml.length > 3 && (
+                          <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 font-normal">
+                            ({searchSuggestionsHtml.length})
+                          </span>
+                        )}
+                      </h3>
+                    </div>
+
+                    {/* For many search suggestions, use tabs or a scrollable container */}
+                    <div className="!no-prose">
+                      {searchSuggestionsHtml.length > 3 ? (
+                        <>
+                          {/* Horizontal scrollable tab navigation for large number of suggestions */}
+                          <div className="mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto whitespace-nowrap pb-1 hide-scrollbar">
+                            {searchSuggestionsHtml
+                              .slice(0, 10)
+                              .map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => setActiveTab(index)}
+                                  className={`inline-block px-4 py-2 mr-2 text-sm rounded-t-lg transition-colors ${
+                                    activeTab === index
+                                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                  }`}
+                                >
+                                  Set {index + 1}
+                                </button>
+                              ))}
+                            {searchSuggestionsHtml.length > 10 && (
+                              <span className="inline-block px-4 py-2 text-sm text-gray-400 dark:text-gray-500">
+                                +{searchSuggestionsHtml.length - 10} more
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Display the active suggestion set */}
+                          <div className="w-full pb-2">
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: searchSuggestionsHtml[activeTab],
+                              }}
+                              className="w-full overflow-x-auto"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        // For fewer suggestions, display them all
+                        <div className="space-y-3">
+                          {searchSuggestionsHtml.map((htmlString, index) => (
+                            <div
+                              key={index}
+                              dangerouslySetInnerHTML={{ __html: htmlString }}
+                              className="w-full overflow-x-auto pb-2"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+          {/* --- End Sources and Suggestions --- */}
         </div>
 
         {/* Article footer */}
