@@ -3,7 +3,8 @@ name: Daily AI Blog Post
 on:
   schedule:
     # - cron: "*/10 * * * *" # every 10 minutes
-    - cron: "0 1 * * *" # 1 AM UTC daily
+    # - cron: "0 1 * * *" # 1 AM UTC daily
+    - cron: "0 22 * * *"
   workflow_dispatch: # lets you run manually from GitHub Actions tab
 
 jobs:
