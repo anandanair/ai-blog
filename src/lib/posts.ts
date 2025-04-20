@@ -157,7 +157,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, content, created_at, image_url, category, author, read_time"
+      "slug, title, description, content, created_at, image_url, category, author, read_time, research_details"
     )
     .eq("slug", id)
     .eq("status", "published") // Adjust status as needed
@@ -184,6 +184,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
     author: data.author,
     author_image: getAuthorImage(data.author),
     read_time: data.read_time,
+    research_details: data.research_details,
   };
 }
 
