@@ -192,8 +192,6 @@ export function parsePostResponse(text: string, type: "general" | "tool") {
   };
 }
 
-
-
 export function extractMarkdownContent(rawOutput: string): string | null {
   // Regex to find content between ```markdown and ```
   // DotAll flag (s) allows . to match newlines
