@@ -14,8 +14,6 @@ export async function refineDraft(
   outlineMarkdown: string,
   topic: string
 ): Promise<string | null> {
-  console.log("\n✨ Evaluating and Refining Blog Post Draft...");
-
   // --- Craft the Refinement Prompt ---
   const refinementPrompt = `
     You are an expert copy editor and content refiner for a technology blog.
@@ -49,7 +47,6 @@ export async function refineDraft(
   `;
 
   try {
-    console.log("   Sending request to Gemini for draft refinement...");
     const refinedResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: refinementPrompt,
@@ -97,8 +94,6 @@ export async function finalPolish(
   genAI: GoogleGenAI,
   potentiallyUnpolishedDraft: string
 ): Promise<string | null> {
-  console.log("\n🧹 Performing Final Polish (Removing Meta-Commentary)...");
-
   if (!potentiallyUnpolishedDraft) {
     console.warn("   Skipping polish stage due to empty input draft.");
     return potentiallyUnpolishedDraft; // Return empty or null as received
@@ -129,7 +124,6 @@ export async function finalPolish(
   `;
 
   try {
-    console.log("   Sending request to Gemini for final polish...");
     const polishResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: polishPrompt,
@@ -169,10 +163,8 @@ export async function finalPolish(
         `   Note: Polish stage significantly shortened the content (original: ${potentiallyUnpolishedDraft.length} chars, polished: ${cleanedPolishedDraft.length} chars).`
       );
     } else {
-      console.log("   Polish stage completed.");
+      console.log("Polish stage completed.");
     }
-
-    console.log("✅ Final polish complete.");
     return cleanedPolishedDraft;
   } catch (error: any) {
     console.error(
