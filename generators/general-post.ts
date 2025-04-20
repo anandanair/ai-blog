@@ -4,12 +4,22 @@ import {
   parsePostResponse,
   generateAndUploadImage,
   normalizeMarkdown,
+  extractMarkdownContent,
+  generateSlug,
 } from "../utils/helpers";
 import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
-import { getDetailedTopicInformation } from "../utils/topic-research";
-import { polishBlogPost } from "../utils/post-refining";
-import { validateAndCorrectMarkdown } from "../utils/post-validation";
+import {
+  getDetailedTopicInformation,
+  GroundedResearchResult,
+  researchTopicWithGrounding,
+} from "../utils/topic-research";
+import { polishBlogPost, refineDraft } from "../utils/post-refining";
+import {
+  validateAndCorrectMarkdown,
+  validateMarkdownSyntax,
+} from "../utils/post-validation";
+import { generateMetadata } from "../utils/metadata-generation";
 
 /**
  * Generates a general blog post using a multi-stage approach:
@@ -32,9 +42,38 @@ export async function generateGeneralPost(
   // STAGE 1: Topic Selection
   console.log("Stage 1: Selecting blog topic...");
 
-  // Get current tech context to inform topic selection
+  // 1.1 Get current tech context to inform topic selection
   console.log("Fetching current tech context...");
   const techContext = await getCurrentTechContext();
+
+  // 1.2 Summarize for topic selection
+  const techContextSummarizePrompt = `You are an expert tech analyst. I will provide you a detailed text containing the latest news, trends, and discussions happening in the tech industry. 
+
+This text is compiled from sources like Reddit, GitHub, StackOverflow, HackerNews, RSS feeds from major tech news outlets, and other platforms.
+
+Your tasks are:
+
+1. Summarize the overall tech landscape covered in the provided text in 5-10 bullet points.
+2. Identify and list the top emerging **key themes** or **trending topics** from the information. Group similar topics together if necessary.
+3. Highlight any notable events, innovations, or controversies mentioned.
+4. Focus on providing a clean, structured summary that can later be used to decide on blog topics.
+
+Important Instructions:
+- Be concise but insightful.
+- Do not add any extra information not present in the input.
+- Stick to the actual content and context provided.
+
+Here is the tech context:
+
+${techContext}
+`;
+  const techContextSummaryRespone = await genAI.models.generateContent({
+    model: "gemini-2.5-flash-preview-04-17",
+    // model: "gemini-2.0-flash",
+    contents: techContextSummarizePrompt,
+  });
+
+  const summarizedTechContext = techContextSummaryRespone.text;
 
   // Get existing post titles to avoid duplication
   console.log("Fetching existing post titles...");
@@ -48,41 +87,41 @@ export async function generateGeneralPost(
           .join("\n")}\n`
       : "";
 
-  // Stage 1 prompt: Select a topic only
+  // Stage 2 prompt: Select a topic
   const topicSelectionPrompt = `
-    You are an AI blog topic selector. Your job is to choose an interesting, relevant tech topic for a blog post.
-    
+    You are an AI blog topic selector. Your primary job is to choose ONE interesting, relevant tech topic for a new blog post.
+
     Here is some current context about technology trends to help you choose:
-    ${techContext}
+    ${summarizedTechContext}
 
     ${existingTopicsContext}
 
-    
     SELECTION CRITERIA:
-    1. Choose a specific tech-related topic that would be relevant today.
-    2. IMPORTANT: Choose a topic that is NOT similar to any of the existing post titles listed above.
-    3. Be specific - don't just say "AI" but rather something like "Using AI for Personal Task Management"
-    4. Choose topics that would be valuable to tech professionals, developers, or tech enthusiasts.
-    5. Prioritize topics that have practical applications or insights rather than just news.
-    
-    Return ONLY the topic title, description, and search terms in this format:
+    1. Choose a specific tech-related topic that is relevant today based on the provided context.
+    2. IMPORTANT: Choose a topic that is distinct and NOT substantially similar to any of the existing post titles listed above.
+    3. Be specific - don't just say "Cloud Computing" but rather something like "Cost Optimization Strategies for Multi-Cloud Environments" or "Comparing Serverless Providers for Real-time Data Processing".
+    4. Choose topics that would provide value to tech professionals, developers, or serious tech enthusiasts.
+    5. Prioritize topics with practical applications, how-tos, comparisons, or deep dives rather than just surface-level news summaries.
 
-    TOPIC: Your Topic Here
-    DESCRIPTION: Brief description of what the blog post will cover
-    SEARCH_TERMS: 3-5 specific search terms that would help find detailed information about this topic
+    Your response MUST contain ONLY the following fields, formatted exactly like this:
+
+    TOPIC: Your Chosen Topic Here
+    DESCRIPTION: A concise (1-2 sentence) description of what the blog post should cover, highlighting its value proposition.
+    SEARCH_TERMS: 3-5 specific phrases someone could use in a search engine (like Google) to find detailed technical information, tutorials, or case studies about this topic.
+
+    Do not include any introductory phrases, explanations, or closing remarks. Just provide the structured output.
     `;
 
   try {
     // Generate topic selection using AI
-    const topicResponse = await genAI.models.generateContent({
+    const topicSelectionResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       // model: "gemini-2.0-flash",
       contents: topicSelectionPrompt,
     });
 
     // Extract text from the response
-    const topicText =
-      topicResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const topicText = topicSelectionResponse.text || "";
 
     // Parse the topic selection using regex to extract key components
     const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
@@ -100,149 +139,208 @@ export async function generateGeneralPost(
     const topicDescription = descriptionMatch[1].trim();
     const searchTerms = searchTermsMatch[1].trim();
 
-    // Uncomment for debugging
-    // console.log(`Selected topic: ${selectedTopic}`);
-    // console.log(`Topic description: ${topicDescription}`);
-    // console.log(`Search terms: ${searchTerms}`);
+    // Stage 3: Outline Generation
+    console.log("\n📝 Generating Blog Post Outline...");
 
-    // STAGE 2: Research - Gather detailed information about the selected topic
-    console.log("Stage 2: Gathering detailed information about the topic...");
-    const detailedInfo = await getDetailedTopicInformation(
-      genAI,
-      selectedTopic,
-      searchTerms
-    );
+    const outlinePrompt = `
+    Generate a detailed blog post outline for the following topic.
 
-    console.log("Detailed information gathered:", detailedInfo);
+    **Topic:** ${selectedTopic}
 
-    // Create prompt for generating the full blog post with the research data
-    const blogGenerationPrompt = `
-      You are a helpful AI blogger. Write a creative, useful and engaging blog post about the following topic:
-      
-      TOPIC: ${selectedTopic}
-      DESCRIPTION: ${topicDescription}
-      
-      Here is detailed information about this topic to help you write an informed post:
-      ${detailedInfo}
-      
-      1. Use the detailed information provided to create an accurate, well-informed blog post.
-      2. Generate a catchy title that reflects the topic but might be more engaging than just "${selectedTopic}".
-      3. Also provide an image description that represents your blog post's main theme.
-      4. Estimate the read time in minutes for your content.
-      5. Provide 3-5 relevant tags for the post (single words or short phrases).
-      6. IMPORTANT: DO NOT include any hyperlinks in your content. Instead, mention resources by name without linking to them.
-      7. Return it in this format:
+    **Description:** ${topicDescription}
 
-      TITLE: Your Title Here
-      DESCRIPTION: Short 1-liner summary here
-      IMAGE_DESCRIPTION: A detailed description for image generation
-      READ_TIME: Estimated read time in minutes (just the number)
-      TAGS: tag1, tag2, tag3, tag4, tag5
-      CONTENT:
-      Your markdown content goes here. Add some structure like headings, bullet points, code blocks if needed.
-      `;
+    **Key Areas/Search Terms to Consider:** ${searchTerms}
 
-    // Generate the full blog post with detailed information
-    const blogResponse = await genAI.models.generateContent({
+    **Instructions:**
+    - Create a logical flow from introduction to conclusion.
+    - Use Markdown format with headings (e.g., ## Section Title) and bullet points (* or -) for sub-topics.
+    - Include an Introduction, several Main Body sections covering key aspects, and a Conclusion.
+    - Break down main points into specific sub-points that suggest areas for research (e.g., instead of just "Benefits", list specific benefits like "* Improved latency for real-time processing", "* Reduced bandwidth costs").
+    - The outline should be comprehensive enough to guide the writing of a ~1000-1500 word blog post.
+
+    **Output the outline below:**
+    **Important: Output *only* the raw Markdown content for the outline, starting directly with the first heading (e.g., ## Introduction). Do not include any introductory text, concluding remarks, or explanations outside of the Markdown structure itself.**
+  `;
+
+    const outlineResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       // model: "gemini-2.0-flash",
-      contents: blogGenerationPrompt,
+      contents: outlinePrompt,
     });
 
-    // Process the generated blog post and save to database
-    return await processGeneralPost(
+    const outlineText =
+      extractMarkdownContent(outlineResponse.text || "") || "";
+
+    const researchResults = await researchTopicWithGrounding(
+      genAI,
+      outlineText,
+      selectedTopic
+    );
+
+    const blogDraft = await generateDraft(
+      genAI,
+      selectedTopic,
+      outlineText,
+      researchResults
+    );
+
+    console.log("Stage 6: Polishing and improving the blog post...");
+    const refinedBlogDraft = await refineDraft(
+      genAI,
+      blogDraft || "",
+      outlineText,
+      selectedTopic
+    );
+
+    const blogMetadata = await generateMetadata(
+      genAI,
+      refinedBlogDraft || "",
+      selectedTopic
+    );
+
+    const validatedMarkdown = await validateMarkdownSyntax(
+      refinedBlogDraft || "",
+      selectedTopic
+    );
+
+    // Proceed to Stage 9 (Image Generation)
+    console.log("Stage 9: Generating and uploading image...");
+    const imageUrl = await generateAndUploadImage(
       genAI,
       supabase,
-      blogResponse,
-      selectedTopic,
-      topicDescription,
-      detailedInfo
+      blogMetadata?.imagePrompt || "",
+      blogMetadata?.title || ""
     );
+
+    // STAGE 6: Save post to database
+    console.log("Stage 6: Saving post to database...");
+    return await savePostToDatabase(supabase, {
+      title: blogMetadata?.title || "",
+      slug: generateSlug(blogMetadata?.title || ""),
+      description: blogMetadata?.metaDescription || "",
+      content: validatedMarkdown,
+      category: null,
+      image_url: imageUrl,
+      tool_name: null,
+      read_time: blogMetadata?.readTimeMinutes || 0,
+      tags: blogMetadata?.tags || [],
+    });
   } catch (error) {
-    console.error("❌ Error generating general post:", error);
     return false;
   }
 }
 
+
 /**
- * Processes the generated blog post response, refines it, and saves it to the database
- *
- * @param genAI - Google Generative AI client instance
- * @param supabase - Supabase client for database operations
- * @param response - The AI-generated blog post response
- * @param selectedTopic - The selected topic title
- * @param topicDescription - Description of the selected topic
- * @param detailedInfo - Research information about the topic
- * @returns Promise<boolean> - Success status of the post processing
+ * Stage 5: Generates the first draft of the blog post using the outline and research findings.
+ * @param genAI Initialized GoogleGenerativeAI client.
+ * @param topic The main topic of the blog post.
+ * @param outlineMarkdown The structured outline in Markdown.
+ * @param researchResults Map containing grounded research for outline points.
+ * @returns The generated blog post draft as a Markdown string, or null on failure.
  */
-async function processGeneralPost(
+export async function generateDraft(
   genAI: GoogleGenAI,
-  supabase: SupabaseClient,
-  response: GenerateContentResponse,
-  selectedTopic: string,
-  topicDescription: string,
-  detailedInfo: string
-): Promise<boolean> {
-  // Extract text from the AI response
-  const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  topic: string,
+  outlineMarkdown: string,
+  researchResults: Map<string, GroundedResearchResult>
+): Promise<string | null> {
+  console.log("\n✍️ Generating Blog Post Draft...");
 
-  // Parse the response into structured blog post data
-  const parsedData = parsePostResponse(text, "general");
-  if (!parsedData) {
-    console.error("❌ Failed to parse blog post response");
-    return false;
-  }
-
-  // Destructure the parsed blog post data
-  let { title, description, imageDescription, content, readTime, tags, slug } =
-    parsedData;
-
-  // Normalize markdown to ensure consistent formatting
-  content = normalizeMarkdown(content);
-
-  // STAGE 3: Polish and improve the blog post
-  console.log("Stage 3: Polishing and improving the blog post...");
-  const polishedContent = await polishBlogPost(genAI, title, content, {
-    topic: selectedTopic,
-    description: topicDescription,
-    detailedInfo: detailedInfo,
-  });
-
-  // Update content with polished version if successful
-  if (polishedContent) {
-    content = polishedContent;
+  // --- 1. Prepare Research Input for Prompt ---
+  let researchFindingsString = "RESEARCH FINDINGS:\n\n";
+  if (researchResults.size === 0) {
+    researchFindingsString +=
+      "No specific research data was gathered for this topic.\n";
   } else {
-    console.log("⚠️ Using original content as polishing failed");
+    researchResults.forEach((result, point) => {
+      researchFindingsString += `Outline Point: "${point}"\n`;
+      if (result.groundedText && !result.groundedText.startsWith("Error")) {
+        researchFindingsString += `Grounded Text: ${result.groundedText}\n`;
+        if (result.sources && result.sources.length > 0) {
+          const sourceTitles = result.sources
+            .map((s) => s.title || s.uri?.split("/")[2] || "Unknown Source") // Extract domain if title missing
+            .filter(Boolean);
+          if (sourceTitles.length > 0) {
+            researchFindingsString += `Sources: [${sourceTitles.join(", ")}]\n`;
+          }
+        }
+      } else {
+        researchFindingsString += `Grounded Text: (No specific data found or error: ${result.groundedText})\n`; // Indicate missing/error data
+      }
+      researchFindingsString += "\n"; // Add blank line between points
+    });
   }
 
-  // STAGE 4: Validate and correct markdown formatting
-  console.log("Stage 4: Validating and correcting markdown formatting...");
-  content = await validateAndCorrectMarkdown(
-    genAI,
-    polishedContent ?? content,
-    title
-  );
+  // --- 2. Craft the Generation Prompt ---
+  const generationPrompt = `
+    You are an expert technical writer specializing in creating engaging and informative blog posts about technology topics.
 
-  // STAGE 5: Generate and upload image for the blog post
-  console.log("Stage 5: Generating and uploading image...");
-  const imageUrl = await generateAndUploadImage(
-    genAI,
-    supabase,
-    imageDescription,
-    title
-  );
+    Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings.
 
-  // STAGE 6: Save post to database
-  console.log("Stage 6: Saving post to database...");
-  return await savePostToDatabase(supabase, {
-    title,
-    slug,
-    description,
-    content,
-    category: null,
-    image_url: imageUrl,
-    tool_name: null,
-    read_time: readTime,
-    tags,
-  });
+    **Topic:**
+    ${topic}
+
+    **Blog Post Outline (Structure to follow):**
+    \`\`\`markdown
+    ${outlineMarkdown}
+    \`\`\`
+
+    **Research Findings (Use this information to elaborate on outline points):**
+    ${researchFindingsString}
+
+    **Instructions:**
+    1.  **Follow the Outline:** Adhere strictly to the structure provided in the Blog Post Outline. Use the headings and cover the points mentioned under each heading.
+    2.  **Integrate Research:** Where an "Outline Point" in the research findings matches a point in the outline, use the corresponding "Grounded Text" to provide details, facts, examples, or explanations for that section. Weave this information naturally into the text.
+    3.  **Handle Missing/Error Research:** If the "Grounded Text" for a point indicates "(No specific data found or error...)" or if a point from the outline is not present in the research findings, use your general knowledge to write about that point. You don't necessarily need to state that data was missing, just write the section as best you can.
+    4.  **Expand and Elaborate:** The outline provides the structure; the research provides specific facts. Expand on these points to create flowing paragraphs. Don't just list the research findings; synthesize them into a coherent narrative.
+    5.  **Tone:** Maintain an informative, engaging, and technically accurate tone suitable for developers or tech enthusiasts (adjust based on the specific topic's audience if known).
+    6.  **Format:** Output the entire blog post draft in **Markdown format**. Ensure proper Markdown syntax for headings, lists, bold text, etc.
+    7.  **Completeness:** Aim for a comprehensive draft covering all sections of the outline. Assume a target length appropriate for a typical tech blog post (~1000-1500 words, but prioritize covering the outline well over hitting an exact word count).
+    8.  **Citations:** For this first draft, do not worry about adding formal inline citations or a reference list based on the 'Sources' provided in the research. Focus on incorporating the *information*. Source attribution can be handled later.
+    9.  **Introduction and Conclusion:** Ensure the draft has a compelling introduction that hooks the reader and sets the stage, and a conclusion that summarizes key takeaways and offers final thoughts.
+
+    **Output only the final Markdown blog post draft.** Do not include any introductory phrases like "Okay, here is the draft..." or any explanations outside the Markdown content itself. Start directly with the first line of the Markdown (likely the main title).
+  `;
+
+  try {
+    // --- 3. Call Gemini API ---
+    console.log("   Sending request to Gemini for draft generation...");
+    const draftResponse = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-preview-04-17",
+      contents: generationPrompt,
+      config: {
+        temperature: 0.6,
+      },
+    });
+    const draftMarkdown = draftResponse.text;
+
+    if (!draftMarkdown) {
+      console.error("❌ LLM returned an empty draft.");
+      return null;
+    }
+
+    // --- 4. Basic Cleanup  ---
+    const cleanedDraft = draftMarkdown
+      .replace(/^```markdown\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    console.log("✅ Blog post draft generated successfully.");
+
+    return cleanedDraft;
+  } catch (error: any) {
+    console.error(
+      "❌ Error generating blog post draft:",
+      error?.message || error
+    );
+    if (error.response?.candidates?.[0]?.finishReason === "SAFETY") {
+      console.error("   -> Blocked due to safety settings.");
+    } else if (error.response?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+      console.error(
+        "   -> Draft generation stopped due to maximum token limit."
+      );
+    }
+    return null;
+  }
 }
