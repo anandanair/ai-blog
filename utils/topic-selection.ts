@@ -257,54 +257,6 @@ export async function getGitHubTrending(): Promise<string> {
 }
 
 /**
- * Gets latest tech news using NewsAPI
- */
-// export async function getTechCrunchNews(): Promise<string> {
-//   try {
-//     // Use NewsAPI to get tech news
-//     const apiKey = process.env.NEWS_API_KEY; // Make sure to add this to your .env file
-
-//     if (!apiKey) {
-//       console.error("NewsAPI key not found in environment variables");
-//       return "No tech news found. Please set the NEWS_API_KEY environment variable.";
-//     }
-
-//     const response = await axios.get(
-//       `https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=${apiKey}`
-//     );
-
-//     if (
-//       response.data.status !== "ok" ||
-//       !response.data.articles ||
-//       response.data.articles.length === 0
-//     ) {
-//       console.warn("NewsAPI returned no articles or error status");
-//       return "No tech news found from the API.";
-//     }
-
-//     let techNews = "";
-
-//     // Format the articles
-//     for (const article of response.data.articles) {
-//       const { title, description, source, url } = article;
-
-//       if (title) {
-//         techNews += `- ${title}\n`;
-//         if (source && source.name) techNews += `  Source: ${source.name}\n`;
-//         if (description) techNews += `  Summary: ${description}\n`;
-//         if (url) techNews += `  URL: ${url}\n`;
-//         techNews += "\n";
-//       }
-//     }
-
-//     return techNews || "No tech news articles found.";
-//   } catch (error) {
-//     console.error("Error fetching tech news from NewsAPI:", error);
-//     return "Error fetching tech news. Please check your API key and network connection.";
-//   }
-// }
-
-/**
  * Gets hot topics from Stack Overflow
  */
 export async function getStackOverflowTopics(): Promise<string> {
