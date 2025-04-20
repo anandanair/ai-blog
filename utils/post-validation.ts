@@ -11,7 +11,7 @@ export async function validateMarkdownSyntax(
   markdownContent: string,
   contentIdentifier: string = "blogPostDraft"
 ): Promise<string> {
-  console.log(`\n📏 Validating Markdown syntax for: ${contentIdentifier}...`);
+  // console.log(`\n📏 Validating Markdown syntax for: ${contentIdentifier}...`);
 
   const options = {
     strings: {
@@ -30,15 +30,15 @@ export async function validateMarkdownSyntax(
       console.warn(
         `❌ Markdown validation found ${errors.length} issue(s) in "${contentIdentifier}":`
       );
-      errors.forEach((error) => {
-        console.warn(
-          `  - Line ${error.lineNumber}: [${error.ruleNames.join(", ")}] ${
-            error.ruleDescription
-          } ${error.errorDetail || ""} ${
-            error.errorContext ? `Context: "${error.errorContext}"` : ""
-          }`
-        );
-      });
+      // errors.forEach((error) => {
+      //   console.warn(
+      //     `  - Line ${error.lineNumber}: [${error.ruleNames.join(", ")}] ${
+      //       error.ruleDescription
+      //     } ${error.errorDetail || ""} ${
+      //       error.errorContext ? `Context: "${error.errorContext}"` : ""
+      //     }`
+      //   );
+      // });
 
       // Try applying fixes
       fixedContent = applyFixes(markdownContent, errors);
