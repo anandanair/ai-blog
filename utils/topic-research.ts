@@ -47,7 +47,9 @@ export async function researchTopicWithGrounding(
   outlineMarkdown: string,
   topic: string
 ): Promise<Map<string, GroundedResearchResult>> {
-  console.log("\n🔍 Starting Research Stage using Gemini 2.0 Grounding...");
+  // console.log(
+  //   "\n🔍 Starting Research Stage using Gemini 2.5 Flash with Grounding Search..."
+  // );
 
   if (IS_TESTING_MODE) {
     console.warn(
@@ -83,15 +85,15 @@ export async function researchTopicWithGrounding(
     ? allResearchPoints.slice(0, MAX_RESEARCH_POINTS_FOR_TESTING)
     : allResearchPoints; // Use all points if not testing
 
-  console.log(
-    `Attempting research for ${pointsToSearch.length} points using grounding.`
-  );
+  // console.log(
+  //   `Attempting research for ${pointsToSearch.length} points using grounding.`
+  // );
 
   for (const point of pointsToSearch) {
     // --- 3a. Craft Research Prompt (Remains the same) ---
     const researchPrompt = `Regarding the topic "${topic}", provide detailed information, facts, examples, or explanations for the following specific point: "${point}". Focus on providing verifiable and current information. If you use external search, please indicate.`; // Added hint about search
 
-    console.log(` -> Researching: "${point}"`);
+    // console.log(` -> Researching: "${point}"`);
 
     try {
       // --- 3b. Call Gemini API with Grounding Enabled (v2.0 style) ---
@@ -115,7 +117,7 @@ export async function researchTopicWithGrounding(
       let renderedContentHtml: string | undefined = undefined;
 
       if (metadata) {
-        console.log(`   -> Grounding metadata found for "${point}"`);
+        // console.log(`   -> Grounding metadata found for "${point}"`);
         if (metadata.groundingChunks) {
           metadata.groundingChunks.forEach((chunk: any) => {
             // Use 'any' or define interface
@@ -126,21 +128,21 @@ export async function researchTopicWithGrounding(
         }
         if (metadata.webSearchQueries) {
           searchQueries = metadata.webSearchQueries;
-          console.log(
-            `   -> Search queries used: [${searchQueries.join(", ")}]`
-          );
+          // console.log(
+          //   `   -> Search queries used: [${searchQueries.join(", ")}]`
+          // );
         }
         if (metadata.searchEntryPoint?.renderedContent) {
           renderedContentHtml = metadata.searchEntryPoint.renderedContent;
-          console.log(
-            `   -> Storing Google Search Suggestions HTML (Required by ToS). Length: ${renderedContentHtml.length}`
-          );
+          // console.log(
+          //   `   -> Storing Google Search Suggestions HTML (Required by ToS). Length: ${renderedContentHtml.length}`
+          // );
           // Store/handle this as per your compliance needs
         }
       } else {
-        console.log(
-          `   -> No grounding metadata found for "${point}". Response is based on model knowledge.`
-        );
+        // console.log(
+        //   `   -> No grounding metadata found for "${point}". Response is based on model knowledge.`
+        // );
       }
 
       if (groundedText) {
@@ -151,7 +153,7 @@ export async function researchTopicWithGrounding(
           renderedContent: renderedContentHtml,
         });
       } else {
-        console.log(`   -> No text response for: "${point}"`);
+        // console.log(`   -> No text response for: "${point}"`);
         researchData.set(point, { groundedText: "", sources: [] });
       }
     } catch (error: any) {
