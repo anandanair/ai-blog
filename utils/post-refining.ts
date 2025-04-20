@@ -1,262 +1,88 @@
 import { GoogleGenAI } from "@google/genai";
-import { normalizeMarkdown } from "./helpers";
 
 /**
- * Polishes a blog post through multiple iterations of evaluation and revision
- * @param genAI The Google GenAI instance
- * @param title The blog post title
- * @param content The initial blog post content
- * @param topicInfo Additional context about the topic
- * @returns The polished blog post content or null if polishing failed
+ * Stage 6: Evaluates and refines the blog post draft using an LLM.
+ * @param genAI Initialized GoogleGenerativeAI client.
+ * @param originalDraft The Markdown draft generated in Stage 5.
+ * @param outlineMarkdown The original outline used for generation.
+ * @param topic The main topic of the blog post.
+ * @returns The refined blog post draft as a Markdown string, or null on failure.
  */
-export async function polishBlogPost(
+export async function refineDraft(
   genAI: GoogleGenAI,
-  title: string,
-  content: string,
-  topicInfo?: { topic: string; description: string; detailedInfo: string }
+  originalDraft: string,
+  outlineMarkdown: string,
+  topic: string
 ): Promise<string | null> {
+  console.log("\n✨ Evaluating and Refining Blog Post Draft...");
+
+  // --- Craft the Refinement Prompt ---
+  const refinementPrompt = `
+    You are an expert copy editor and content refiner for a technology blog.
+    Your task is to evaluate and significantly improve the provided blog post draft based on the original outline and topic.
+
+    **Topic:**
+    ${topic}
+
+    **Original Outline (Ensure the refined draft still follows this structure):**
+    \`\`\`markdown
+    ${outlineMarkdown}
+    \`\`\`
+
+    **Original Draft (To be evaluated and refined):**
+    \`\`\`markdown
+    ${originalDraft}
+    \`\`\`
+
+    **Evaluation Criteria & Refinement Instructions:**
+    1.  **Clarity & Conciseness:** Is the language clear, precise, and easy for a technical audience (e.g., developers) to understand? Remove jargon where possible or explain it simply. Eliminate wordiness and redundant phrases. Ensure arguments are presented logically.
+    2.  **Engagement & Flow:** Is the writing engaging? Does the introduction hook the reader? Do paragraphs transition smoothly? Is the tone appropriate (informative yet accessible)? Enhance sentence variety.
+    3.  **Structure & Outline Adherence:** Does the draft strictly follow the provided Original Outline? Are all sections and key points from the outline covered appropriately? Ensure headings match the outline structure.
+    4.  **Completeness & Depth:** While adhering to the outline, does each section feel sufficiently developed? (You don't need external knowledge, evaluate based on the content present). Are the explanations thorough enough?
+    5.  **Grammar & Style:** Correct any grammatical errors, spelling mistakes, punctuation issues, and awkward phrasing. Improve sentence structure for better readability. Maintain a professional and consistent style.
+    6.  **Maintain Core Information:** Do NOT change the core facts or technical information presented in the original draft. Your goal is to improve the *presentation*, clarity, and flow, not the underlying substance.
+
+    **Your Action:**
+    Rewrite the *entire* Original Draft, applying improvements based on the criteria above. Ensure the final output is a complete, refined blog post in Markdown format.
+
+    **Output ONLY the refined Markdown blog post.** Do not include your evaluation notes, introductory phrases ("Here is the refined draft..."), or anything other than the final Markdown content. Start directly with the first line of the refined post (likely the title).
+  `;
+
   try {
-    let currentContent = content;
-    let iterations = 0;
-    const SAFETY_MAX_ITERATIONS = 5; // Safety limit to prevent infinite loops
-    let isContentSatisfactory = false;
-    let previousSatisfactionScore = 0;
-    let consecutiveNoImprovementCount = 0;
-
-    // Prepare topic context if available
-    const topicContext = topicInfo
-      ? `
-        TOPIC INFORMATION:
-        Topic: ${topicInfo.topic}
-        Description: ${topicInfo.description}
-        
-        DETAILED RESEARCH:
-        ${topicInfo.detailedInfo}
-        `
-      : "";
-
-    // Initialize conversation for the evaluation model
-    const evaluationModel = genAI.chats.create({
+    console.log("   Sending request to Gemini for draft refinement...");
+    const refinedResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
-      // model: "gemini-2.0-flash",
-      history: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `You are an expert blog editor. Your job is to evaluate blog posts and provide specific feedback for improvement.
-                You will be evaluating the same blog post multiple times as it gets revised.
-                
-                For each evaluation, focus on:
-                1. Content accuracy and depth
-                2. Structure and flow
-                3. Engagement and readability
-                4. SEO optimization
-                5. Call-to-action effectiveness
-                
-                IMPORTANT: You MUST ALWAYS provide your evaluation in EXACTLY this format:
-                STRENGTHS: List the strengths of the post
-                WEAKNESSES: List specific areas that need improvement
-                SUGGESTIONS: Provide specific suggestions for improvement
-                SATISFACTION_SCORE: Rate from 1-10 how satisfied you are with the post (be honest and critical)
-                IS_SATISFACTORY: Answer YES if the post is ready to publish (score ≥ 8), or NO if it needs more work
-                
-                The SATISFACTION_SCORE and IS_SATISFACTORY fields are critical and must be included in exactly this format.
-                
-                If you see that the post has been revised based on your previous feedback, acknowledge the improvements.
-                If you notice that despite revisions, certain issues persist or new issues appear, highlight them.
-                
-                Be thorough but fair in your assessment.`,
-            },
-          ],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "I understand my role as an expert blog editor. I'll evaluate blog posts thoroughly, focusing on content accuracy, structure, engagement, SEO, and calls to action. I'll provide structured feedback with strengths, weaknesses, suggestions, a satisfaction score, and a clear yes/no on whether the post is ready to publish. I'll acknowledge improvements in revised versions and highlight any persistent or new issues. My evaluations will be thorough and fair, with honest scoring on the 1-10 scale. I'm ready to begin evaluating whenever you share a blog post.",
-            },
-          ],
-        },
-      ],
+      contents: refinementPrompt,
+      config: { temperature: 0.5 },
     });
+    const refinedMarkdown = refinedResponse.text;
 
-    while (!isContentSatisfactory && iterations < SAFETY_MAX_ITERATIONS) {
-      iterations++;
-      console.log(`Polishing iteration ${iterations}...`);
-
-      // Step 1: Evaluate the current content using the conversation
-      const evaluationPrompt = `
-          I need you to evaluate this blog post:
-          
-          TITLE: ${title}
-          
-          ${topicContext}
-          
-          CONTENT:
-          ${currentContent}
-          
-          This is revision #${iterations}. ${
-        iterations > 1
-          ? "Please consider your previous feedback when evaluating this version."
-          : ""
-      }
-          
-          IMPORTANT: You MUST include a numerical satisfaction score in your response.
-          Format it exactly as: "SATISFACTION_SCORE: X" where X is a number from 1 to 10.
-          Also include "IS_SATISFACTORY: YES" or "IS_SATISFACTORY: NO" at the end of your evaluation.
-        `;
-
-      const evaluationResponse = await evaluationModel.sendMessage({
-        message: evaluationPrompt,
-      });
-      const evaluationText = evaluationResponse.text ?? "";
-
-      // console.log(
-      //   "Evaluation response received, extracting satisfaction score..."
-      // );
-
-      // Parse evaluation results with improved regex and logging
-      const satisfactionMatch = evaluationText.match(
-        /SATISFACTION_SCORE:\s*(\d+)/i
-      );
-
-      // Log a snippet of the evaluation text to debug
-      // console.log(
-      //   "Evaluation text snippet:",
-      //   evaluationText.substring(0, 200) + "..."
-      // );
-
-      let currentSatisfactionScore = 0;
-      if (satisfactionMatch) {
-        currentSatisfactionScore = parseInt(satisfactionMatch[1], 10);
-        console.log(`Found satisfaction score: ${currentSatisfactionScore}`);
-      } else {
-        // Try alternative regex patterns if the first one fails
-        const altMatch1 = evaluationText.match(/score:?\s*(\d+)/i);
-        const altMatch2 = evaluationText.match(/rating:?\s*(\d+)/i);
-        const altMatch3 = evaluationText.match(/(\d+)\s*\/\s*10/i);
-
-        if (altMatch1) {
-          currentSatisfactionScore = parseInt(altMatch1[1], 10);
-          console.log(
-            `Found satisfaction score using alt pattern 1: ${currentSatisfactionScore}`
-          );
-        } else if (altMatch2) {
-          currentSatisfactionScore = parseInt(altMatch2[1], 10);
-          console.log(
-            `Found satisfaction score using alt pattern 2: ${currentSatisfactionScore}`
-          );
-        } else if (altMatch3) {
-          currentSatisfactionScore = parseInt(altMatch3[1], 10);
-          console.log(
-            `Found satisfaction score using alt pattern 3: ${currentSatisfactionScore}`
-          );
-        } else {
-          console.warn(
-            "⚠️ Could not extract satisfaction score from evaluation text"
-          );
-          // Default to a slight improvement to avoid early termination
-          currentSatisfactionScore = previousSatisfactionScore + 1;
-          console.log(
-            `Using default improvement score: ${currentSatisfactionScore}`
-          );
-        }
-      }
-
-      const satisfactoryMatch = evaluationText.match(
-        /IS_SATISFACTORY:\s*(YES|NO)/i
-      );
-      isContentSatisfactory = satisfactoryMatch
-        ? satisfactoryMatch[1].toUpperCase() === "YES"
-        : false;
-
-      console.log(`Satisfaction score: ${currentSatisfactionScore}/10`);
-
-      // Check if we're making progress
-      if (currentSatisfactionScore <= previousSatisfactionScore) {
-        consecutiveNoImprovementCount++;
-        console.log(
-          `No improvement detected (${consecutiveNoImprovementCount} consecutive times)`
-        );
-
-        // If we've had 2 iterations with no improvement, stop
-        if (consecutiveNoImprovementCount >= 2) {
-          console.log(
-            "Stopping refinement as no further improvements are being made"
-          );
-          break;
-        }
-      } else {
-        consecutiveNoImprovementCount = 0;
-      }
-
-      previousSatisfactionScore = currentSatisfactionScore;
-
-      if (isContentSatisfactory) {
-        console.log("✅ Content is satisfactory after evaluation");
-        break;
-      }
-
-      // Step 2: Revise the content based on evaluation
-      const revisionPrompt = `
-          You are an expert blog writer. Revise and improve the following blog post based on the editor's feedback.
-
-          // --- Contextual Information (Do NOT include in the output) ---
-          TITLE: ${title}
-          ${topicContext} // Optional: Include if relevant context for revision
-          // --- End Contextual Information ---
-
-          
-          ORIGINAL CONTENT TO REVISE:
-          ${currentContent}
-          
-          EDITOR'S FEEDBACK:
-          ${evaluationText}
-          
-          // --- Instructions for Revision ---
-          Please provide a revised version of the blog post that addresses the feedback.
-          Keep the same overall structure but improve the content according to the suggestions.
-          
-          // --- IMPORTANT - Output Formatting Rules ---
-          1.  **DO NOT include the TITLE (provided above for context) in your response.** Start your response directly with the revised blog post body text.
-          2.  Return ONLY the revised content in markdown format.
-          3.  DO NOT include any hyperlinks. Mention resources by name only if necessary.
-          4.  DO NOT include markdown code block delimiters like \`\`\`markdown or \`\`\` around your response.
-          5.  Output only the raw revised markdown content directly.
-        `;
-
-      const revisionResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash-preview-04-17",
-        // model: "gemini-2.0-flash",
-        contents: revisionPrompt,
-      });
-
-      let revisedContent =
-        revisionResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-      // Remove markdown code block delimiters if present
-      revisedContent = normalizeMarkdown(revisedContent);
-
-      if (revisedContent.trim().length > 0) {
-        currentContent = revisedContent;
-        console.log(
-          `✅ Successfully revised content in iteration ${iterations}`
-        );
-      } else {
-        console.error("❌ Failed to generate revised content");
-        break;
-      }
+    if (!refinedMarkdown) {
+      console.error("❌ LLM returned an empty refined draft.");
+      return null;
     }
 
-    if (iterations >= SAFETY_MAX_ITERATIONS) {
-      console.log(
-        "Reached maximum number of iterations. Using the latest version."
-      );
+    // Basic cleanup (remove potential fences)
+    const cleanedRefinedDraft = refinedMarkdown
+      .replace(/^```markdown\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    console.log("✅ Blog post draft refined successfully.");
+    return cleanedRefinedDraft;
+  } catch (error: any) {
+    console.error(
+      "❌ Error refining blog post draft:",
+      error?.message || error
+    );
+    const candidate = error.response?.candidates?.[0];
+    if (candidate?.finishReason === "SAFETY") {
+      console.error("   -> Blocked due to safety settings.");
+    } else if (candidate?.finishReason === "MAX_TOKENS") {
+      console.error("   -> Refinement stopped due to maximum token limit.");
+    } else if (candidate?.finishReason) {
+      console.error(`   -> Finished with reason: ${candidate.finishReason}`);
     }
-    return currentContent;
-  } catch (error) {
-    console.error("❌ Error polishing blog post:", error);
     return null;
   }
 }
