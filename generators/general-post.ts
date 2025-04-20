@@ -34,13 +34,14 @@ export async function generateGeneralPost(
   console.log("\n--- Generating General Post ---");
 
   // STAGE 1: Topic Selection
-  console.log("Stage 1: Selecting blog topic...");
+  console.log("Stage 1: Fetch & Summarize Tech Context");
 
   // 1.1 Get current tech context to inform topic selection
-  console.log("Fetching current tech context...");
+  console.log("1.1 - Fetching current tech context...");
   const techContext = await getCurrentTechContext();
 
   // 1.2 Summarize for topic selection
+  console.log("1.2 - Summarizing tech context for topic selection");
   const techContextSummarizePrompt = `You are an expert tech analyst. I will provide you a detailed text containing the latest news, trends, and discussions happening in the tech industry. 
 
 This text is compiled from sources like Reddit, GitHub, StackOverflow, HackerNews, RSS feeds from major tech news outlets, and other platforms.
@@ -69,8 +70,8 @@ ${techContext}
 
   const summarizedTechContext = techContextSummaryRespone.text;
 
-  // Get existing post titles to avoid duplication
-  console.log("Fetching existing post titles...");
+  // 1.3 Get existing post titles to avoid duplication
+  console.log("1.3 - Fetching existing post titles..");
   const existingTitles = await getExistingPostTitles(supabase);
 
   // Create a context string of existing topics to avoid in the prompt
@@ -81,7 +82,8 @@ ${techContext}
           .join("\n")}\n`
       : "";
 
-  // Stage 2 prompt: Select a topic
+  // STAGE 2: Topic Ideation & Selection
+  console.log("Stage 2: Topic Ideation & Selection");
   const topicSelectionPrompt = `
     You are an AI blog topic selector. Your primary job is to choose ONE interesting, relevant tech topic for a new blog post.
 
@@ -132,9 +134,10 @@ ${techContext}
     const selectedTopic = topicMatch[1].trim();
     const topicDescription = descriptionMatch[1].trim();
     const searchTerms = searchTermsMatch[1].trim();
+    console.log("- Selected Topic:", selectedTopic);
 
     // Stage 3: Outline Generation
-    console.log("\n📝 Generating Blog Post Outline...");
+    console.log("STAGE 3: Generating Blog Post Outline...");
 
     const outlinePrompt = `
     Generate a detailed blog post outline for the following topic.
@@ -165,12 +168,16 @@ ${techContext}
     const outlineText =
       extractMarkdownContent(outlineResponse.text || "") || "";
 
+    // Stage 4: Research
+    console.log("STAGE 4: Research...");
     const researchResults = await researchTopicWithGrounding(
       genAI,
       outlineText,
       selectedTopic
     );
 
+    // Stage 5: Draft Generation
+    console.log("STAGE 5: Draft Generation...");
     const blogDraft = await generateDraft(
       genAI,
       selectedTopic,
@@ -178,6 +185,7 @@ ${techContext}
       researchResults
     );
 
+    // STAGE 6: Content Evaluation & Refinement
     console.log("Stage 6: Polishing and improving the blog post...");
     const refinedBlogDraft = await refineDraft(
       genAI,
@@ -186,23 +194,27 @@ ${techContext}
       selectedTopic
     );
 
-    // *** NEW STAGE 7: Final Polish ***
+    // STAGE 7: Final Polish (Removing Meta-Commentary)
     console.log("Stage 7: Performing final polish...");
     const polishedDraft = await finalPolish(genAI, refinedBlogDraft || "");
 
+    // STAGE 8: Generate Metadata
+    console.log("Stage 8: Generating metadata...");
     const blogMetadata = await generateMetadata(
       genAI,
       polishedDraft || "",
       selectedTopic
     );
 
+    // STAGE 9: Markdown Validation
+    console.log("Stage 9: Validating markdown...");
     const validatedMarkdown = await validateMarkdownSyntax(
       polishedDraft || "",
       selectedTopic
     );
 
-    // Proceed to Stage 9 (Image Generation)
-    console.log("Stage 9: Generating and uploading image...");
+    // STAGE 10: Image Generation and Upload
+    console.log("Stage 10: Generating image and uploading...");
     const imageUrl = await generateAndUploadImage(
       genAI,
       supabase,
@@ -210,8 +222,8 @@ ${techContext}
       blogMetadata?.title || ""
     );
 
-    // STAGE 10: Save post to database
-    console.log("Stage 6: Saving post to database...");
+    // STAGE 11: Save to Supabase Database
+    console.log("Stage 11: Saving to Supabase Database...");
     return await savePostToDatabase(supabase, {
       title: blogMetadata?.title || "",
       slug: generateSlug(blogMetadata?.title || ""),
@@ -242,8 +254,6 @@ export async function generateDraft(
   outlineMarkdown: string,
   researchResults: Map<string, GroundedResearchResult>
 ): Promise<string | null> {
-  console.log("\n✍️ Generating Blog Post Draft...");
-
   // --- 1. Prepare Research Input for Prompt ---
   let researchFindingsString = "RESEARCH FINDINGS:\n\n";
   if (researchResults.size === 0) {
@@ -302,7 +312,9 @@ export async function generateDraft(
 
   try {
     // --- 3. Call Gemini API ---
-    console.log("   Sending request to Gemini for draft generation...");
+    console.log(
+      `   Draft Generation Prompt Length (approx chars): ${generationPrompt.length}`
+    );
     const draftResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: generationPrompt,
@@ -322,8 +334,6 @@ export async function generateDraft(
       .replace(/^```markdown\s*/i, "")
       .replace(/\s*```$/i, "")
       .trim();
-
-    console.log("✅ Blog post draft generated successfully.");
 
     return cleanedDraft;
   } catch (error: any) {
