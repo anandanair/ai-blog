@@ -22,11 +22,8 @@ export async function generateMetadata(
   refinedBlogDraft: string,
   topic: string
 ): Promise<BlogPostMetadata | null> {
-  console.log("\n📊 Generating Blog Post Metadata...");
-
   // --- 1. Calculate Read Time ---
   const readTimeMinutes = calculateReadTime(refinedBlogDraft);
-  console.log(`   Estimated Read Time: ${readTimeMinutes} minute(s)`);
 
   // --- 2. Craft LLM Prompt for other metadata ---
   // Using JSON output instruction for easier parsing (works well with Gemini 1.5+)
@@ -65,18 +62,6 @@ export async function generateMetadata(
 
   try {
     // --- 3. Call Gemini API ---
-    // Flash might be sufficient here, but Pro could yield better prompts/descriptions
-    // const model = genAI.getGenerativeModel({
-    //   model: "gemini-1.5-pro-latest", // Or "gemini-1.5-flash-latest"
-    //   safetySettings, // Ensure safetySettings is defined
-    //   generationConfig: {
-    //     temperature: 0.5,
-    //     // *** IMPORTANT FOR JSON OUTPUT with 1.5+ models: ***
-    //     responseMimeType: "application/json",
-    //   },
-    // });
-
-    console.log("   Sending request to Gemini for metadata generation...");
     const metedataResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: metadataPrompt,
@@ -126,9 +111,9 @@ export async function generateMetadata(
 
     console.log("✅ Metadata generated successfully:");
     console.log(`   Title: ${finalMetadata.title}`);
-    console.log(`   Meta Desc: ${finalMetadata.metaDescription}`);
-    console.log(`   Image Prompt: ${finalMetadata.imagePrompt}`);
-    console.log(`   Tags: ${finalMetadata.tags.join(", ")}`);
+    // console.log(`   Meta Desc: ${finalMetadata.metaDescription}`);
+    // console.log(`   Image Prompt: ${finalMetadata.imagePrompt}`);
+    // console.log(`   Tags: ${finalMetadata.tags.join(", ")}`);
 
     return finalMetadata;
   } catch (error: any) {
