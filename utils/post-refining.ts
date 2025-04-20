@@ -86,3 +86,107 @@ export async function refineDraft(
     return null;
   }
 }
+
+/**
+ * Stage 7: Performs a final polish pass to remove meta-commentary from the draft.
+ * @param genAI Initialized GoogleGenerativeAI client.
+ * @param potentiallyUnpolishedDraft The draft potentially containing LLM notes (output of refineDraft).
+ * @returns The polished blog post draft as a Markdown string, or null on failure.
+ */
+export async function finalPolish(
+  genAI: GoogleGenAI,
+  potentiallyUnpolishedDraft: string
+): Promise<string | null> {
+  console.log("\n🧹 Performing Final Polish (Removing Meta-Commentary)...");
+
+  if (!potentiallyUnpolishedDraft) {
+    console.warn("   Skipping polish stage due to empty input draft.");
+    return potentiallyUnpolishedDraft; // Return empty or null as received
+  }
+
+  // --- Craft the Polishing Prompt ---
+  const polishPrompt = `
+    You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown text by REMOVING any sentences or paragraphs that are NOT part of the actual blog post content intended for the reader.
+
+    Specifically, REMOVE text that matches these descriptions:
+    - Notes about the writing process itself (e.g., "Note: I focused on...", "As requested...", "This section covers...")
+    - Commentary on the instructions received (e.g., "Based on the outline provided...", "The research indicated...")
+    - Apologies or explanations for missing information (e.g., "I couldn't find specific data on...", "Further research would be needed for...")
+    - Self-correction remarks or alternative phrasings considered (e.g., "Alternatively, one could say...", "A better way might be...")
+    - Any other meta-commentary or text clearly not intended for the final published blog post reader.
+
+    **IMPORTANT INSTRUCTIONS:**
+    - **DO NOT rewrite, rephrase, or change the actual blog post content.** Only remove the unwanted meta-text.
+    - **Preserve all original Markdown formatting** of the remaining content.
+    - If the input text contains NO meta-commentary, return the input text exactly as is.
+
+    **Input Text (potentially needs cleaning):**
+    \`\`\`markdown
+    ${potentiallyUnpolishedDraft}
+    \`\`\`
+
+    **Output ONLY the cleaned Markdown content.** Do not include any explanations, introductions, or confirmations. Start directly with the first line of the cleaned content.
+  `;
+
+  try {
+    console.log("   Sending request to Gemini for final polish...");
+    const polishResponse = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-preview-04-17",
+      contents: polishPrompt,
+      config: { temperature: 0.1 },
+    });
+    const polishedMarkdown = polishResponse.text;
+
+    if (!polishedMarkdown) {
+      // It's possible valid input resulted in empty output if the LLM removed everything
+      // Check if the input was non-trivial
+      if (potentiallyUnpolishedDraft.length > 50) {
+        // Arbitrary threshold
+        console.warn(
+          "⚠️ LLM returned an empty polished draft from non-empty input. Check original draft."
+        );
+        // Decide: return original? return null? For safety, let's return original with warning
+        console.warn(
+          "   Returning the pre-polish draft due to empty polish result."
+        );
+        return potentiallyUnpolishedDraft;
+      } else {
+        // Input was likely already empty or just meta-commentary
+        return ""; // Return empty string
+      }
+    }
+
+    // Basic cleanup (remove potential fences, though less likely with low temp)
+    const cleanedPolishedDraft = polishedMarkdown
+      .replace(/^```markdown\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    // Simple check to see if significant content was removed (optional)
+    if (cleanedPolishedDraft.length < potentiallyUnpolishedDraft.length * 0.8) {
+      // If more than 20% shorter
+      console.log(
+        `   Note: Polish stage significantly shortened the content (original: ${potentiallyUnpolishedDraft.length} chars, polished: ${cleanedPolishedDraft.length} chars).`
+      );
+    } else {
+      console.log("   Polish stage completed.");
+    }
+
+    console.log("✅ Final polish complete.");
+    return cleanedPolishedDraft;
+  } catch (error: any) {
+    console.error(
+      "❌ Error during final polish stage:",
+      error?.message || error
+    );
+    const candidate = error.response?.candidates?.[0];
+    if (candidate?.finishReason === "SAFETY") {
+      console.error("   -> Blocked due to safety settings.");
+    } else if (candidate?.finishReason) {
+      console.error(`   -> Finished with reason: ${candidate.finishReason}`);
+    }
+    // Fallback: Return the original draft if polishing fails
+    console.warn("   Returning the pre-polish draft due to error.");
+    return potentiallyUnpolishedDraft;
+  }
+}
