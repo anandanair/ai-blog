@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenAI, Modality } from "@google/genai";
 
+const AVERAGE_WPM = 225;
+
 // String manipulation utilities
 export function generateFileName(title: string): string {
   return (
@@ -190,23 +192,7 @@ export function parsePostResponse(text: string, type: "general" | "tool") {
   };
 }
 
-export function normalizeMarkdown(markdown: string): string {
-  return (
-    markdown
-      // Remove any markdown code block delimiters
-      .replace(/^```markdown\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "")
-      // Ensure consistent heading format (space after #)
-      .replace(/^(#{1,6})([^#\s])/gm, "$1 $2")
-      // Ensure consistent list item format (space after bullet)
-      .replace(/^([*+-])([^\s])/gm, "$1 $2")
-      // Normalize line endings
-      .replace(/\r\n/g, "\n")
-      // Remove multiple consecutive blank lines
-      .replace(/\n{3,}/g, "\n\n")
-  );
-}
+
 
 export function extractMarkdownContent(rawOutput: string): string | null {
   // Regex to find content between ```markdown and ```
@@ -220,8 +206,6 @@ export function extractMarkdownContent(rawOutput: string): string | null {
     return rawOutput;
   }
 }
-
-const AVERAGE_WPM = 225; // Average words per minute for reading time calculation
 
 /**
  * Calculates the estimated reading time in minutes for a given text.
