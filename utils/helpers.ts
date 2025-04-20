@@ -207,3 +207,34 @@ export function normalizeMarkdown(markdown: string): string {
       .replace(/\n{3,}/g, "\n\n")
   );
 }
+
+export function extractMarkdownContent(rawOutput: string): string | null {
+  // Regex to find content between ```markdown and ```
+  // DotAll flag (s) allows . to match newlines
+  const match = rawOutput.match(/```markdown\s*([\s\S]*?)\s*```/);
+
+  if (match && match[1]) {
+    // Return the captured group (the content inside), trimmed
+    return match[1].trim();
+  } else {
+    return rawOutput;
+  }
+}
+
+const AVERAGE_WPM = 225; // Average words per minute for reading time calculation
+
+/**
+ * Calculates the estimated reading time in minutes for a given text.
+ * @param text The text content (ideally Markdown).
+ * @returns Estimated reading time in minutes (integer, minimum 1).
+ */
+export function calculateReadTime(text: string): number {
+  if (!text) {
+    return 1;
+  }
+  // Basic word count: split by whitespace.
+  // More sophisticated counting could strip Markdown, but this is often sufficient.
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const minutes = Math.ceil(wordCount / AVERAGE_WPM);
+  return Math.max(1, minutes); // Ensure minimum 1 minute
+}
