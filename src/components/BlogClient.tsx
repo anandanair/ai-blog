@@ -251,42 +251,6 @@ export default function BlogClient({ posts }: BlogClientProps) {
             )}
           </AnimatePresence>
         </div>
-
-        {/* AI Tools Section */}
-        <div className="mt-16 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 md:p-8 shadow-md">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 md:mb-0">
-              Explore AI Tools
-            </h2>
-            <Link href="/ai-tools">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors cursor-pointer"
-              >
-                View All AI Tools
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </motion.div>
-            </Link>
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 mb-2">
-            Discover the latest AI tools to enhance your productivity and
-            creativity.
-          </p>
-        </div>
       </main>
 
       {/* Footer */}
