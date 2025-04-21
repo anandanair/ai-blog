@@ -36,5 +36,4 @@ export type AiTool = PostData; // Assuming AiTool has the same structure as Post
 
 export interface BlogClientProps {
   posts: PostData[];
-  latestTool: AiTool | null;
 }

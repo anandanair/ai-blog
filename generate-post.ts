@@ -2,7 +2,6 @@ import { GoogleGenAI } from "@google/genai"; // Added GenerateContentResponse
 import dotenv from "dotenv";
 import { initSupabase } from "./utils/database";
 import { generateGeneralPost } from "./generators/general-post";
-import { generateAiToolPost } from "./generators/tool-post";
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +21,6 @@ async function main() {
 
   // Generate posts
   await generateGeneralPost(genAI, supabase);
-  // await generateAiToolPost(genAI, supabase);
 
   console.log("\n--- Script Finished ---");
 }

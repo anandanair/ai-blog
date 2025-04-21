@@ -7,7 +7,7 @@ import Image from "next/image";
 import { BlogClientProps } from "@/types";
 import { formatDate } from "@/utils/helpers";
 
-export default function BlogClient({ posts, latestTool }: BlogClientProps) {
+export default function BlogClient({ posts }: BlogClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(posts);
 
@@ -48,64 +48,6 @@ export default function BlogClient({ posts, latestTool }: BlogClientProps) {
 
   return (
     <div className={`min-h-screen  bg-gray-50 dark:bg-gray-900`}>
-      {/* AI Tool of the Day - Compact Banner */}
-      {latestTool && (
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div className="flex items-center mb-4 md:mb-0">
-                <div className="bg-white/20 rounded-full p-2 mr-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-purple-200 text-sm font-medium">
-                    AI Tool of the Day
-                  </div>
-                  <h3 className="text-white font-bold">{latestTool.title}</h3>
-                </div>
-              </div>
-
-              <Link href={`/ai-tools/${latestTool.id}`}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-lg border border-white/20 flex items-center text-sm font-medium cursor-pointer"
-                >
-                  Check it out
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 ml-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    />
-                  </svg>
-                </motion.div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Featured Post (First Post) */}
