@@ -6,15 +6,16 @@ import { createPortal } from "react-dom";
 interface ReferenceTooltipProps {
   researchData: ResearchDetailItem["data"];
   refId: string;
+  displayMode?: "inline" | "grid";
 }
 
 const ReferenceTooltip: React.FC<ReferenceTooltipProps> = ({
   researchData,
   refId,
+  displayMode = "inline",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isLocked, setIsLocked] = useState(false); // Track if tooltip is locked open
   const tooltipRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
 
@@ -72,25 +73,30 @@ const ReferenceTooltip: React.FC<ReferenceTooltipProps> = ({
 
   // This wrapper has display: contents to avoid nesting issues
   return (
-    <span className="inline-block align-baseline" ref={triggerRef}>
-      {/* Reference trigger */}
-      <button
-        type="button"
-        onClick={handleClick}
-        onFocus={() => {}} // Empty handlers to maintain accessibility
-        onBlur={() => {}}
-        className="inline-flex items-center justify-center mx-1 px-1.5 py-0.5 
+    <span
+      className={`${
+        displayMode === "inline"
+          ? "inline-block align-baseline"
+          : "absolute inset-0"
+      }`}
+      ref={triggerRef}
+      onClick={handleClick}
+    >
+      {/* Reference trigger - only show for inline mode */}
+      {displayMode === "inline" && (
+        <span
+          className="inline-flex items-center justify-center mx-1 px-1.5 py-0.5 
                   bg-blue-100 hover:bg-blue-200 
                   dark:bg-blue-900 dark:hover:bg-blue-800 
                   text-blue-700 dark:text-blue-300 
                   text-xs font-mono rounded 
                   cursor-pointer align-middle 
-                  transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-blue-400"
-        aria-describedby={`tooltip-${refId}`}
-      >
-        [{refNumber}]
-      </button>
+                  transition-colors duration-200"
+          aria-describedby={`tooltip-${refId}`}
+        >
+          [{refNumber}]
+        </span>
+      )}
 
       {/* Portal for tooltip content to avoid nesting issues */}
       {isMounted && isVisible && (
