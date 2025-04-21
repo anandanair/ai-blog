@@ -11,6 +11,85 @@ import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 import ReferenceTooltip from "./ReferenceTooltip";
 
+// Helper component to process references in any text content
+const ProcessReferences = ({
+  children,
+  researchDataMap,
+  as: Component = "p",
+  ...props
+}: {
+  children: React.ReactNode;
+  researchDataMap: Map<string, ResearchDetailItem["data"]>;
+  as?: React.ElementType;
+  [key: string]: any;
+}) => {
+  // Process children to find and replace reference patterns
+  const processedChildren = React.Children.map(children, (child) => {
+    // Only process string children
+    if (typeof child !== "string") {
+      return child;
+    }
+
+    // Split the text by reference patterns
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+
+    // Enhanced regex to match both single and multiple references
+    // This will match patterns like [ref:ref-14] and [ref:ref-13, ref:ref-14]
+    const regex = /\[ref:(ref-\d+)(?:,\s*ref:(ref-\d+))*\]/g;
+    let match;
+
+    while ((match = regex.exec(child)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(child.substring(lastIndex, match.index));
+      }
+
+      // Extract all reference IDs from the match
+      const fullMatch = match[0];
+      const refIds = fullMatch.match(/ref-\d+/g) || [];
+
+      // Create a fragment with all references
+      parts.push(
+        <Fragment key={`refs-${match.index}`}>
+          {refIds.map((refId, idx) => {
+            const researchData = researchDataMap.get(refId);
+
+            if (researchData) {
+              return (
+                <Fragment key={`${refId}-${idx}`}>
+                  <ReferenceTooltip researchData={researchData} refId={refId} />
+                  {idx < refIds.length - 1 && ", "}
+                </Fragment>
+              );
+            } else {
+              return (
+                <Fragment key={`missing-${refId}-${idx}`}>
+                  <span className="inline-flex items-center text-red-500 font-medium text-xs bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-md">
+                    [Missing Ref: {refId}]
+                  </span>
+                  {idx < refIds.length - 1 && ", "}
+                </Fragment>
+              );
+            }
+          })}
+        </Fragment>
+      );
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text after the last match
+    if (lastIndex < child.length) {
+      parts.push(child.substring(lastIndex));
+    }
+
+    return parts.length > 1 ? parts : child;
+  });
+
+  return <Component {...props}>{processedChildren}</Component>;
+};
+
 interface PostClientProps {
   postData: PostData;
 }
@@ -245,6 +324,7 @@ export default function PostClient({ postData }: PostClientProps) {
               remarkPlugins={[remarkGfm]}
               components={{
                 code(props) {
+                  // Your existing code component logic
                   const { children, className, node, ...rest } = props;
                   const match = /language-(\w+)/.exec(className || "");
                   const value = String(children).replace(/\n$/, "");
@@ -291,6 +371,128 @@ export default function PostClient({ postData }: PostClientProps) {
                       </code>
                     );
                   }
+                },
+                // Improved p component to handle references
+                p(props) {
+                  return (
+                    <ProcessReferences
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                // Add handlers for other common elements
+                li(props) {
+                  return (
+                    <ProcessReferences
+                      as="li"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h1(props) {
+                  return (
+                    <ProcessReferences
+                      as="h1"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h2(props) {
+                  return (
+                    <ProcessReferences
+                      as="h2"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h3(props) {
+                  return (
+                    <ProcessReferences
+                      as="h3"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h4(props) {
+                  return (
+                    <ProcessReferences
+                      as="h4"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h5(props) {
+                  return (
+                    <ProcessReferences
+                      as="h5"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                h6(props) {
+                  return (
+                    <ProcessReferences
+                      as="h6"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                blockquote(props) {
+                  return (
+                    <ProcessReferences
+                      as="blockquote"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                strong(props) {
+                  return (
+                    <ProcessReferences
+                      as="strong"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                em(props) {
+                  return (
+                    <ProcessReferences
+                      as="em"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
+                },
+                a(props) {
+                  // For links, we need to be careful not to process the href attribute
+                  return (
+                    <ProcessReferences
+                      as="a"
+                      {...props}
+                      children={props.children}
+                      researchDataMap={researchDataMap}
+                    />
+                  );
                 },
               }}
             >
