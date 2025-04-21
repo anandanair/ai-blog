@@ -261,35 +261,59 @@ export async function generateDraft(
   researchResults: Map<string, GroundedResearchResult>
 ): Promise<string | null> {
   // --- 1. Prepare Research Input for Prompt ---
-  let researchFindingsString = "RESEARCH FINDINGS:\n\n";
-  if (researchResults.size === 0) {
+  let researchFindingsString = "RESEARCH FINDINGS (Cite using ID):\n\n";
+  const researchEntriesForPrompt: Array<{
+    id: string;
+    point: string;
+    text: string;
+    sourcesText?: string;
+  }> = [];
+  let researchIndex = 0;
+
+  if (researchResults.size > 0) {
+    researchResults.forEach((result, point) => {
+      const entryId = `ref-${researchIndex}`; // Create unique ID
+      researchIndex++;
+      let sourcesStr = "";
+      if (result.sources && result.sources.length > 0) {
+        const sourceTitles = result.sources
+          .map((s) => s.title || s.uri?.split("/")[2] || "Unknown Source")
+          .filter(Boolean);
+        if (sourceTitles.length > 0) {
+          sourcesStr = `[Sources Used: ${sourceTitles.join(", ")}]`; // Note for LLM context
+        }
+      }
+      researchEntriesForPrompt.push({
+        id: entryId,
+        point: point,
+        text:
+          result.groundedText && !result.groundedText.startsWith("Error")
+            ? result.groundedText
+            : `(No specific data found or error: ${result.groundedText})`, // Still pass error info
+        sourcesText: sourcesStr || undefined,
+      });
+    });
+
+    // Format for the prompt string, including the ID
+    researchFindingsString += researchEntriesForPrompt
+      .map(
+        (entry) =>
+          `ID: ${entry.id}\nOutline Point: "${entry.point}"\nGrounded Text: ${
+            entry.text
+          } ${entry.sourcesText || ""}\n`
+      )
+      .join("\n");
+  } else {
     researchFindingsString +=
       "No specific research data was gathered for this topic.\n";
-  } else {
-    researchResults.forEach((result, point) => {
-      researchFindingsString += `Outline Point: "${point}"\n`;
-      if (result.groundedText && !result.groundedText.startsWith("Error")) {
-        researchFindingsString += `Grounded Text: ${result.groundedText}\n`;
-        if (result.sources && result.sources.length > 0) {
-          const sourceTitles = result.sources
-            .map((s) => s.title || s.uri?.split("/")[2] || "Unknown Source") // Extract domain if title missing
-            .filter(Boolean);
-          if (sourceTitles.length > 0) {
-            researchFindingsString += `Sources: [${sourceTitles.join(", ")}]\n`;
-          }
-        }
-      } else {
-        researchFindingsString += `Grounded Text: (No specific data found or error: ${result.groundedText})\n`; // Indicate missing/error data
-      }
-      researchFindingsString += "\n"; // Add blank line between points
-    });
   }
 
   // --- 2. Craft the Generation Prompt ---
   const generationPrompt = `
     You are an expert technical writer specializing in creating engaging and informative blog posts about technology topics.
 
-    Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings.
+    Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings. 
+    A key requirement is to insert reference markers linking text back to the specific research findings used.
 
     **Topic:**
     ${topic}
@@ -299,33 +323,39 @@ export async function generateDraft(
     ${outlineMarkdown}
     \`\`\`
 
-    **Research Findings (Use this information to elaborate on outline points):**
+    **Research Findings (Cite using the provided ID):**
     ${researchFindingsString}
 
-    **Instructions:**
-    1.  **Follow the Outline:** Adhere strictly to the structure provided in the Blog Post Outline. Use the headings and cover the points mentioned under each heading.
-    2.  **Integrate Research:** Where an "Outline Point" in the research findings matches a point in the outline, use the corresponding "Grounded Text" to provide details, facts, examples, or explanations for that section. Weave this information naturally into the text.
-    3.  **Handle Missing/Error Research:** If the "Grounded Text" for a point indicates "(No specific data found or error...)" or if a point from the outline is not present in the research findings, use your general knowledge to write about that point. You don't necessarily need to state that data was missing, just write the section as best you can.
-    4.  **Expand and Elaborate:** The outline provides the structure; the research provides specific facts. Expand on these points to create flowing paragraphs. Don't just list the research findings; synthesize them into a coherent narrative.
-    5.  **Tone:** Maintain an informative, engaging, and technically accurate tone suitable for developers or tech enthusiasts (adjust based on the specific topic's audience if known).
-    6.  **Format:** Output the entire blog post draft in **Markdown format**. Ensure proper Markdown syntax for headings, lists, bold text, etc.
-    7.  **Completeness:** Aim for a comprehensive draft covering all sections of the outline. Assume a target length appropriate for a typical tech blog post (~1000-1500 words, but prioritize covering the outline well over hitting an exact word count).
-    8.  **Citations:** For this first draft, do not worry about adding formal inline citations or a reference list based on the 'Sources' provided in the research. Focus on incorporating the *information*. Source attribution can be handled later.
-    9.  **Introduction and Conclusion:** Ensure the draft has a compelling introduction that hooks the reader and sets the stage, and a conclusion that summarizes key takeaways and offers final thoughts.
+    **CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
+    1.  **Follow the Outline:** Strictly adhere to the structure in the Outline. Use the headings and cover the points mentioned.
+    2.  **Integrate Research:** Use the "Grounded Text" from the Research Findings to provide details, facts, or examples for matching "Outline Points". Weave this information naturally into your writing.
+    3.  **INSERT REFERENCE MARKERS:** Immediately after a sentence or phrase that relies *primarily* on information from a specific entry in the Research Findings, you MUST insert its corresponding unique ID marker in the exact format: \`[ref:ID]\`. For example, if you use data from the entry with ID \`ref-5\`, insert \`[ref:ref-5]\` right after the relevant text.
+        *   Be precise. Place the marker directly adjacent to the information it supports.
+        *   If a paragraph synthesizes info from multiple research points, you might need multiple markers.
+        *   If a sentence uses only general knowledge or elaborates without specific research data, DO NOT insert a marker.
+    4.  **Handle Missing/Error Research:** If "Grounded Text" indicates no data/error, or an outline point has no matching research, write that section using your general knowledge. DO NOT insert a marker for these parts.
+    5.  **Expand and Elaborate:** Create flowing paragraphs. Don't just list research; synthesize it into a coherent narrative around the outline points.
+    6.  **Tone:** Maintain an informative, engaging, and technically accurate tone suitable for the tech audience.
+    7.  **Format:** Output the entire blog post draft in **Markdown format**. Ensure proper syntax.
+    8.  **Completeness:** Cover all sections of the outline comprehensively.
+    9.  **Introduction and Conclusion:** Write compelling intro/conclusions.
+    10. **IGNORE Other Citation Styles:** Only use the \`[ref:ID]\` marker format as specified in Instruction 3.
 
-    **Output only the final Markdown blog post draft.** Do not include any introductory phrases like "Okay, here is the draft..." or any explanations outside the Markdown content itself. Start directly with the first line of the Markdown (likely the main title).
+    **Output only the final Markdown blog post draft with the embedded [ref:ID] markers.** Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the first line of the Markdown (likely the main title).
   `;
 
   try {
     // --- 3. Call Gemini API ---
     const countTokensResponse = await genAI.models.countTokens({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: "gemini-2.5-pro-exp-03-25",
+      // model: "gemini-2.5-flash-preview-04-17",
       contents: generationPrompt,
     });
     console.log("Tokens:", countTokensResponse);
 
     const draftResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: "gemini-2.5-pro-exp-03-25",
+      // model: "gemini-2.5-flash-preview-04-17",
       contents: generationPrompt,
       config: {
         temperature: 0.6,
