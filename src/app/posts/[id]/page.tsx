@@ -2,7 +2,7 @@ import { getPostData, getAllPostIds } from "@/lib/posts";
 import PostClient from "@/components/PostClient";
 
 type Params = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateStaticParams() {
