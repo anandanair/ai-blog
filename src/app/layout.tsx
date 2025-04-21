@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AI Blog",
-  description: "A blog about AI tools and technology",
+  title: "AutoTek",
+  description: "Autonomous insights. Human curiosity.",
 };
 
 export default function RootLayout({

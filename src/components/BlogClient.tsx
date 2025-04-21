@@ -259,10 +259,10 @@ export default function BlogClient({ posts }: BlogClientProps) {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
               <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                AI Blog
+                AutoTek
               </div>
               <p className="text-gray-400 mt-2">
-                Exploring the future of technology
+                Autonomous insights. Human curiosity.
               </p>
             </div>
 

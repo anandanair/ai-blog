@@ -17,7 +17,7 @@ export default function Navbar() {
                 href="/"
                 className="text-xl font-bold text-gray-900 dark:text-white"
               >
-                AI Blog
+                AutoTek
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -105,10 +105,10 @@ export default function Navbar() {
               Blog
             </Link>
             <Link
-              href="/ai-tools"
+              href="/news"
               className="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
             >
-              AI Tools
+              Latest News
             </Link>
             <div className="px-3 py-2">
               <ThemeToggle />
