@@ -83,3 +83,17 @@ body {
 #tooltip-portal [role="tooltip"] {
   animation: tooltipFadeIn 0.2s ease-out forwards;
 }
+
+@keyframes shine-slow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shine-effect-slow {
+  animation: shine-slow 8s infinite;
+  pointer-events: none;
+}
