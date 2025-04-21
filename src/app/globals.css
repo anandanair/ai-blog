@@ -25,3 +25,61 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Add this to your global CSS file */
+
+/* Custom scrollbar for tooltip content */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Style override for Google's rendered search content */
+.related-search-content a {
+  color: #3b82f6 !important; /* blue-500 */
+  text-decoration: none !important;
+}
+
+.related-search-content a:hover {
+  text-decoration: underline !important;
+}
+
+/* Dark mode for related content */
+.dark .related-search-content a {
+  color: #60a5fa !important; /* blue-400 */
+}
+
+/* Fix potential style conflicts in rendered HTML content */
+.related-search-content * {
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+
+/* Animation for tooltip */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+#tooltip-portal [role="tooltip"] {
+  animation: tooltipFadeIn 0.2s ease-out forwards;
+}
