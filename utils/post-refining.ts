@@ -15,9 +15,10 @@ export async function refineDraft(
   topic: string
 ): Promise<string | null> {
   // --- Craft the Refinement Prompt ---
+
   const refinementPrompt = `
     You are an expert copy editor and content refiner for a technology blog.
-    Your task is to evaluate and significantly improve the provided blog post draft based on the original outline and topic.
+    Your task is to evaluate and significantly improve the provided blog post draft based on the original outline and topic, while carefully preserving embedded reference markers.
 
     **Topic:**
     ${topic}
@@ -27,9 +28,9 @@ export async function refineDraft(
     ${outlineMarkdown}
     \`\`\`
 
-    **Original Draft (To be evaluated and refined):**
+    **Original Draft (Contains [ref:ID] markers that MUST be preserved):**
     \`\`\`markdown
-    ${originalDraft}
+    ${originalDraft} 
     \`\`\`
 
     **Evaluation Criteria & Refinement Instructions:**
@@ -39,11 +40,16 @@ export async function refineDraft(
     4.  **Completeness & Depth:** While adhering to the outline, does each section feel sufficiently developed? (You don't need external knowledge, evaluate based on the content present). Are the explanations thorough enough?
     5.  **Grammar & Style:** Correct any grammatical errors, spelling mistakes, punctuation issues, and awkward phrasing. Improve sentence structure for better readability. Maintain a professional and consistent style.
     6.  **Maintain Core Information:** Do NOT change the core facts or technical information presented in the original draft. Your goal is to improve the *presentation*, clarity, and flow, not the underlying substance.
+    7.  **PRESERVE REFERENCE MARKERS:** The Original Draft contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers link statements to research sources.
+        *   **You MUST preserve these markers exactly as they appear.**
+        *   **DO NOT remove, change, or reformat these \`[ref:ID]\` markers.**
+        *   **Crucially, ensure these markers remain immediately adjacent to the specific sentence or phrase they originally followed.** Even if you rephrase a sentence, the marker associated with its core information must stay directly connected to that rephrased text. 
+    8.  **Markdown Formatting:** Ensure standard Markdown syntax is used correctly throughout (list spacing, heading levels, etc.).
 
     **Your Action:**
-    Rewrite the *entire* Original Draft, applying improvements based on the criteria above. Ensure the final output is a complete, refined blog post in Markdown format.
+    Rewrite the *entire* Original Draft, applying improvements based on the criteria above, paying special attention to preserving the \`[ref:ID]\` markers and their exact positions relative to the text they reference. Ensure the final output is a complete, refined blog post in Markdown format, including the preserved markers.
 
-    **Output ONLY the refined Markdown blog post.** Do not include your evaluation notes, introductory phrases ("Here is the refined draft..."), or anything other than the final Markdown content. Start directly with the first line of the refined post (likely the title).
+    **Output ONLY the refined Markdown blog post.** Do not include your evaluation notes, introductory phrases ("Here is the refined draft..."), or anything other than the final Markdown content (which must include the original \`[ref:ID]\` markers). Start directly with the first line of the refined post.
   `;
 
   try {
@@ -100,27 +106,29 @@ export async function finalPolish(
   }
 
   // --- Craft the Polishing Prompt ---
+
   const polishPrompt = `
-    You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown text by REMOVING any sentences or paragraphs that are NOT part of the actual blog post content intended for the reader.
+  You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown text by REMOVING any sentences or paragraphs that are NOT part of the actual blog post content intended for the reader, while carefully preserving specific reference markers.
 
-    Specifically, REMOVE text that matches these descriptions:
-    - Notes about the writing process itself (e.g., "Note: I focused on...", "As requested...", "This section covers...")
-    - Commentary on the instructions received (e.g., "Based on the outline provided...", "The research indicated...")
-    - Apologies or explanations for missing information (e.g., "I couldn't find specific data on...", "Further research would be needed for...")
-    - Self-correction remarks or alternative phrasings considered (e.g., "Alternatively, one could say...", "A better way might be...")
-    - Any other meta-commentary or text clearly not intended for the final published blog post reader.
+  Specifically, REMOVE text that matches these descriptions:
+  - Notes about the writing process itself (e.g., "Note: I focused on...", "As requested...", "This section covers...")
+  - Commentary on the instructions received (e.g., "Based on the outline provided...", "The research indicated...")
+  - Apologies or explanations for missing information (e.g., "I couldn't find specific data on...", "Further research would be needed for...")
+  - Self-correction remarks or alternative phrasings considered (e.g., "Alternatively, one could say...", "A better way might be...")
+  - Any other meta-commentary or text clearly not intended for the final published blog post reader.
 
-    **IMPORTANT INSTRUCTIONS:**
-    - **DO NOT rewrite, rephrase, or change the actual blog post content.** Only remove the unwanted meta-text.
-    - **Preserve all original Markdown formatting** of the remaining content.
-    - If the input text contains NO meta-commentary, return the input text exactly as is.
+  **CRITICAL INSTRUCTIONS:**
+  1.  **PRESERVE REFERENCE MARKERS:** The Input Text contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers are PART OF THE INTENDED CONTENT and MUST NOT BE REMOVED OR ALTERED. They are *not* meta-commentary.
+  2.  **DO NOT rewrite, rephrase, or change the actual blog post content** (other than removing the specific types of meta-commentary listed above).
+  3.  **Preserve all original Markdown formatting** of the remaining content, including the exact placement and formatting of the \`[ref:ID]\` markers.
+  4.  If the input text contains NO meta-commentary (only blog content and markers), return the input text exactly as is.
 
-    **Input Text (potentially needs cleaning):**
-    \`\`\`markdown
-    ${potentiallyUnpolishedDraft}
-    \`\`\`
+  **Input Text (Contains [ref:ID] markers to preserve, may need meta-commentary removed):**
+  \`\`\`markdown
+  ${potentiallyUnpolishedDraft}
+  \`\`\`
 
-    **Output ONLY the cleaned Markdown content.** Do not include any explanations, introductions, or confirmations. Start directly with the first line of the cleaned content.
+  **Output ONLY the cleaned Markdown content including the preserved [ref:ID] markers.** Do not include any explanations, introductions, or confirmations. Start directly with the first line of the cleaned content.
   `;
 
   try {
