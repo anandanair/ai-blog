@@ -47,9 +47,10 @@ export async function researchTopicWithGrounding(
   outlineMarkdown: string,
   topic: string
 ): Promise<Map<string, GroundedResearchResult>> {
-  // console.log(
-  //   "\n🔍 Starting Research Stage using Gemini 2.5 Flash with Grounding Search..."
-  // );
+  console.log(
+    "\n🔍 Starting Research Stage using Gemini 2.5 Flash with Grounding Search..."
+  );
+  console.log(`📝 Topic: "${topic}"`);
 
   if (IS_TESTING_MODE) {
     console.warn(
@@ -85,15 +86,17 @@ export async function researchTopicWithGrounding(
     ? allResearchPoints.slice(0, MAX_RESEARCH_POINTS_FOR_TESTING)
     : allResearchPoints; // Use all points if not testing
 
-  // console.log(
-  //   `Attempting research for ${pointsToSearch.length} points using grounding.`
-  // );
+  console.log(
+    `🔎 Found ${allResearchPoints.length} research points, processing ${pointsToSearch.length} points.`
+  );
 
-  for (const point of pointsToSearch) {
+  for (const [index, point] of pointsToSearch.entries()) {
     // --- 3a. Craft Research Prompt (Remains the same) ---
-    const researchPrompt = `Regarding the topic "${topic}", provide detailed information, facts, examples, or explanations for the following specific point: "${point}". Focus on providing verifiable and current information. If you use external search, please indicate.`; // Added hint about search
+    const researchPrompt = `Regarding the topic "${topic}", provide detailed information, facts, examples, or explanations for the following specific point: "${point}". Focus on providing verifiable and current information. If you use external search, please indicate.`;
 
-    // console.log(` -> Researching: "${point}"`);
+    console.log(
+      `[${index + 1}/${pointsToSearch.length}] 🔍 Researching: "${point}"`
+    );
 
     try {
       // --- 3b. Call Gemini API with Grounding Enabled (v2.0 style) ---
@@ -109,7 +112,6 @@ export async function researchTopicWithGrounding(
 
       // --- 3c. Process API Results (Response structure expected to be similar) ---
       const groundedText = researchResponse.text;
-      // Grounding metadata path might be slightly different, but likely under candidates[0]
       const metadata = researchResponse.candidates?.[0]?.groundingMetadata;
 
       const sources: SourceInfo[] = [];
@@ -117,10 +119,8 @@ export async function researchTopicWithGrounding(
       let renderedContentHtml: string | undefined = undefined;
 
       if (metadata) {
-        // console.log(`   -> Grounding metadata found for "${point}"`);
         if (metadata.groundingChunks) {
           metadata.groundingChunks.forEach((chunk: any) => {
-            // Use 'any' or define interface
             if (chunk.web) {
               sources.push({ uri: chunk.web.uri, title: chunk.web.title });
             }
@@ -128,21 +128,14 @@ export async function researchTopicWithGrounding(
         }
         if (metadata.webSearchQueries) {
           searchQueries = metadata.webSearchQueries;
-          // console.log(
-          //   `   -> Search queries used: [${searchQueries.join(", ")}]`
-          // );
         }
         if (metadata.searchEntryPoint?.renderedContent) {
           renderedContentHtml = metadata.searchEntryPoint.renderedContent;
-          // console.log(
-          //   `   -> Storing Google Search Suggestions HTML (Required by ToS). Length: ${renderedContentHtml.length}`
-          // );
-          // Store/handle this as per your compliance needs
         }
+
+        console.log(`  ✅ Retrieved data with ${sources.length} sources`);
       } else {
-        // console.log(
-        //   `   -> No grounding metadata found for "${point}". Response is based on model knowledge.`
-        // );
+        console.log(`  ℹ️ Retrieved data from model knowledge (no grounding)`);
       }
 
       if (groundedText) {
@@ -153,16 +146,15 @@ export async function researchTopicWithGrounding(
           renderedContent: renderedContentHtml,
         });
       } else {
-        // console.log(`   -> No text response for: "${point}"`);
+        console.log(`  ⚠️ No text response received`);
         researchData.set(point, { groundedText: "", sources: [] });
       }
     } catch (error: any) {
       console.error(
-        `❌ Error during grounding research for "${point}":`,
-        error?.message || error
+        `❌ Error researching "${point}": ${error?.message || error}`
       );
       if (error.response?.candidates?.[0]?.finishReason === "SAFETY") {
-        console.error("   -> Blocked due to safety settings.");
+        console.error("  ⛔ Blocked due to safety settings");
       }
       researchData.set(point, {
         groundedText: `Error fetching research: ${error?.message}`,
@@ -172,7 +164,7 @@ export async function researchTopicWithGrounding(
   }
 
   console.log(
-    `✅ Research Stage Completed. Processed ${pointsToSearch.length} points.`
+    `\n✅ Research Stage Completed: ${researchData.size}/${pointsToSearch.length} points processed successfully.`
   );
   return researchData;
 }
