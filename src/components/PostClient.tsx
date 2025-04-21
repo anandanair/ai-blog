@@ -157,7 +157,7 @@ export default function PostClient({ postData }: PostClientProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen">
       {/* Progress bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50 origin-left"
@@ -166,12 +166,12 @@ export default function PostClient({ postData }: PostClientProps) {
 
       {/* Hero section - Fixed visibility issue */}
       <motion.header
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden rounded-3xl"
         style={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl">
           {postData.image_url ? ( // Use image_url from PostData
             <div className="absolute inset-0">
               <Image
@@ -298,7 +298,7 @@ export default function PostClient({ postData }: PostClientProps) {
       {/* Article content - Improved styling */}
       <article
         ref={articleRef}
-        className="relative z-10 -mt-16 bg-white dark:bg-gray-800 rounded-t-3xl shadow-xl max-w-4xl mx-auto mb-20"
+        className="relative z-10 -mt-16 bg-gradient-to-b from-white/80 to-white/20 dark:from-gray-900/50 dark:to-gray-900/40 backdrop-blur-lg rounded-3xl shadow-xl max-w-4xl mx-auto mb-20"
       >
         <div className="prose prose-lg lg:prose-xl dark:prose-invert max-w-none px-4 sm:px-8 md:px-16 py-12">
           {postData.description && (
