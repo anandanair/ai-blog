@@ -98,7 +98,6 @@ export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [expandedSources, setExpandedSources] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -329,28 +328,35 @@ export default function PostClient({ postData }: PostClientProps) {
                   const match = /language-(\w+)/.exec(className || "");
                   const value = String(children).replace(/\n$/, "");
 
-                  // Check if this is a reference marker
-                  const refMatch = value.match(/^\[ref:(ref-\d+)\]$/);
+                  // Check if this contains reference markers - updated to handle multiple references
+                  // This will match both single references and comma-separated multiple references
+                  if (value.includes("[ref:ref-")) {
+                    // Extract all reference IDs from the value
+                    const refIds = value.match(/ref-\d+/g) || [];
 
-                  if (refMatch && refMatch[1]) {
-                    const refId = refMatch[1];
-                    const researchData = researchDataMap.get(refId);
+                    if (refIds.length > 0) {
+                      return (
+                        <Fragment key={`code-refs-${refIds.join("-")}`}>
+                          {refIds.map((refId, idx) => {
+                            const researchData = researchDataMap.get(refId);
 
-                    if (researchData) {
-                      // Replace inline code with our tooltip component
-                      return (
-                        <ReferenceTooltip
-                          key={refId}
-                          researchData={researchData}
-                          refId={refId}
-                        />
-                      );
-                    } else {
-                      // Missing reference handling
-                      return (
-                        <span className="inline-flex items-center text-red-500 font-medium text-xs bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-md">
-                          [Missing Ref: {refId}]
-                        </span>
+                            return (
+                              <Fragment key={`code-${refId}-${idx}`}>
+                                {researchData ? (
+                                  <ReferenceTooltip
+                                    researchData={researchData}
+                                    refId={refId}
+                                  />
+                                ) : (
+                                  <span className="inline-flex items-center text-red-500 font-medium text-xs bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-md">
+                                    [Missing Ref: {refId}]
+                                  </span>
+                                )}
+                                {idx < refIds.length - 1 && ", "}
+                              </Fragment>
+                            );
+                          })}
+                        </Fragment>
                       );
                     }
                   }
@@ -500,223 +506,71 @@ export default function PostClient({ postData }: PostClientProps) {
             </ReactMarkdown>
           </motion.div>
 
-          {/* --- Modern Display Sources and Suggestions --- */}
-          {(uniqueSources.length > 0 || searchSuggestionsHtml.length > 0) && (
-            <motion.div
-              className="mt-12"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isLoaded ? 1 : 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-            >
-              <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
-                {/* Modern Sources Section */}
-                {uniqueSources.length > 0 && (
-                  <div className="mb-10">
-                    <div className="flex items-center justify-between mb-5">
-                      <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 flex items-center !no-prose">
-                        <span className="inline-flex items-center justify-center w-7 h-7 mr-2 bg-blue-50 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="w-4 h-4"
-                          >
-                            <path d="M12 21l-8.2-8.2c-2-2-2-5.2 0-7.2s5.2-2 7.2 0L12 6.8l1-1c2-2 5.2-2 7.2 0s2 5.2 0 7.2L12 21z"></path>
-                          </svg>
-                        </span>
-                        Sources
-                        {uniqueSources.length > 0 && (
-                          <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 font-normal">
-                            ({uniqueSources.length})
-                          </span>
-                        )}
-                      </h3>
-
-                      {/* Show expand/collapse toggle if many sources */}
-                      {uniqueSources.length > 12 && (
-                        <button
-                          onClick={() => setExpandedSources((prev) => !prev)}
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+          {/* --- Modern References Display --- */}
+          {postData.research_details &&
+            postData.research_details.length > 0 && (
+              <motion.div
+                className="mt-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoaded ? 1 : 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              >
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 flex items-center !no-prose">
+                      <span className="inline-flex items-center justify-center w-7 h-7 mr-2 bg-blue-50 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-4 h-4"
                         >
-                          {expandedSources ? (
-                            <>
-                              <span>Show less</span>
-                              <svg
-                                className="w-4 h-4 ml-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M5 15l7-7 7 7"
-                                ></path>
-                              </svg>
-                            </>
-                          ) : (
-                            <>
-                              <span>Show all</span>
-                              <svg
-                                className="w-4 h-4 ml-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M19 9l-7 7-7-7"
-                                ></path>
-                              </svg>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Modern grid layout for sources */}
-                    <div className="!no-prose">
-                      {uniqueSources.length <= 12 || expandedSources ? (
-                        // Full grid when expanded or fewer sources
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {uniqueSources.map((source, index) => (
-                            <a
-                              key={source.uri || index}
-                              href={source.uri}
-                              target="_blank"
-                              rel="noopener noreferrer nofollow"
-                              className="flex items-center px-4 py-3 rounded-lg bg-white dark:bg-gray-800 
-                    border border-gray-100 dark:border-gray-700 shadow-sm
-                    hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:shadow-md"
-                              title={source.uri}
-                            >
-                              <div className="flex-shrink-0 w-5 h-5 text-blue-500 dark:text-blue-400">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
-                                  <path d="M15 3h6v6"></path>
-                                  <path d="M10 14L21 3"></path>
-                                </svg>
-                              </div>
-                              <div className="ml-3 text-sm text-gray-700 dark:text-gray-300 truncate">
-                                {source.title ||
-                                  source.uri?.split("/")[2] ||
-                                  "Source Link"}
-                              </div>
-                            </a>
-                          ))}
-                        </div>
-                      ) : (
-                        // Show limited sources with visual indicator for more
-                        <div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {uniqueSources.slice(0, 12).map((source, index) => (
-                              <a
-                                key={source.uri || index}
-                                href={source.uri}
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                                className="flex items-center px-4 py-3 rounded-lg bg-white dark:bg-gray-800 
-                      border border-gray-100 dark:border-gray-700 shadow-sm
-                      hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:shadow-md"
-                                title={source.uri}
-                              >
-                                <div className="flex-shrink-0 w-5 h-5 text-blue-500 dark:text-blue-400">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
-                                    <path d="M15 3h6v6"></path>
-                                    <path d="M10 14L21 3"></path>
-                                  </svg>
-                                </div>
-                                <div className="ml-3 text-sm text-gray-700 dark:text-gray-300 truncate">
-                                  {source.title ||
-                                    source.uri?.split("/")[2] ||
-                                    "Source Link"}
-                                </div>
-                              </a>
-                            ))}
-                          </div>
-
-                          {/* Modern "show more" indicator */}
-                          <button
-                            onClick={() => setExpandedSources(true)}
-                            className="mt-4 w-full flex items-center justify-center px-4 py-2 rounded-lg
-                  bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700
-                  text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          >
-                            <span>
-                              Show {uniqueSources.length - 12} more sources
-                            </span>
-                            <svg
-                              className="w-4 h-4 ml-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 9l-7 7-7-7"
-                              ></path>
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Display Search Suggestions */}
-                {searchSuggestionsHtml.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300 !no-prose">
-                      Related Searches
+                          <path d="M12 21l-8.2-8.2c-2-2-2-5.2 0-7.2s5.2-2 7.2 0L12 6.8l1-1c2-2 5.2-2 7.2 0s2 5.2 0 7.2L12 21z"></path>
+                        </svg>
+                      </span>
+                      References
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 font-normal">
+                        ({postData.research_details.length})
+                      </span>
                     </h3>
-                    {/* Container for the potentially styled suggestion boxes */}
-                    <div className="space-y-4 !no-prose">
-                      {searchSuggestionsHtml.map((htmlString, index) => (
-                        // Render the HTML provided by Google for suggestions
-                        // WARNING: Only use dangerouslySetInnerHTML with trusted content.
-                        // Google's renderedContent for Search Suggestions is considered trusted in this context.
-                        // DO NOT use this with untrusted or user-generated HTML.
-                        <div
-                          key={index}
-                          dangerouslySetInnerHTML={{ __html: htmlString }}
-                        />
-                      ))}
+                  </div>
+
+                  {/* Grid layout for reference numbers */}
+                  <div className="!no-prose">
+                    <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2 sm:gap-3">
+                      {postData.research_details.map((detail, index) => {
+                        const refId = `ref-${index}`;
+
+                        return (
+                          <div key={refId} className="relative group">
+                            <div
+                              className="w-full aspect-square flex items-center justify-center rounded-md 
+                                      bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+                                      text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 
+                                      dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 
+                                      hover:border-blue-200 dark:hover:border-blue-800 transition-colors
+                                      cursor-pointer"
+                              aria-label={`Reference ${index + 1}`}
+                            >
+                              <ReferenceTooltip
+                                researchData={detail.data}
+                                refId={refId}
+                                displayMode="grid"
+                              />
+                              {index + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-          {/* --- End Sources and Suggestions --- */}
+                </div>
+              </motion.div>
+            )}
         </div>
 
         {/* Article footer */}
