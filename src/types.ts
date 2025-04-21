@@ -9,6 +9,11 @@ export interface GroundedResearchResult {
   renderedContent?: string;
 }
 
+export interface ResearchDetailItem {
+  point: string;
+  data: GroundedResearchResult;
+}
+
 export interface PostData {
   id: string;
   title: string;
