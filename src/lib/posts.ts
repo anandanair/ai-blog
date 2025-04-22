@@ -112,8 +112,6 @@ export async function getAllPostIds() {
 
   // Map slugs to the format expected by getStaticPaths
   return data.map((post) => ({
-    params: {
-      id: post.slug, // The route parameter is the slug
-    },
+    id: post.slug,
   }));
 }
