@@ -32,8 +32,6 @@ export interface PostData {
   }> | null;
 }
 
-export type AiTool = PostData; // Assuming AiTool has the same structure as PostData
-
 export interface BlogClientProps {
   posts: PostData[];
 }
