@@ -1,7 +1,6 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { PostData } from "@/types";
-import { supabaseClient } from "@/utils/supabase/client";
-import { AiTool } from "@/types";
+import { initSupabase } from "../../utils/database";
 
 // Helper function to get author image based on model name
 function getAuthorImage(authorName: string | null): string {
@@ -92,7 +91,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
 }
 
 export async function getAllPostIds() {
-  const supabase = supabaseClient;
+  const supabase = initSupabase();
 
   // Fetch slugs for all posts
   const { data, error } = await supabase
