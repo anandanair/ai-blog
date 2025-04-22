@@ -11,8 +11,11 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
   // Latest posts section - show the 6 most recent posts
   const latestPosts = posts.slice(0, 6);
 
-  // Featured post is the most recent one after the latest posts
-  const featuredPost = posts[6] || posts[0]; // Fallback to first post if not enough posts
+  // Hero post - the most recent post (highest priority)
+  const heroPost = posts[0];
+
+  // Featured post is the next most recent one after the hero post
+  const featuredPost = posts[6] || posts[1]; // Fallback to second post if not enough posts
 
   // Rest of the posts
   const regularPosts = posts.slice(7);
@@ -69,6 +72,184 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {posts.length > 0 ? (
           <>
+            {/* Hero Section - Showcase Most Important Content */}
+            <div className="mb-16">
+              <motion.h2
+                className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <span className="inline-block w-8 h-1 bg-purple-600 mr-3"></span>
+                Tech Spotlight
+              </motion.h2>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Hero Post - Large */}
+                <motion.article
+                  className="lg:col-span-2 relative rounded-2xl overflow-hidden shadow-xl h-[500px] group"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="absolute inset-0">
+                    {heroPost.image_url ? (
+                      <Image
+                        src={heroPost.image_url || "/placeholder-hero.jpg"}
+                        alt={heroPost.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
+                        priority
+                      />
+                    ) : (
+                      <div className="h-full bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center">
+                        <span className="text-white text-9xl font-bold opacity-30">
+                          {heroPost.title.substring(0, 1)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white z-10">
+                    <div className="mb-4 flex items-center">
+                      <span className="inline-block bg-purple-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                        {heroPost.category || "Featured"}
+                      </span>
+                      <span className="mx-2 text-gray-300 text-sm">•</span>
+                      <span className="text-gray-300 text-sm">
+                        {formatDate(heroPost.created_at)}
+                      </span>
+                    </div>
+
+                    <Link
+                      href={`/posts/${heroPost.id}`}
+                      className="block group"
+                    >
+                      <h2 className="text-3xl md:text-4xl font-bold mb-4 group-hover:text-purple-300 transition-colors duration-200">
+                        {heroPost.title}
+                      </h2>
+                    </Link>
+
+                    <p className="text-gray-200 mb-6 text-lg line-clamp-2 max-w-3xl">
+                      {heroPost.description}
+                    </p>
+
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden">
+                          <Image
+                            src={
+                              heroPost.author_image || "/placeholder-author.jpg"
+                            }
+                            alt={heroPost.author || "Author"}
+                            width={40}
+                            height={40}
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {heroPost.author || "AI Model"}
+                        </p>
+                        <p className="text-xs text-gray-300">
+                          {heroPost.read_time || "5"} min read
+                        </p>
+                      </div>
+
+                      <div className="ml-auto">
+                        <Link
+                          href={`/posts/${heroPost.id}`}
+                          className="text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-full px-5 py-2 text-sm inline-flex items-center transition-colors duration-200"
+                        >
+                          Read Full Story
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 ml-1.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </motion.article>
+
+                {/* Secondary Featured Posts - Right Column */}
+                <div className="lg:col-span-1 flex flex-col space-y-6">
+                  {posts.slice(1, 3).map((post, index) => (
+                    <motion.article
+                      key={post.id}
+                      className="relative rounded-xl overflow-hidden shadow-lg h-[235px] group"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.1 * (index + 1) }}
+                      whileHover={{ y: -3 }}
+                    >
+                      <div className="absolute inset-0">
+                        {post.image_url ? (
+                          <Image
+                            src={
+                              post.image_url || `/placeholder-${post.id}.jpg`
+                            }
+                            alt={post.title}
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            sizes="(max-width: 768px) 100vw, 400px"
+                          />
+                        ) : (
+                          <div className="h-full bg-gradient-to-br from-indigo-600 to-purple-800 flex items-center justify-center">
+                            <span className="text-white text-6xl font-bold opacity-30">
+                              {post.title.substring(0, 1)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                      </div>
+
+                      <div className="absolute bottom-0 left-0 right-0 p-5 text-white z-10">
+                        <div className="mb-2 flex items-center">
+                          <span className="inline-block bg-purple-600 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                            {post.category || "Technology"}
+                          </span>
+                        </div>
+
+                        <Link
+                          href={`/posts/${post.id}`}
+                          className="block group"
+                        >
+                          <h3 className="text-lg font-bold mb-2 group-hover:text-purple-300 transition-colors duration-200 line-clamp-2">
+                            {post.title}
+                          </h3>
+                        </Link>
+
+                        <div className="flex items-center text-xs">
+                          <span className="text-gray-300">
+                            {formatDate(post.created_at)}
+                          </span>
+                          <span className="mx-2 text-gray-400">•</span>
+                          <span className="text-gray-300">
+                            {post.read_time || "3"} min
+                          </span>
+                        </div>
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Latest Posts Section - Modern Design with Animations */}
             <div className="mb-12">
               <motion.h2
@@ -205,7 +386,7 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
                           href={`/posts/${post.id}`}
                           className="block group mb-2"
                         >
-                          <h3 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200 line-clamp-2">
+                          <h3 className="text-base font-bold text-gray-900 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200 line-clamp-2">
                             {post.title}
                           </h3>
                         </Link>
@@ -284,25 +465,25 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
             <div className="mb-16">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Featured Post - Left Column */}
-                <div>
+                <div className="mb-12">
                   <motion.h2
-                    className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center"
+                    className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-8 flex items-center"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <span className="inline-block w-8 h-1 bg-purple-600 mr-3"></span>
+                    <span className="inline-block w-10 h-1.5 bg-purple-600 dark:bg-purple-500 mr-4"></span>
                     Featured Article
                   </motion.h2>
 
                   <motion.article
-                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden h-full"
+                    className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-xl dark:shadow-gray-900/30 h-full transform-gpu"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    whileHover={{ y: -5 }}
+                    whileHover={{ y: -8, transition: { duration: 0.3 } }}
                   >
-                    <div className="relative h-64">
+                    <div className="relative h-80 md:h-96">
                       {featuredPost.image_url ? (
                         <Image
                           src={
@@ -311,26 +492,41 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
                           }
                           alt={featuredPost.title}
                           fill
-                          className="object-cover"
-                          sizes="(max-width: 1280px) 100vw, 1280px"
+                          className="object-cover transition-transform duration-700 hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          priority
                         />
                       ) : (
-                        <div className="h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                          <span className="text-white text-8xl font-bold">
+                        <div className="h-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center">
+                          <span className=" text-8xl font-bold opacity-80">
                             {featuredPost.title.substring(0, 1)}
                           </span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                     </div>
 
-                    <div className="relative mt-[-60px] p-6 text-white z-10">
-                      <div className="mb-3">
-                        <span className="inline-block bg-purple-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                    <div className="relative mt-[-100px] p-8 z-10">
+                      <div className="mb-4 flex flex-wrap items-center">
+                        <span className="inline-block bg-purple-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg shadow-purple-600/30">
                           {featuredPost.category || "Technology"}
                         </span>
-                        <span className="mx-2 text-gray-300 text-sm">•</span>
-                        <span className="text-gray-300 text-sm">
+                        <span className="mx-3 text-gray-300 text-sm">•</span>
+                        <span className="text-gray-300 text-sm flex items-center">
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            ></path>
+                          </svg>
                           {formatDate(featuredPost.created_at)}
                         </span>
                       </div>
@@ -339,58 +535,58 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
                         href={`/posts/${featuredPost.id}`}
                         className="block group"
                       >
-                        <h2 className="text-2xl font-bold mb-3 group-hover:text-purple-300 transition-colors duration-200">
+                        <h2 className="text-3xl font-bold mb-4 group-hover:text-purple-300 transition-colors duration-300 leading-tight">
                           {featuredPost.title}
                         </h2>
                       </Link>
 
-                      <p className="text-gray-200 mb-4 line-clamp-2">
+                      <p className="mb-6 text-lg line-clamp-3">
                         {featuredPost.description}
                       </p>
 
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden">
-                            <Image
-                              src={
-                                featuredPost.author_image ||
-                                "/placeholder-author.jpg"
-                              }
-                              alt={featuredPost.author || "Author"}
-                              width={32}
-                              height={32}
-                              className="object-cover"
-                            />
+                      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700/30">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 mr-3">
+                            <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
+                              <Image
+                                src={
+                                  featuredPost.author_image ||
+                                  "/placeholder-author.jpg"
+                                }
+                                alt={featuredPost.author || "Author"}
+                                width={40}
+                                height={40}
+                                className="object-cover"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold">
+                              {featuredPost.author || "AI Model"}
+                            </p>
                           </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {featuredPost.author || "AI Model"}
-                          </p>
-                        </div>
 
-                        <div className="ml-auto">
-                          <Link
-                            href={`/posts/${featuredPost.id}`}
-                            className="text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-full px-4 py-1.5 text-sm inline-flex items-center transition-colors duration-200"
+                        <Link
+                          href={`/posts/${featuredPost.id}`}
+                          className="text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 font-medium rounded-full px-6 py-2.5 text-sm inline-flex items-center transition-all duration-300 shadow-lg shadow-purple-600/30 hover:shadow-purple-700/40"
+                        >
+                          Read Article
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform duration-300"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            Read Article
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-3.5 w-3.5 ml-1.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                              />
-                            </svg>
-                          </Link>
-                        </div>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
+                          </svg>
+                        </Link>
                       </div>
                     </div>
                   </motion.article>
