@@ -116,3 +116,43 @@ export async function getAllPostIds() {
     id: post.slug,
   }));
 }
+
+// New function to get popular posts
+export async function getPopularPostsData(
+  limit: number = 5
+): Promise<PostData[]> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+    )
+    .eq("status", "published")
+    .not("views", "is", null) // Ensure posts have views
+    .order("views", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error fetching popular posts:", error);
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  return data.map((post) => ({
+    id: post.slug,
+    title: post.title,
+    description: post.description,
+    created_at: post.created_at,
+    image_url: post.image_url,
+    category: post.category,
+    author: post.author,
+    author_image: getAuthorImage(post.author),
+    read_time: post.read_time,
+    tags: post.tags,
+    views: post.views,
+  }));
+}
