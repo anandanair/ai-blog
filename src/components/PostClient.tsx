@@ -10,7 +10,7 @@ import { PostData, ResearchDetailItem } from "@/types"; // Import the PostData t
 import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 import ReferenceTooltip from "./ReferenceTooltip";
-import { incrementPostViews } from "@/lib/posts";
+import { incrementPostViews } from "@/lib/posts.client";
 
 // Helper component to process references in any text content
 const ProcessReferences = ({
