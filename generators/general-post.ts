@@ -234,7 +234,7 @@ ${techContext}
       slug: generateSlug(blogMetadata?.title || ""),
       description: blogMetadata?.metaDescription || "",
       content: validatedMarkdown,
-      category: null,
+      category: blogMetadata?.category || null,
       image_url: imageUrl,
       tool_name: null,
       read_time: blogMetadata?.readTimeMinutes || 0,

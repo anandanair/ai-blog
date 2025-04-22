@@ -8,6 +8,7 @@ export interface BlogPostMetadata {
   imagePrompt: string; // Prompt for image generation model
   tags: string[]; // Array of tag strings
   readTimeMinutes: number; // Calculated read time
+  category: string; // Main category for the post
 }
 
 /**
@@ -46,9 +47,10 @@ export async function generateMetadata(
       2.  **meta_description:** A concise summary for search engine results (~150-160 characters). It should entice clicks.
       3.  **image_prompt:** A detailed and descriptive prompt (suitable for an AI image generation model like DALL-E, Midjourney, or Gemini Image) that visually represents the core theme or a key concept of the blog post. Be specific about subjects, style (e.g., realistic photo, vector illustration, abstract), and mood.
       4.  **tags:** A list of 3-7 relevant keywords or tags as a JSON array of strings (e.g., ["tag1", "tag2", "tag3"]).
+      5.  **category:** A single main category that best represents the post's primary topic area. Choose from common tech blog categories like "Smartphones", "Software & Apps", "Gaming", "AI & Machine Learning", "Cybersecurity", "Hardware", "Internet & Web", "Programming", "Tech News", "Gadgets", etc. Pick the most specific and relevant category.
   
       **Output Format:**
-      Return ONLY a single valid JSON object containing these fields: "title", "meta_description", "image_prompt", "tags".
+      Return ONLY a single valid JSON object containing these fields: "title", "meta_description", "image_prompt", "tags", "category".
       Do NOT include any other text, explanations, or markdown formatting outside the JSON object.
   
       **Example JSON Output Structure:**
@@ -56,7 +58,8 @@ export async function generateMetadata(
         "title": "Example Title Here",
         "meta_description": "Concise description of the post content goes here, optimized for search engines.",
         "image_prompt": "Detailed visual prompt for an AI image generator relevant to the post.",
-        "tags": ["keyword1", "keyword2", "relevant_tag"]
+        "tags": ["keyword1", "keyword2", "relevant_tag"],
+        "category": "Software & Apps"
       }
     `;
 
@@ -85,7 +88,8 @@ export async function generateMetadata(
         !parsedMetadata.title ||
         !parsedMetadata.meta_description ||
         !parsedMetadata.image_prompt ||
-        !Array.isArray(parsedMetadata.tags)
+        !Array.isArray(parsedMetadata.tags) ||
+        !parsedMetadata.category
       ) {
         throw new Error("Missing required fields in LLM JSON response.");
       }
@@ -107,10 +111,12 @@ export async function generateMetadata(
         .map((tag: any) => String(tag).trim())
         .filter(Boolean), // Ensure tags are strings
       readTimeMinutes: readTimeMinutes,
+      category: parsedMetadata.category.trim(),
     };
 
     console.log("✅ Metadata generated successfully:");
     console.log(`   Title: ${finalMetadata.title}`);
+    console.log(`   Category: ${finalMetadata.category}`);
     // console.log(`   Meta Desc: ${finalMetadata.metaDescription}`);
     // console.log(`   Image Prompt: ${finalMetadata.imagePrompt}`);
     // console.log(`   Tags: ${finalMetadata.tags.join(", ")}`);
