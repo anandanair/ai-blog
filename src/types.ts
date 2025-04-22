@@ -23,6 +23,7 @@ export interface PostData {
   category?: string | null;
   tool_name?: string | null;
   content?: string;
+  tags?: string[] | null;
   author?: string | null;
   author_image?: string | null;
   read_time?: number | null;
