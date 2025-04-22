@@ -24,6 +24,7 @@ export interface PostData {
   tool_name?: string | null;
   content?: string;
   tags?: string[] | null;
+  views: number | null;
   author?: string | null;
   author_image?: string | null;
   read_time?: number | null;
