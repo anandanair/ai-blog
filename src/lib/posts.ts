@@ -24,7 +24,7 @@ export async function getSortedPostsData(): Promise<PostData[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, created_at, image_url, category, author, read_time"
+      "slug, title, description, created_at, image_url, category, author, read_time, tags"
     )
     .is("category", null)
     .eq("status", "published")
@@ -49,6 +49,7 @@ export async function getSortedPostsData(): Promise<PostData[]> {
     author: post.author,
     author_image: getAuthorImage(post.author), // Add author image based on author name
     read_time: post.read_time,
+    tags: post.tags,
   }));
 }
 
@@ -59,7 +60,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, content, created_at, image_url, category, author, read_time, research_details"
+      "slug, title, description, content, created_at, image_url, category, tags, author, read_time, research_details"
     )
     .eq("slug", id)
     .eq("status", "published") // Adjust status as needed
@@ -83,6 +84,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
     created_at: data.created_at,
     image_url: data.image_url,
     category: data.category,
+    tags: data.tags,
     author: data.author,
     author_image: getAuthorImage(data.author),
     read_time: data.read_time,
