@@ -116,16 +116,3 @@ export async function getAllPostIds() {
     id: post.slug,
   }));
 }
-
-export async function incrementPostViews(slug: string) {
-  const supabase = initSupabase();
-  const { data, error } = await supabase.rpc("increment_post_views_by_slug", {
-    post_slug: slug,
-  });
-
-  if (error) {
-    console.error("Error incrementing views:", error);
-  } else {
-    console.log("Views incremented successfully!");
-  }
-}
