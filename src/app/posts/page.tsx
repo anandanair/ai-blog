@@ -2,7 +2,7 @@ import { getSortedPostsData } from "@/lib/posts";
 import Link from "next/link";
 import Image from "next/image";
 
-export default async function BlogPage() {
+export default async function PostsPage() {
   const posts = await getSortedPostsData();
 
   // Filter out AI Tool posts if needed
@@ -68,7 +68,7 @@ export default async function BlogPage() {
                   </div>
 
                   <Link
-                    href={`/blog/${featuredPost.id}`}
+                    href={`/posts/${featuredPost.id}`}
                     className="block group"
                   >
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 group-hover:text-purple-300 transition-colors duration-200">
@@ -103,7 +103,7 @@ export default async function BlogPage() {
 
                     <div className="ml-auto">
                       <Link
-                        href={`/blog/${featuredPost.id}`}
+                        href={`/posts/${featuredPost.id}`}
                         className="text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-full px-5 py-2 inline-flex items-center transition-colors duration-200"
                       >
                         Read Article
@@ -174,7 +174,7 @@ export default async function BlogPage() {
                       </div>
 
                       <Link
-                        href={`/blog/${post.id}`}
+                        href={`/posts/${post.id}`}
                         className="block group mb-3"
                       >
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200">
@@ -210,7 +210,7 @@ export default async function BlogPage() {
                         </div>
                         <div className="ml-auto">
                           <Link
-                            href={`/blog/${post.id}`}
+                            href={`/posts/${post.id}`}
                             className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-sm font-medium"
                           >
                             Read more

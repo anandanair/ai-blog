@@ -55,7 +55,7 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
-                  href="/blog"
+                  href="/posts"
                   className="border-transparent text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Blog
@@ -126,7 +126,7 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
-                href="/blog"
+                href="/posts"
                 className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
               >
                 Blog

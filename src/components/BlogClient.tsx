@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BlogClientProps } from "@/types";
 import { formatDate } from "@/utils/helpers";
+import { motion } from "framer-motion";
 
 export default function BlogClient({ posts }: BlogClientProps) {
   // Filter out AI Tool posts from the main posts list
@@ -21,37 +22,166 @@ export default function BlogClient({ posts }: BlogClientProps) {
   // Rest of the posts
   const regularPosts = blogPosts.slice(7);
 
+  // Scroll container reference
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
+
+  // Handle scroll event to update progress bar
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
+      const scrollPercentage = scrollLeft / (scrollWidth - clientWidth);
+      setScrollProgress(scrollPercentage);
+
+      // Show/hide navigation arrows based on scroll position
+      setShowLeftArrow(scrollLeft > 20);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 20);
+    }
+  };
+
+  // Scroll left/right functions
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: "smooth" });
+    }
+  };
+
+  // Add scroll event listener
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll);
+      // Check if right arrow should be shown initially
+      setShowRightArrow(
+        scrollContainer.scrollWidth > scrollContainer.clientWidth
+      );
+      return () => scrollContainer.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {blogPosts.length > 0 ? (
           <>
-            {/* Latest Posts Section - Modern Design */}
+            {/* Latest Posts Section - Modern Design with Animations */}
             <div className="mb-12">
-              <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center">
+              <motion.h2
+                className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <span className="inline-block w-8 h-1 bg-purple-600 mr-3"></span>
                 Latest Posts
-              </h2>
+              </motion.h2>
 
-              <div className="relative overflow-hidden">
-                {/* Horizontal scrollable container */}
-                <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-                  {latestPosts.map((post) => (
-                    <article
-                      key={post.id}
-                      className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden snap-start"
+              <div className="relative">
+                {/* Navigation Arrows */}
+                {showLeftArrow && (
+                  <motion.button
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none"
+                    onClick={scrollLeft}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-purple-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <div className="relative h-40">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                  </motion.button>
+                )}
+
+                {showRightArrow && (
+                  <motion.button
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none"
+                    onClick={scrollRight}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-purple-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </motion.button>
+                )}
+
+                {/* Horizontal scrollable container */}
+                <div
+                  ref={scrollContainerRef}
+                  className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar snap-x snap-mandatory"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  onScroll={handleScroll}
+                >
+                  {latestPosts.map((post, index) => (
+                    <motion.article
+                      key={post.id}
+                      className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden snap-start"
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      whileHover={{
+                        y: -5,
+                        transition: { duration: 0.2 },
+                      }}
+                      onHoverStart={() => setHoveredPostId(post.id)}
+                      onHoverEnd={() => setHoveredPostId(null)}
+                    >
+                      <div className="relative h-40 overflow-hidden">
                         {post.image_url ? (
-                          <Image
-                            src={
-                              post.image_url || `/placeholder-${post.id}.jpg`
-                            }
-                            alt={post.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 280px, 320px"
-                          />
+                          <motion.div
+                            className="w-full h-full"
+                            animate={{
+                              scale: hoveredPostId === post.id ? 1.05 : 1,
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Image
+                              src={
+                                post.image_url || `/placeholder-${post.id}.jpg`
+                              }
+                              alt={post.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 280px, 320px"
+                            />
+                          </motion.div>
                         ) : (
                           <div className="h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
                             <span className="text-white text-4xl font-bold">
@@ -60,9 +190,12 @@ export default function BlogClient({ posts }: BlogClientProps) {
                           </div>
                         )}
                         <div className="absolute top-3 left-3">
-                          <span className="inline-block bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 text-xs font-medium px-2.5 py-1 rounded-full">
+                          <motion.span
+                            className="inline-block bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 text-xs font-medium px-2.5 py-1 rounded-full"
+                            whileHover={{ scale: 1.05 }}
+                          >
                             {post.category || "Technology"}
-                          </span>
+                          </motion.span>
                         </div>
                       </div>
 
@@ -103,18 +236,32 @@ export default function BlogClient({ posts }: BlogClientProps) {
                           </span>
                         </div>
                       </div>
-                    </article>
+                    </motion.article>
                   ))}
                 </div>
 
-                {/* Gradient fade effect on the right side */}
-                <div className="absolute top-0 right-0 bottom-0 w-16 bg-gradient-to-l from-gray-50 dark:from-gray-900 to-transparent pointer-events-none"></div>
+                {/* Modern Custom Scrollbar */}
+                <div className="mt-4 mx-auto w-full max-w-md bg-gray-200 dark:bg-gray-700 h-1 rounded-full overflow-hidden">
+                  <motion.div
+                    className="bg-purple-600 h-full rounded-full"
+                    style={{ width: `${scrollProgress * 100}%` }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${scrollProgress * 100}%` }}
+                    transition={{ duration: 0.1 }}
+                  />
+                </div>
               </div>
 
               {/* View all posts link */}
-              <div className="mt-4 text-right">
+              <motion.div
+                className="mt-4 text-right"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ x: -5 }}
+              >
                 <Link
-                  href="/blog"
+                  href="/posts"
                   className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 inline-flex items-center"
                 >
                   View all posts
@@ -133,7 +280,7 @@ export default function BlogClient({ posts }: BlogClientProps) {
                     />
                   </svg>
                 </Link>
-              </div>
+              </motion.div>
             </div>
 
             {/* Featured post */}
