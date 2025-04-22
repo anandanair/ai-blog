@@ -152,7 +152,9 @@ export default function BlogClient({ posts }: BlogClientProps) {
                   {latestPosts.map((post, index) => (
                     <motion.article
                       key={post.id}
-                      className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden snap-start"
+                      className="flex-shrink-0 w-[280px] sm:w-[320px] 
+                      bg-gradient-to-r from-indigo-200/10 via-purple-300/30 to-blue-400/20 dark:from-violet-900/30 dark:via-blue-800/10 dark:to-slate-950/50
+                      backdrop-blur-sm rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden snap-start"
                       initial={{ opacity: 0, x: 50 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
