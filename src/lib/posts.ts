@@ -26,7 +26,6 @@ export async function getSortedPostsData(): Promise<PostData[]> {
     .select(
       "slug, title, description, created_at, image_url, category, author, read_time, tags"
     )
-    .is("category", null)
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
