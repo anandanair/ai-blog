@@ -14,14 +14,19 @@ export interface ResearchDetailItem {
   data: GroundedResearchResult;
 }
 
+export interface Category {
+  id: number;
+  title: string;
+  post_count: number;
+}
+
 export interface PostData {
   id: string;
   title: string;
   description?: string | null;
   created_at: string;
   image_url?: string | null;
-  category?: string | null;
-  tool_name?: string | null;
+  category: string | null;
   content?: string;
   tags?: string[] | null;
   views: number | null;
@@ -39,5 +44,5 @@ export interface BlogClientProps {
   featuredPosts: PostData[];
   popularPosts: PostData[];
   trendingPosts: PostData[];
-  categories: string[];
+  categories: Category[];
 }
