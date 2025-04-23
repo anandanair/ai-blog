@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 
 export default function BlogClient({
   posts,
+  featuredPosts,
   popularPosts,
   trendingPosts,
   categories,
@@ -17,7 +18,7 @@ export default function BlogClient({
   const latestPosts = posts.slice(0, 6);
 
   // Hero post - the most recent post (highest priority)
-  const heroPost = posts[0];
+  const heroPost = featuredPosts[0];
 
   // Get a background color for each category
   const getCategoryColor = (category: string) => {
@@ -162,7 +163,7 @@ export default function BlogClient({
 
                 {/* Secondary Featured Posts - Right Column */}
                 <div className="lg:col-span-1 flex flex-col space-y-6">
-                  {posts.slice(1, 3).map((post, index) => (
+                  {featuredPosts.slice(1, 3).map((post, index) => (
                     <motion.article
                       key={post.id}
                       className="relative rounded-xl overflow-hidden shadow-lg h-[235px] group"

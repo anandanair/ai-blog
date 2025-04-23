@@ -273,3 +273,56 @@ export async function getTrendingPostsData(
     views: post.views,
   }));
 }
+
+export async function getFeaturedPosts(limit: number = 3): Promise<PostData[]> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+    )
+    .eq("status", "published")
+    .not("views", "is", null);
+
+  if (error || !data) {
+    console.error("Error fetching featured posts:", error);
+    return [];
+  }
+
+  const postsWithScore = data.map((post) => {
+    const createdDate = new Date(post.created_at);
+    const now = new Date();
+    const daysSinceCreation = Math.max(
+      1,
+      Math.floor(
+        (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    const featuredScore = post.views - daysSinceCreation * 5;
+
+    return {
+      ...post,
+      featuredScore,
+    };
+  });
+
+  const featuredPosts = postsWithScore
+    .sort((a, b) => b.featuredScore - a.featuredScore)
+    .slice(0, limit);
+
+  return featuredPosts.map((post) => ({
+    id: post.slug,
+    title: post.title,
+    description: post.description,
+    created_at: post.created_at,
+    image_url: post.image_url,
+    category: post.category,
+    author: post.author,
+    author_image: getAuthorImage(post.author),
+    read_time: post.read_time,
+    tags: post.tags,
+    views: post.views,
+  }));
+}
