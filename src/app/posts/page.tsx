@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default async function PostsPage({ searchParams }: PostsPageProps) {
   const categoryParam = (await searchParams).category;
-  const posts = await getSortedPostsData(categoryParam);
+  const posts = await getSortedPostsData(categoryParam as number | undefined);
 
   // Create a title that includes the category if one is selected
   const pageTitle = categoryParam
