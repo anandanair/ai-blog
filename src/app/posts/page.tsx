@@ -17,11 +17,6 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   const categoryParam = (await searchParams).category;
   const posts = await getSortedPostsData(categoryParam as number | undefined);
 
-  // Create a title that includes the category if one is selected
-  const pageTitle = categoryParam
-    ? `${categoryParam} Articles`
-    : "All Articles";
-
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -35,7 +30,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {posts.slice(0, 6).map((post) => (
+                {posts.map((post) => (
                   <article
                     key={post.id}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col h-full"
