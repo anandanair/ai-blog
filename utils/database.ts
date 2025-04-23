@@ -27,7 +27,6 @@ export async function savePostToDatabase(
     content: string;
     category: number;
     image_url: string | null;
-    tool_name: string | null;
     read_time: number;
     tags: string[];
     research_details: Array<{ point: string; data: any }> | null;
@@ -44,7 +43,6 @@ export async function savePostToDatabase(
           content: postData.content,
           category: postData.category,
           image_url: postData.image_url,
-          tool_name: postData.tool_name,
           author: "Gemini",
           read_time: postData.read_time,
           tags: postData.tags,
