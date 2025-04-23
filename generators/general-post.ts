@@ -6,7 +6,11 @@ import {
   generateSlug,
   formatResearchForStorage,
 } from "../utils/helpers";
-import { getExistingPostTitles, savePostToDatabase } from "../utils/database";
+import {
+  getCategoryPostCounts,
+  getExistingPostTitles,
+  savePostToDatabase,
+} from "../utils/database";
 import { getCurrentTechContext } from "../utils/topic-selection";
 import {
   GroundedResearchResult,
@@ -83,6 +87,27 @@ ${techContext}
           .join("\n")}\n`
       : "";
 
+  // 1.4 Get category post counts
+  console.log("1.4 - Fetching category post counts...");
+  let categoryCountsText = "Could not fetch category counts."; // Default text
+  try {
+    const categoryCounts = await getCategoryPostCounts(supabase);
+    if (categoryCounts.length > 0) {
+      // Sort by count, ascending
+      categoryCounts.sort((a, b) => a.count - b.count);
+      categoryCountsText =
+        "Current post counts per category (lower count suggests potential areas for new content):\n" +
+        categoryCounts
+          .map((cat) => `- ${cat.title}: ${cat.count} posts`)
+          .join("\n");
+    } else {
+      categoryCountsText = "No category data available.";
+    }
+  } catch (error) {
+    console.error("❌ Error fetching category counts for prompt:", error);
+    // Keep the default categoryCountsText
+  }
+
   // STAGE 2: Topic Ideation & Selection
   console.log("Stage 2: Topic Ideation & Selection");
   const topicSelectionPrompt = `
@@ -93,12 +118,16 @@ ${techContext}
 
     ${existingTopicsContext}
 
+    Here is the current distribution of posts across categories. Consider choosing topics that might fit into less covered categories, but **only if relevant** to the current tech context:
+    ${categoryCountsText}
+
     SELECTION CRITERIA:
-    1. Choose a specific tech-related topic that is relevant today based on the provided context.
+    1. Choose a specific tech-related topic that is relevant today based on the provided **tech context**.
     2. IMPORTANT: Choose a topic that is distinct and NOT substantially similar to any of the existing post titles listed above.
     3. Be specific - don't just say "Cloud Computing" but rather something like "Cost Optimization Strategies for Multi-Cloud Environments" or "Comparing Serverless Providers for Real-time Data Processing".
     4. Choose topics that would provide value to tech professionals, developers, or serious tech enthusiasts.
     5. Prioritize topics with practical applications, how-tos, comparisons, or deep dives rather than just surface-level news summaries.
+    6. **Relevance to the tech context is the most important factor.** Use the category counts as a suggestion, not a strict rule. Do not force a topic into an underrepresented category if it doesn't fit the current trends.
 
     Your response MUST contain ONLY the following fields, formatted exactly like this:
 
@@ -203,6 +232,7 @@ ${techContext}
     console.log("Stage 8: Generating metadata...");
     const blogMetadata = await generateMetadata(
       genAI,
+      supabase,
       polishedDraft || "",
       selectedTopic
     );
@@ -234,7 +264,7 @@ ${techContext}
       slug: generateSlug(blogMetadata?.title || ""),
       description: blogMetadata?.metaDescription || "",
       content: validatedMarkdown,
-      category: blogMetadata?.category || null,
+      category: blogMetadata?.category || 6,
       image_url: imageUrl,
       tool_name: null,
       read_time: blogMetadata?.readTimeMinutes || 0,
