@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BlogClientProps } from "@/types";
-import { formatDate } from "@/utils/helpers";
+import { formatDate, getCategoryColor } from "@/utils/helpers";
 import { motion } from "framer-motion";
 
 export default function BlogClient({
@@ -19,28 +19,6 @@ export default function BlogClient({
 
   // Hero post - the most recent post (highest priority)
   const heroPost = featuredPosts[0];
-
-  // Get a background color for each category
-  const getCategoryColor = (category: string) => {
-    const colors = [
-      "from-purple-500 to-indigo-600",
-      "from-blue-500 to-cyan-600",
-      "from-green-500 to-emerald-600",
-      "from-yellow-500 to-amber-600",
-      "from-red-500 to-rose-600",
-      "from-pink-500 to-fuchsia-600",
-      "from-indigo-500 to-violet-600",
-      "from-cyan-500 to-blue-600",
-      "from-emerald-500 to-green-600",
-      "from-amber-500 to-yellow-600",
-    ];
-
-    // Use the category string to deterministically select a color
-    const index =
-      category.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-      colors.length;
-    return colors[index];
-  };
 
   return (
     <div className="min-h-screen">
@@ -343,7 +321,7 @@ export default function BlogClient({
                   </motion.h2>
 
                   <div className="space-y-4">
-                    {categories.map((category) => (
+                    {categories.slice(0, 5).map((category) => (
                       <motion.div
                         key={category.id}
                         className="relative overflow-hidden rounded-xl shadow-sm"
@@ -381,6 +359,37 @@ export default function BlogClient({
                         </Link>
                       </motion.div>
                     ))}
+
+                    {/* Show All Categories Button */}
+                    <motion.div
+                      className="relative overflow-hidden rounded-xl shadow-sm"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      whileHover={{ y: -5 }}
+                    >
+                      <Link href="/categories">
+                        <div className="bg-gradient-to-r from-gray-500 to-gray-600 h-16 p-4 flex items-center justify-center group">
+                          <h3 className="text-base font-medium text-white group-hover:text-white/90 transition-colors flex items-center">
+                            Show All Categories
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 ml-2"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"
+                              />
+                            </svg>
+                          </h3>
+                        </div>
+                      </Link>
+                    </motion.div>
                   </div>
 
                   {/* Trending Posts Section */}
