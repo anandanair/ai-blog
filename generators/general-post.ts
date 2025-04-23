@@ -266,7 +266,6 @@ ${techContext}
       content: validatedMarkdown,
       category: blogMetadata?.category || 6,
       image_url: imageUrl,
-      tool_name: null,
       read_time: blogMetadata?.readTimeMinutes || 0,
       tags: blogMetadata?.tags || [],
       research_details: researchDetailsForStorage,
