@@ -1,9 +1,9 @@
 import {
   getSortedPostsData,
   getPopularPostsData,
-  getUniqueCategories,
   getTrendingPostsData,
   getFeaturedPosts,
+  getAllCategoriesSortedByPostCount,
 } from "@/lib/posts"; // Import getPopularPostsData
 import BlogClient from "@/components/BlogClient";
 
@@ -12,7 +12,7 @@ export default async function Home() {
   const popularPosts = await getPopularPostsData(5);
   const trendingPosts = await getTrendingPostsData(10, 7);
   const featuredPosts = await getFeaturedPosts(3);
-  const categories = await getUniqueCategories();
+  const categories = await getAllCategoriesSortedByPostCount();
 
   return (
     <BlogClient
