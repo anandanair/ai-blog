@@ -7,7 +7,11 @@ import { BlogClientProps } from "@/types";
 import { formatDate } from "@/utils/helpers";
 import { motion } from "framer-motion";
 
-export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
+export default function BlogClient({
+  posts,
+  popularPosts,
+  categories,
+}: BlogClientProps) {
   // Latest posts section - show the 6 most recent posts
   const latestPosts = posts.slice(0, 6);
 
@@ -27,6 +31,12 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
 
+  // Category carousel references and state
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [categoryScrollProgress, setCategoryScrollProgress] = useState(0);
+  const [showCategoryLeftArrow, setShowCategoryLeftArrow] = useState(false);
+  const [showCategoryRightArrow, setShowCategoryRightArrow] = useState(true);
+
   // Handle scroll event to update progress bar
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -38,6 +48,20 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
       // Show/hide navigation arrows based on scroll position
       setShowLeftArrow(scrollLeft > 20);
       setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 20);
+    }
+  };
+
+  // Handle category carousel scroll
+  const handleCategoryScroll = () => {
+    if (categoryScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        categoryScrollRef.current;
+      const scrollPercentage = scrollLeft / (scrollWidth - clientWidth);
+      setCategoryScrollProgress(scrollPercentage);
+
+      // Show/hide navigation arrows based on scroll position
+      setShowCategoryLeftArrow(scrollLeft > 20);
+      setShowCategoryRightArrow(scrollLeft < scrollWidth - clientWidth - 20);
     }
   };
 
@@ -54,6 +78,19 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
     }
   };
 
+  // Category carousel scroll functions
+  const scrollCategoryLeft = () => {
+    if (categoryScrollRef.current) {
+      categoryScrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
+    }
+  };
+
+  const scrollCategoryRight = () => {
+    if (categoryScrollRef.current) {
+      categoryScrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+    }
+  };
+
   // Add scroll event listener
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -66,6 +103,44 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
       return () => scrollContainer.removeEventListener("scroll", handleScroll);
     }
   }, []);
+
+  // Add category scroll event listener
+  useEffect(() => {
+    const categoryContainer = categoryScrollRef.current;
+
+    if (categoryContainer) {
+      categoryContainer.addEventListener("scroll", handleCategoryScroll);
+      // Check if right arrow should be shown initially
+      setShowCategoryRightArrow(
+        categoryContainer.scrollWidth > categoryContainer.clientWidth
+      );
+
+      return () =>
+        categoryContainer.removeEventListener("scroll", handleCategoryScroll);
+    }
+  }, []);
+
+  // Get a background color for each category
+  const getCategoryColor = (category: string) => {
+    const colors = [
+      "from-purple-500 to-indigo-600",
+      "from-blue-500 to-cyan-600",
+      "from-green-500 to-emerald-600",
+      "from-yellow-500 to-amber-600",
+      "from-red-500 to-rose-600",
+      "from-pink-500 to-fuchsia-600",
+      "from-indigo-500 to-violet-600",
+      "from-cyan-500 to-blue-600",
+      "from-emerald-500 to-green-600",
+      "from-amber-500 to-yellow-600",
+    ];
+
+    // Use the category string to deterministically select a color
+    const index =
+      category.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+      colors.length;
+    return colors[index];
+  };
 
   return (
     <div className="min-h-screen">
@@ -250,6 +325,155 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
               </div>
             </div>
 
+            {/* Category Spotlights Section */}
+            {categories.length > 0 && (
+              <div className="mb-16">
+                <motion.h2
+                  className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <span className="inline-block w-8 h-1 bg-purple-600 mr-3"></span>
+                  Category Spotlights
+                </motion.h2>
+
+                {/* Category Carousel */}
+                <div className="relative">
+                  {/* Left Navigation Arrow */}
+                  {showCategoryLeftArrow && (
+                    <button
+                      onClick={scrollCategoryLeft}
+                      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                      aria-label="Scroll left"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-gray-600 dark:text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                  )}
+
+                  {/* Scrollable Container */}
+                  <div
+                    ref={categoryScrollRef}
+                    className="flex overflow-x-auto scrollbar-hide space-x-4 py-4 px-1"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {categories.map((category, index) => {
+                      const categoryPosts = posts.filter(
+                        (post) => post.category === category
+                      );
+                      const postCount = categoryPosts.length;
+                      const bgGradient = getCategoryColor(category);
+
+                      return (
+                        <motion.div
+                          key={`category-${index}`}
+                          className="flex-shrink-0 w-64 h-40 rounded-xl overflow-hidden shadow-lg group relative"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          whileHover={{ y: -5, scale: 1.02 }}
+                        >
+                          <Link
+                            href={`/posts?category=${encodeURIComponent(
+                              category
+                            )}`}
+                          >
+                            <div
+                              className={`absolute inset-0 bg-gradient-to-br ${bgGradient}`}
+                            >
+                              {categoryPosts[0]?.image_url ? (
+                                <div className="absolute inset-0 opacity-30">
+                                  <Image
+                                    src={categoryPosts[0].image_url}
+                                    alt={category}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="absolute inset-0 flex flex-col justify-between p-6 text-white">
+                              <div>
+                                <h3 className="text-xl font-bold mb-1 group-hover:underline">
+                                  {category}
+                                </h3>
+                                <p className="text-sm opacity-90">
+                                  {postCount} article
+                                  {postCount !== 1 ? "s" : ""}
+                                </p>
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <span>Explore</span>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Navigation Arrow */}
+                  {showCategoryRightArrow && (
+                    <button
+                      onClick={scrollCategoryRight}
+                      className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                      aria-label="Scroll right"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-gray-600 dark:text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  )}
+
+                  {/* Scroll Progress Indicator */}
+                  <div className="mt-4 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-purple-600 rounded-full"
+                      style={{ width: `${categoryScrollProgress * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Latest Posts Section - Modern Design with Animations */}
             <div className="mb-12">
               <motion.h2
@@ -386,7 +610,7 @@ export default function BlogClient({ posts, popularPosts }: BlogClientProps) {
                           href={`/posts/${post.id}`}
                           className="block group mb-2"
                         >
-                          <h3 className="text-base font-bold text-gray-900 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200 line-clamp-2">
+                          <h3 className="text-base font-bold group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200 line-clamp-2">
                             {post.title}
                           </h3>
                         </Link>
