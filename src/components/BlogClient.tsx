@@ -345,21 +345,21 @@ export default function BlogClient({
                   <div className="space-y-4">
                     {categories.map((category) => (
                       <motion.div
-                        key={category}
+                        key={category.id}
                         className="relative overflow-hidden rounded-xl shadow-sm"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         whileHover={{ y: -5 }}
                       >
-                        <Link href={`/posts?category=${category}`}>
+                        <Link href={`/posts?category=${category.id}`}>
                           <div
                             className={`bg-gradient-to-r ${getCategoryColor(
-                              category
+                              category.title
                             )} h-24 p-6 flex items-center justify-between group`}
                           >
                             <h3 className="text-xl font-bold text-white group-hover:text-white/90 transition-colors">
-                              {category}
+                              {category.title}
                             </h3>
                             <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-colors">
                               <svg
