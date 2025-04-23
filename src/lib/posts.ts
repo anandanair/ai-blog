@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { PostData } from "@/types";
+import { Category, PostData } from "@/types";
 import { initSupabase } from "../../utils/database";
 
 // Helper function to get author image based on model name
@@ -19,14 +19,14 @@ function getAuthorImage(authorName: string | null): string {
 }
 
 export async function getSortedPostsData(
-  category?: string
+  category?: number
 ): Promise<PostData[]> {
   const supabase = await createSupabaseServerClient();
 
   let query = supabase
     .from("posts")
     .select(
-      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+      "slug, title, description, created_at, image_url, author, read_time, tags, views, post_categories!fk_category(title)"
     )
     .eq("status", "published")
     .order("created_at", { ascending: false });
@@ -46,19 +46,22 @@ export async function getSortedPostsData(
     return [];
   }
 
-  return data.map((post) => ({
-    id: post.slug,
-    title: post.title,
-    description: post.description,
-    created_at: post.created_at,
-    image_url: post.image_url,
-    category: post.category,
-    author: post.author,
-    author_image: getAuthorImage(post.author), // Add author image based on author name
-    read_time: post.read_time,
-    tags: post.tags,
-    views: post.views,
-  }));
+  return data.map((post) => {
+    const category = post.post_categories as unknown as { title: string };
+    return {
+      id: post.slug,
+      title: post.title,
+      description: post.description,
+      created_at: post.created_at,
+      image_url: post.image_url,
+      category: category.title,
+      author: post.author,
+      author_image: getAuthorImage(post.author), // Add author image based on author name
+      read_time: post.read_time,
+      tags: post.tags,
+      views: post.views,
+    };
+  });
 }
 
 export async function getPostData(id: string): Promise<PostData | null> {
@@ -68,7 +71,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, content, created_at, image_url, category, tags, author, read_time, research_details, views"
+      "slug, title, description, content, created_at, image_url, post_categories!fk_category(title), tags, author, read_time, research_details, views"
     )
     .eq("slug", id)
     .eq("status", "published") // Adjust status as needed
@@ -83,6 +86,8 @@ export async function getPostData(id: string): Promise<PostData | null> {
     return null;
   }
 
+  const category = data.post_categories as unknown as { title: string };
+
   // Return the combined data
   return {
     id: data.slug,
@@ -91,7 +96,7 @@ export async function getPostData(id: string): Promise<PostData | null> {
     description: data.description,
     created_at: data.created_at,
     image_url: data.image_url,
-    category: data.category,
+    category: category.title,
     tags: data.tags,
     author: data.author,
     author_image: getAuthorImage(data.author),
@@ -134,7 +139,7 @@ export async function getPopularPostsData(
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+      "slug, title, description, created_at, image_url, post_categories!fk_category(title), author, read_time, tags, views"
     )
     .eq("status", "published")
     .not("views", "is", null) // Ensure posts have views
@@ -150,49 +155,22 @@ export async function getPopularPostsData(
     return [];
   }
 
-  return data.map((post) => ({
-    id: post.slug,
-    title: post.title,
-    description: post.description,
-    created_at: post.created_at,
-    image_url: post.image_url,
-    category: post.category,
-    author: post.author,
-    author_image: getAuthorImage(post.author),
-    read_time: post.read_time,
-    tags: post.tags,
-    views: post.views,
-  }));
-}
-
-export async function getUniqueCategories(): Promise<string[]> {
-  const supabase = await createSupabaseServerClient();
-  // Fetch only the 'category' column for published posts
-  const { data, error } = await supabase
-    .from("posts")
-    .select("category")
-    .eq("status", "published");
-
-  if (error) {
-    console.error("Error fetching categories:", error);
-    return [];
-  }
-
-  if (!data) {
-    return [];
-  }
-
-  // 1. Extract the category strings from the data array.
-  // 2. Filter out any null or undefined category values.
-  const categories = data
-    .map((item) => item.category)
-    .filter(Boolean) as string[];
-
-  // 3. Use a Set to automatically handle uniqueness.
-  // 4. Convert the Set back into an Array.
-  const uniqueCategories = Array.from(new Set(categories));
-
-  return uniqueCategories;
+  return data.map((post) => {
+    const category = post.post_categories as unknown as { title: string };
+    return {
+      id: post.slug,
+      title: post.title,
+      description: post.description,
+      created_at: post.created_at,
+      image_url: post.image_url,
+      category: category.title,
+      author: post.author,
+      author_image: getAuthorImage(post.author),
+      read_time: post.read_time,
+      tags: post.tags,
+      views: post.views,
+    };
+  });
 }
 
 // New function to get trending posts
@@ -211,7 +189,7 @@ export async function getTrendingPostsData(
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+      "slug, title, description, created_at, image_url, post_categories!fk_category(title), author, read_time, tags, views"
     )
     .eq("status", "published")
     .not("views", "is", null) // Ensure posts have views
@@ -259,19 +237,22 @@ export async function getTrendingPostsData(
     .slice(0, limit);
 
   // Map to the expected PostData format
-  return trendingPosts.map((post) => ({
-    id: post.slug,
-    title: post.title,
-    description: post.description,
-    created_at: post.created_at,
-    image_url: post.image_url,
-    category: post.category,
-    author: post.author,
-    author_image: getAuthorImage(post.author),
-    read_time: post.read_time,
-    tags: post.tags,
-    views: post.views,
-  }));
+  return trendingPosts.map((post) => {
+    const category = post.post_categories as unknown as { title: string };
+    return {
+      id: post.slug,
+      title: post.title,
+      description: post.description,
+      created_at: post.created_at,
+      image_url: post.image_url,
+      category: category.title,
+      author: post.author,
+      author_image: getAuthorImage(post.author),
+      read_time: post.read_time,
+      tags: post.tags,
+      views: post.views,
+    };
+  });
 }
 
 export async function getFeaturedPosts(limit: number = 3): Promise<PostData[]> {
@@ -280,7 +261,7 @@ export async function getFeaturedPosts(limit: number = 3): Promise<PostData[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+      "slug, title, description, created_at, image_url, post_categories!fk_category(title), author, read_time, tags, views"
     )
     .eq("status", "published")
     .not("views", "is", null);
@@ -312,17 +293,53 @@ export async function getFeaturedPosts(limit: number = 3): Promise<PostData[]> {
     .sort((a, b) => b.featuredScore - a.featuredScore)
     .slice(0, limit);
 
-  return featuredPosts.map((post) => ({
-    id: post.slug,
-    title: post.title,
-    description: post.description,
-    created_at: post.created_at,
-    image_url: post.image_url,
-    category: post.category,
-    author: post.author,
-    author_image: getAuthorImage(post.author),
-    read_time: post.read_time,
-    tags: post.tags,
-    views: post.views,
-  }));
+  return featuredPosts.map((post) => {
+    const category = post.post_categories as unknown as { title: string };
+    return {
+      id: post.slug,
+      title: post.title,
+      description: post.description,
+      created_at: post.created_at,
+      image_url: post.image_url,
+      category: category.title,
+      author: post.author,
+      author_image: getAuthorImage(post.author),
+      read_time: post.read_time,
+      tags: post.tags,
+      views: post.views,
+    };
+  });
+}
+
+export async function getAllCategoriesSortedByPostCount(): Promise<
+  { id: number; title: string; post_count: number }[]
+> {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    // Call the database function created in Supabase
+    const { data, error } = await supabase.rpc(
+      "get_categories_sorted_by_post_count"
+    );
+
+    if (error) {
+      console.error("Error fetching categories sorted by post count:", error);
+      return []; // Return empty array on error
+    }
+
+    if (!data) {
+      return []; // Return empty array if no data
+    }
+
+    // The RPC function returns data in the format: { id: number, title: string, post_count: bigint }
+    // Convert any bigint values to number if needed
+    return data.map((category: any) => ({
+      id: Number(category.id),
+      title: category.title,
+      post_count: Number(category.post_count),
+    }));
+  } catch (error) {
+    console.error("Unexpected error fetching categories:", error);
+    return [];
+  }
 }
