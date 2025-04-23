@@ -1,133 +1,32 @@
 import { getSortedPostsData } from "@/lib/posts";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 
-export default async function PostsPage() {
-  const posts = await getSortedPostsData();
+// Define the page props type to include searchParams
+type PostsPageProps = {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+};
 
-  // Filter out AI Tool posts if needed
-  const blogPosts = posts.filter(
-    (post) => post.category !== "AI Tool of the Day"
-  );
+export const metadata: Metadata = {
+  title: "Blog Posts | AutoTek",
+  description: "Explore our collection of articles on AI and technology",
+};
 
-  // Featured post is the most recent one
-  const featuredPost = blogPosts[0];
-  // Rest of the posts
-  const regularPosts = blogPosts.slice(1);
+export default async function PostsPage({ searchParams }: PostsPageProps) {
+  const categoryParam = (await searchParams).category;
+  const posts = await getSortedPostsData(categoryParam);
+
+  // Create a title that includes the category if one is selected
+  const pageTitle = categoryParam
+    ? `${categoryParam} Articles`
+    : "All Articles";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {blogPosts.length > 0 ? (
+        {posts.length > 0 ? (
           <>
-            {/* Featured post */}
-            <div className="mb-16">
-              <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center">
-                <span className="inline-block w-8 h-1 bg-purple-600 mr-3"></span>
-                Featured Article
-              </h2>
-
-              <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-                <div className="relative h-96">
-                  {featuredPost.image_url ? (
-                    <Image
-                      src={
-                        featuredPost.image_url || "/placeholder-featured.jpg"
-                      }
-                      alt={featuredPost.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1280px) 100vw, 1280px"
-                    />
-                  ) : (
-                    <div className="h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                      <span className="text-white text-8xl font-bold">
-                        {featuredPost.title.substring(0, 1)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                </div>
-
-                <div className="relative mt-[-100px] p-8 text-white z-10">
-                  <div className="mb-4">
-                    <span className="inline-block bg-purple-600 text-white text-xs font-medium px-3 py-1 rounded-full">
-                      {featuredPost.category || "Technology"}
-                    </span>
-                    <span className="mx-2 text-gray-300 text-sm">•</span>
-                    <span className="text-gray-300 text-sm">
-                      {new Date(featuredPost.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
-                    </span>
-                  </div>
-
-                  <Link
-                    href={`/posts/${featuredPost.id}`}
-                    className="block group"
-                  >
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 group-hover:text-purple-300 transition-colors duration-200">
-                      {featuredPost.title}
-                    </h2>
-                  </Link>
-
-                  <p className="text-gray-200 mb-6 line-clamp-3">
-                    {featuredPost.description}
-                  </p>
-
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-4">
-                      <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden">
-                        <Image
-                          src={
-                            featuredPost.author_image ||
-                            "/placeholder-author.jpg"
-                          }
-                          alt={featuredPost.author || "Author"}
-                          width={40}
-                          height={40}
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {featuredPost.author || "AI Model"}
-                      </p>
-                    </div>
-
-                    <div className="ml-auto">
-                      <Link
-                        href={`/posts/${featuredPost.id}`}
-                        className="text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-full px-5 py-2 inline-flex items-center transition-colors duration-200"
-                      >
-                        Read Article
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 ml-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14 5l7 7m0 0l-7 7m7-7H3"
-                          />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-
             {/* Latest posts section */}
             <div className="mb-16">
               <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center">
@@ -136,7 +35,7 @@ export default async function PostsPage() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {regularPosts.slice(0, 6).map((post) => (
+                {posts.slice(0, 6).map((post) => (
                   <article
                     key={post.id}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col h-full"
