@@ -18,16 +18,24 @@ function getAuthorImage(authorName: string | null): string {
   return authorImages[authorName] || "/images/authors/default.png";
 }
 
-export async function getSortedPostsData(): Promise<PostData[]> {
+export async function getSortedPostsData(
+  category?: string
+): Promise<PostData[]> {
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("posts")
     .select(
       "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
     )
     .eq("status", "published")
     .order("created_at", { ascending: false });
+
+  if (category) {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error fetching sorted posts:", error);
@@ -155,4 +163,34 @@ export async function getPopularPostsData(
     tags: post.tags,
     views: post.views,
   }));
+}
+
+export async function getUniqueCategories(): Promise<string[]> {
+  const supabase = await createSupabaseServerClient();
+  // Fetch only the 'category' column for published posts
+  const { data, error } = await supabase
+    .from("posts")
+    .select("category")
+    .eq("status", "published");
+
+  if (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // 1. Extract the category strings from the data array.
+  // 2. Filter out any null or undefined category values.
+  const categories = data
+    .map((item) => item.category)
+    .filter(Boolean) as string[];
+
+  // 3. Use a Set to automatically handle uniqueness.
+  // 4. Convert the Set back into an Array.
+  const uniqueCategories = Array.from(new Set(categories));
+
+  return uniqueCategories;
 }
