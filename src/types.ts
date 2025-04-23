@@ -37,5 +37,6 @@ export interface PostData {
 export interface BlogClientProps {
   posts: PostData[];
   popularPosts: PostData[];
+  trendingPosts: PostData[];
   categories: string[];
 }

@@ -194,3 +194,82 @@ export async function getUniqueCategories(): Promise<string[]> {
 
   return uniqueCategories;
 }
+
+// New function to get trending posts
+export async function getTrendingPostsData(
+  limit: number = 10,
+  timeWindowDays: number = 7
+): Promise<PostData[]> {
+  const supabase = await createSupabaseServerClient();
+
+  // Calculate the date for the time window (e.g., last 7 days)
+  const timeWindow = new Date();
+  timeWindow.setDate(timeWindow.getDate() - timeWindowDays);
+  const timeWindowStr = timeWindow.toISOString();
+
+  // First, get posts created within the time window
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "slug, title, description, created_at, image_url, category, author, read_time, tags, views"
+    )
+    .eq("status", "published")
+    .not("views", "is", null) // Ensure posts have views
+    .gte("created_at", timeWindowStr) // Only posts within the time window
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching trending posts:", error);
+    return [];
+  }
+
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Calculate trending score for each post
+  const postsWithScore = data.map((post) => {
+    // Calculate days since post creation
+    const createdDate = new Date(post.created_at);
+    const now = new Date();
+    const daysSinceCreation = Math.max(
+      1,
+      Math.floor(
+        (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    // Freshness factor - newer posts get higher weight
+    const freshnessFactor = Math.exp(-0.1 * daysSinceCreation); // Exponential decay
+
+    // Calculate trending score
+    // Views per day × freshness factor
+    const viewsPerDay = post.views / daysSinceCreation;
+    const trendingScore = viewsPerDay * freshnessFactor;
+
+    return {
+      ...post,
+      trendingScore,
+    };
+  });
+
+  // Sort by trending score and limit results
+  const trendingPosts = postsWithScore
+    .sort((a, b) => b.trendingScore - a.trendingScore)
+    .slice(0, limit);
+
+  // Map to the expected PostData format
+  return trendingPosts.map((post) => ({
+    id: post.slug,
+    title: post.title,
+    description: post.description,
+    created_at: post.created_at,
+    image_url: post.image_url,
+    category: post.category,
+    author: post.author,
+    author_image: getAuthorImage(post.author),
+    read_time: post.read_time,
+    tags: post.tags,
+    views: post.views,
+  }));
+}

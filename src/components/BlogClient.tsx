@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 export default function BlogClient({
   posts,
   popularPosts,
+  trendingPosts,
   categories,
 }: BlogClientProps) {
   // Latest posts section - show the 6 most recent posts
@@ -310,7 +311,7 @@ export default function BlogClient({
                                 {post.author || "AI Model"}
                               </p>
                               <p className="text-gray-500 dark:text-gray-400">
-                                {post.read_time || "5 min read"}
+                                {post.read_time + " min read" || "5 min read"}
                               </p>
                             </div>
                             <div className="ml-auto">
@@ -381,6 +382,75 @@ export default function BlogClient({
                     ))}
                   </div>
 
+                  {/* Trending Posts Section */}
+                  <div className="mt-8">
+                    {trendingPosts && trendingPosts.length > 0 && (
+                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                        <div className="p-6">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 mr-2 text-red-500"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Trending Now
+                          </h3>
+                          <div className="space-y-4">
+                            {trendingPosts.slice(0, 5).map((post, index) => (
+                              <div
+                                key={post.id}
+                                className={`flex items-start ${
+                                  index !== trendingPosts.length - 1
+                                    ? "pb-4 border-b border-gray-100 dark:border-gray-700"
+                                    : ""
+                                }`}
+                              >
+                                <div className="flex-shrink-0 mr-4">
+                                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
+                                    {post.image_url ? (
+                                      <Image
+                                        src={post.image_url}
+                                        alt={post.title}
+                                        fill
+                                        className="object-cover"
+                                        sizes="64px"
+                                      />
+                                    ) : (
+                                      <div className="h-full w-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                                        <span className="text-white text-xl font-bold">
+                                          {index + 1}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div>
+                                  <Link
+                                    href={`/posts/${post.id}`}
+                                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 line-clamp-2 transition-colors duration-200"
+                                  >
+                                    {post.title}
+                                  </Link>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {formatDate(post.created_at)} •{" "}
+                                    {post.views || 0} views
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Popular Posts Section */}
                   <div className="mt-8">
                     <motion.h2
@@ -394,7 +464,7 @@ export default function BlogClient({
                     </motion.h2>
 
                     <div className="space-y-4">
-                      {popularPosts.slice(0, 4).map((post, index) => (
+                      {popularPosts.map((post, index) => (
                         <motion.div
                           key={post.id}
                           className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
