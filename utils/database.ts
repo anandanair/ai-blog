@@ -167,3 +167,44 @@ export async function getCategoryPostCounts(
     return []; // Return empty array on failure
   }
 }
+
+// Fetch all published posts for the RSS feed
+export async function getAllPostsForRss(supabase: SupabaseClient): Promise<
+  {
+    id: string; // Assuming id is UUID string, adjust if it's number
+    title: string;
+    slug: string;
+    description: string;
+    created_at: string; // Or Date, depending on how Supabase returns it
+    author: string | null;
+    image_url: string | null;
+  }[]
+> {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("id, title, slug, description, created_at, author, image_url")
+      .eq("status", "published") // Only fetch published posts
+      .order("created_at", { ascending: false }); // Latest posts first
+
+    if (error) {
+      console.error("❌ Error fetching posts for RSS:", error);
+      throw error;
+    }
+
+    // Ensure data is not null and map if necessary (e.g., type casting)
+    // Assuming Supabase returns types compatible with the return type promise
+    return (data || []) as {
+      id: string;
+      title: string;
+      slug: string;
+      description: string;
+      created_at: string;
+      author: string | null;
+      image_url: string | null;
+    }[];
+  } catch (error) {
+    console.error("Error in getAllPostsForRss:", error);
+    return []; // Return an empty array on failure
+  }
+}
