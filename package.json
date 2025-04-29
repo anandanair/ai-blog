@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build  && npx tsx ./scripts/generate-rss.ts",
     "start": "next start",
     "lint": "next lint"
   },
@@ -39,7 +39,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/rss": "^0.0.32",
+    "rss": "^1.2.2",
     "tailwindcss": "^4",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }
