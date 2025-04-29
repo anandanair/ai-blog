@@ -4,7 +4,8 @@ on:
   schedule:
     # - cron: "*/10 * * * *" # every 10 minutes
     # - cron: "0 1 * * *" # 1 AM UTC daily
-    - cron: "0 22 * * *"
+    - cron: "0 22 * * *" # 6 AM UTC daily
+    - cron: "0 10 * * *" # 6 PM UTC daily
   workflow_dispatch: # lets you run manually from GitHub Actions tab
 
 jobs:
