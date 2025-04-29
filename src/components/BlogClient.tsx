@@ -193,7 +193,7 @@ export default function BlogClient({
                           </span>
                           <span className="mx-2 text-gray-400">•</span>
                           <span className="text-gray-300">
-                            {post.read_time || "3"} min
+                            {post.read_time || "3"} min read
                           </span>
                         </div>
                       </div>
@@ -290,7 +290,7 @@ export default function BlogClient({
                                 {post.author || "AI Model"}
                               </p>
                               <p className="text-gray-500 dark:text-gray-400">
-                                {post.read_time + " min read" || "5 min read"}
+                                {post.read_time || "5"} min read
                               </p>
                             </div>
                             <div className="ml-auto">

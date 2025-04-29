@@ -99,7 +99,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
                             {post.author || "AI Model"}
                           </p>
                           <p className="text-gray-500 dark:text-gray-400">
-                            {post.read_time || "5 min read"}
+                            {post.read_time || "5"} min read
                           </p>
                         </div>
                         <div className="ml-auto">
