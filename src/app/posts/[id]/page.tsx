@@ -1,26 +1,73 @@
 import { getPostData, getAllPostIds } from "@/lib/posts";
 import PostClient from "@/components/PostClient";
-import { Metadata } from "next";
+import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 type Params = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: Params,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const { id } = await params;
   const postData = await getPostData(id).catch(() => null);
+
+  const siteUrl = "https://blog.itsmeanand.com/";
 
   if (!postData) {
     return {
       title: "Post Not Found",
-      description: "The requested post could not be found",
+      description: "The requested AutoTek post could not be found.",
+      alternates: {
+        canonical: `${siteUrl}/posts`,
+      },
     };
   }
 
+  const postUrl = `${siteUrl}/posts/${postData.id}`;
+  const imageUrl = postData.image_url
+    ? postData.image_url.startsWith("http")
+      ? postData.image_url
+      : `${siteUrl}${postData.image_url}`
+    : `${siteUrl}/og-default.png`;
+
+  const metaDescription =
+    postData.description ||
+    `Read the full post "${postData.title}" on AutoTek. Discover insights on autonomous technology.`;
+
   return {
     title: postData.title,
-    description: postData.description || "",
+    description: metaDescription,
+    alternates: {
+      canonical: postUrl,
+    },
+    openGraph: {
+      title: `${postData.title} | AutoTek`,
+      description: metaDescription,
+      url: postUrl,
+      siteName: "AutoTek",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: postData.title,
+        },
+      ],
+      locale: "en_US",
+      type: "article",
+      publishedTime: postData.created_at,
+      modifiedTime: postData.created_at,
+      authors: [postData.author || "AutoTek Team"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${postData.title} | AutoTek`,
+      description: metaDescription,
+      images: [imageUrl], // Must be an absolute URL
+    },
   };
 }
 
@@ -33,6 +80,12 @@ export async function generateStaticParams() {
     return [];
   }
 }
+
+// 2. Enable Incremental Static Regeneration (ISR)
+// Revalidate the page data periodically (e.g., every hour)
+// Good balance for daily posts: allows updates without full rebuilds.
+// export const revalidate = 3600; // Revalidate every 60 minutes (in seconds)
+export const revalidate = 86400; // Or revalidate daily (24 * 60 * 60 seconds)
 
 export default async function Post({ params }: Params) {
   try {
