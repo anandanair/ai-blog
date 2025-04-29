@@ -1,4 +1,7 @@
-import { getSortedPostsData } from "@/lib/posts";
+import {
+  getAllCategoriesSortedByPostCount,
+  getSortedPostsData,
+} from "@/lib/posts";
 import { Metadata } from "next";
 import PostsClient from "@/components/PostsClient";
 
@@ -16,7 +19,9 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   // Server-side data fetching
   const categoryParam = (await searchParams).category;
   const posts = await getSortedPostsData(categoryParam as number | undefined);
+  const categories = await getAllCategoriesSortedByPostCount();
+  const tags = [{ id: "ai-0", name: "AI" }]; // Replace with actual tags fetching functio
 
   // Pass data to client component
-  return <PostsClient posts={posts} />;
+  return <PostsClient posts={posts} categories={categories} tags={tags} />;
 }
