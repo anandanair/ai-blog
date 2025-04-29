@@ -113,7 +113,8 @@ export async function getAllPostIds() {
   const { data, error } = await supabase
     .from("posts")
     .select("slug")
-    .eq("status", "published"); // Adjust status as needed
+    .eq("status", "published")
+    .limit(500);
 
   if (error) {
     console.error("Error fetching post IDs:", error);
