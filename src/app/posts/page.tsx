@@ -7,7 +7,7 @@ import PostsClient from "@/components/PostsClient";
 
 // Define the page props type to include searchParams
 type PostsPageProps = {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export const metadata: Metadata = {
@@ -17,10 +17,37 @@ export const metadata: Metadata = {
 
 export default async function PostsPage({ searchParams }: PostsPageProps) {
   // Server-side data fetching
-  const categoryParam = (await searchParams).category;
-  const posts = await getSortedPostsData(categoryParam as number | undefined);
+  const params = await searchParams;
+
+  // Extract all search parameters
+  const categoryParam = params.category ? Number(params.category) : undefined;
+  const queryParam = params.query as string | undefined;
+
+  // Handle tags - could be a string or array of strings
+  let tagsParam: string[] | undefined;
+  if (params.tags) {
+    tagsParam = Array.isArray(params.tags)
+      ? params.tags
+      : [params.tags as string];
+  }
+
+  // Handle read time
+  const readTimeParam = params.readTime ? Number(params.readTime) : undefined;
+
+  // Handle popularity
+  const popularityParam = params.popularity as string | undefined;
+
+  // Call getSortedPostsData with all parameters
+  const posts = await getSortedPostsData({
+    category: categoryParam,
+    query: queryParam,
+    tags: tagsParam,
+    readTime: readTimeParam,
+    popularity: popularityParam,
+  });
+
   const categories = await getAllCategoriesSortedByPostCount();
-  const tags = [{ id: "ai-0", name: "AI" }]; // Replace with actual tags fetching functio
+  const tags = [{ id: "ai-0", name: "AI" }]; // Replace with actual tags fetching function
 
   // Pass data to client component
   return <PostsClient posts={posts} categories={categories} tags={tags} />;

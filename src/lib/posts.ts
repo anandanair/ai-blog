@@ -18,9 +18,13 @@ function getAuthorImage(authorName: string | null): string {
   return authorImages[authorName] || "/images/authors/default.png";
 }
 
-export async function getSortedPostsData(
-  category?: number
-): Promise<PostData[]> {
+export async function getSortedPostsData(options?: {
+  category?: number;
+  query?: string;
+  tags?: string[];
+  readTime?: number;
+  popularity?: string;
+}): Promise<PostData[]> {
   const supabase = await createSupabaseServerClient();
 
   let query = supabase
@@ -31,8 +35,52 @@ export async function getSortedPostsData(
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
-  if (category) {
-    query = query.eq("category", category);
+  if (options?.category) {
+    query = query.eq("category", options.category);
+  }
+
+  // Apply text search if provided
+  if (options?.query && options.query.trim() !== "") {
+    query = query.or(
+      `title.ilike.%${options.query}%,description.ilike.%${options.query}%`
+    );
+  }
+
+  // Apply tags filter if provided
+  if (options?.tags && options.tags.length > 0) {
+    // Using containedBy for array comparison - checks if tags column contains any of the provided tags
+    query = query.contains("tags", options.tags);
+  }
+
+  // Apply read time filter if provided
+  if (options?.readTime) {
+    query = query.lte("read_time", options.readTime);
+  }
+
+  // Apply sorting based on popularity
+  if (options?.popularity) {
+    switch (options.popularity) {
+      case "trending":
+        // For trending, we might want to get posts from the last 7 days with high views
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        query = query
+          .gte("created_at", sevenDaysAgo.toISOString())
+          .order("views", { ascending: false });
+        break;
+      case "most_viewed":
+        query = query.order("views", { ascending: false });
+        break;
+      case "most_recent":
+        query = query.order("created_at", { ascending: false });
+        break;
+      default:
+        // Default sorting by creation date
+        query = query.order("created_at", { ascending: false });
+    }
+  } else {
+    // Default sorting by creation date
+    query = query.order("created_at", { ascending: false });
   }
 
   const { data, error } = await query;
