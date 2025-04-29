@@ -126,7 +126,9 @@ export default function SearchBar({
     }
 
     if (searchParams.tags.length > 0) {
-      params.set("tags", searchParams.tags.map((tag) => tag.id).join(","));
+      // Extract just the tag names from the tag objects for the API call
+      const tagNames = searchParams.tags.map(tag => tag.name);
+      params.set("tags", tagNames.join(","));
     }
 
     if (searchParams.readTime) {

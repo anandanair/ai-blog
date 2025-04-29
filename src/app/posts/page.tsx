@@ -1,6 +1,7 @@
 import {
   getAllCategoriesSortedByPostCount,
   getSortedPostsData,
+  getAllUniqueTags,
 } from "@/lib/posts";
 import { Metadata } from "next";
 import PostsClient from "@/components/PostsClient";
@@ -47,7 +48,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   });
 
   const categories = await getAllCategoriesSortedByPostCount();
-  const tags = [{ id: "ai-0", name: "AI" }]; // Replace with actual tags fetching function
+  const tags = await getAllUniqueTags(); // Fetch real tags from posts
 
   // Pass data to client component
   return <PostsClient posts={posts} categories={categories} tags={tags} />;

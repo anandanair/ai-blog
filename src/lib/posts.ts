@@ -48,8 +48,8 @@ export async function getSortedPostsData(options?: {
 
   // Apply tags filter if provided
   if (options?.tags && options.tags.length > 0) {
-    // Using containedBy for array comparison - checks if tags column contains any of the provided tags
-    query = query.contains("tags", options.tags);
+    // Using overlaps for array comparison - checks if tags column contains any of the provided tags
+    query = query.overlaps("tags", options.tags);
   }
 
   // Apply read time filter if provided
@@ -391,4 +391,56 @@ export async function getAllCategoriesSortedByPostCount(): Promise<
     console.error("Unexpected error fetching categories:", error);
     return [];
   }
+}
+
+// Function to get all unique tags from posts
+export async function getAllUniqueTags(): Promise<
+  { id: string; name: string }[]
+> {
+  const supabase = await createSupabaseServerClient();
+
+  // Fetch all tags from published posts
+  const { data, error } = await supabase
+    .from("posts")
+    .select("tags")
+    .eq("status", "published")
+    .not("tags", "is", null);
+
+  if (error) {
+    console.error("Error fetching tags:", error);
+    return [];
+  }
+
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Extract and flatten all tags from posts
+  const allTags = data.flatMap((post) => post.tags || []);
+
+  // Create a map to handle case-insensitive uniqueness
+  const tagMap = new Map<string, string>();
+
+  // For each tag, store the lowercase version as key and keep the best capitalization as value
+  allTags.forEach((tag) => {
+    if (!tag || tag.trim() === "") return;
+
+    const lowerTag = tag.toLowerCase();
+
+    // If this tag doesn't exist yet or the current one has a better capitalization, store it
+    if (
+      !tagMap.has(lowerTag) ||
+      (tag !== tag.toLowerCase() && tag !== tag.toUpperCase())
+    ) {
+      tagMap.set(lowerTag, tag);
+    }
+  });
+
+  // Convert map to array of objects
+  return Array.from(tagMap.entries())
+    .map(([lowerTag, displayTag]) => ({
+      id: `tag-${lowerTag.replace(/\s+/g, "-")}`,
+      name: displayTag,
+    }))
+    .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())); // Sort alphabetically
 }
