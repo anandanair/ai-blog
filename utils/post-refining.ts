@@ -116,27 +116,27 @@ export async function finalPolish(
   // --- Craft the Polishing Prompt ---
 
   const polishPrompt = `
-  You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown text by REMOVING any sentences or paragraphs that are NOT part of the actual blog post content intended for the reader, while carefully preserving specific reference markers.
-
-  Specifically, REMOVE text that matches these descriptions:
-  - Notes about the writing process itself (e.g., "Note: I focused on...", "As requested...", "This section covers...")
-  - Commentary on the instructions received (e.g., "Based on the outline provided...", "The research indicated...")
-  - Apologies or explanations for missing information (e.g., "I couldn't find specific data on...", "Further research would be needed for...")
-  - Self-correction remarks or alternative phrasings considered (e.g., "Alternatively, one could say...", "A better way might be...")
-  - Any other meta-commentary or text clearly not intended for the final published blog post reader.
-
+  You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown blog post by removing any **meta-commentary** that does not belong in the final published article, while preserving the intended content and reference markers.
+  
+  **REMOVE any text that fits the following types of non-content:**
+  - Comments about the writing process (e.g., "Note: I focused on...", "This draft covers...")
+  - Explanations of instructions followed (e.g., "Based on the outline provided...")
+  - Apologies or limitations (e.g., "I couldn't find exact data...", "More research might be needed...")
+  - Self-corrections or alternate phrasing (e.g., "Another way to put this is...", "Alternatively...")
+  - Any sentence or paragraph clearly not written for the final reader of the blog post
+  
   **CRITICAL INSTRUCTIONS:**
-  1.  **PRESERVE REFERENCE MARKERS:** The Input Text contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers are PART OF THE INTENDED CONTENT and MUST NOT BE REMOVED OR ALTERED. They are *not* meta-commentary.
-  2.  **DO NOT rewrite, rephrase, or change the actual blog post content** (other than removing the specific types of meta-commentary listed above).
-  3.  **Preserve all original Markdown formatting** of the remaining content, including the exact placement and formatting of the \`[ref:ID]\` markers.
-  4.  If the input text contains NO meta-commentary (only blog content and markers), return the input text exactly as is.
-
-  **Input Text (Contains [ref:ID] markers to preserve, may need meta-commentary removed):**
+  1. **Preserve all \`[ref:ID]\` markers exactly** — these are part of the final content and must not be removed, changed, or moved.
+  2. **Do NOT rephrase or rewrite any of the remaining content** — your only task is to delete unintended meta-commentary.
+  3. **Maintain all original Markdown formatting**, including headings, lists, emphasis, and code blocks.
+  4. If no meta-commentary is found, return the original input content exactly as it is.
+  
+  **Input Markdown (with [ref:ID] markers to preserve):**
   \`\`\`markdown
   ${potentiallyUnpolishedDraft}
   \`\`\`
-
-  **Output ONLY the cleaned Markdown content including the preserved [ref:ID] markers.** Do not include any explanations, introductions, or confirmations. Start directly with the first line of the cleaned content.
+  
+  **Output ONLY the cleaned Markdown content — no comments, notes, or introductions. Start directly with the first line of the cleaned blog post.**
   `;
 
   try {
