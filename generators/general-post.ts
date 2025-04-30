@@ -240,6 +240,7 @@ ${techContext}
     // STAGE 9: Markdown Validation
     console.log("Stage 9: Validating markdown...");
     const validatedMarkdown = await validateMarkdownSyntax(
+      genAI,
       polishedDraft || "",
       selectedTopic
     );
@@ -337,40 +338,98 @@ export async function generateDraft(
       "No specific research data was gathered for this topic.\n";
   }
 
+  // const generationPrompt = `
+  //   You are an expert technical writer specializing in creating engaging and informative blog posts about technology topics.
+
+  //   Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings.
+  //   A key requirement is to insert reference markers linking text back to the specific research findings used.
+
+  //   **Topic:**
+  //   ${topic}
+
+  //   **Blog Post Outline (Structure to follow):**
+  //   \`\`\`markdown
+  //   ${outlineMarkdown}
+  //   \`\`\`
+
+  //   **Research Findings (Cite using the provided ID):**
+  //   ${researchFindingsString}
+
+  //   **CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
+  //   1.  **Follow the Outline:** Strictly adhere to the structure in the Outline. Use the headings and cover the points mentioned.
+  //   2.  **Integrate Research:** Use the "Grounded Text" from the Research Findings to provide details, facts, or examples for matching "Outline Points". Weave this information naturally into your writing.
+  //   3.  **INSERT REFERENCE MARKERS:** Immediately after a sentence or phrase that relies *primarily* on information from a specific entry in the Research Findings, you MUST insert its corresponding unique ID marker in the exact format: \`[ref:ID]\`. For example, if you use data from the entry with ID \`ref-5\`, insert \`[ref:ref-5]\` right after the relevant text.
+  //       *   Be precise. Place the marker directly adjacent to the information it supports.
+  //       *   If a paragraph synthesizes info from multiple research points, you might need multiple markers.
+  //       *   If a sentence uses only general knowledge or elaborates without specific research data, DO NOT insert a marker.
+  //   4.  **Handle Missing/Error Research:** If "Grounded Text" indicates no data/error, or an outline point has no matching research, write that section using your general knowledge. DO NOT insert a marker for these parts.
+  //   5.  **Expand and Elaborate:** Create flowing paragraphs. Don't just list research; synthesize it into a coherent narrative around the outline points.
+  //   6.  **Tone:** Maintain an informative, engaging, and technically accurate tone suitable for the tech audience.
+  //   7.  **Format:** Output the entire blog post draft in **Markdown format**. Ensure proper syntax.
+  //   8.  **Completeness:** Cover all sections of the outline comprehensively.
+  //   9.  **Introduction and Conclusion:** Write compelling intro/conclusions.
+  //   10. **IGNORE Other Citation Styles:** Only use the \`[ref:ID]\` marker format as specified in Instruction 3.
+
+  //   **Output only the final Markdown blog post draft with the embedded [ref:ID] markers.** Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the first line of the Markdown (likely the main title).
+  // `;
+
   // --- 2. Craft the Generation Prompt ---
+
   const generationPrompt = `
-    You are an expert technical writer specializing in creating engaging and informative blog posts about technology topics.
-
-    Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings. 
-    A key requirement is to insert reference markers linking text back to the specific research findings used.
-
-    **Topic:**
-    ${topic}
-
-    **Blog Post Outline (Structure to follow):**
-    \`\`\`markdown
-    ${outlineMarkdown}
-    \`\`\`
-
-    **Research Findings (Cite using the provided ID):**
-    ${researchFindingsString}
-
-    **CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
-    1.  **Follow the Outline:** Strictly adhere to the structure in the Outline. Use the headings and cover the points mentioned.
-    2.  **Integrate Research:** Use the "Grounded Text" from the Research Findings to provide details, facts, or examples for matching "Outline Points". Weave this information naturally into your writing.
-    3.  **INSERT REFERENCE MARKERS:** Immediately after a sentence or phrase that relies *primarily* on information from a specific entry in the Research Findings, you MUST insert its corresponding unique ID marker in the exact format: \`[ref:ID]\`. For example, if you use data from the entry with ID \`ref-5\`, insert \`[ref:ref-5]\` right after the relevant text.
-        *   Be precise. Place the marker directly adjacent to the information it supports.
-        *   If a paragraph synthesizes info from multiple research points, you might need multiple markers.
-        *   If a sentence uses only general knowledge or elaborates without specific research data, DO NOT insert a marker.
-    4.  **Handle Missing/Error Research:** If "Grounded Text" indicates no data/error, or an outline point has no matching research, write that section using your general knowledge. DO NOT insert a marker for these parts.
-    5.  **Expand and Elaborate:** Create flowing paragraphs. Don't just list research; synthesize it into a coherent narrative around the outline points.
-    6.  **Tone:** Maintain an informative, engaging, and technically accurate tone suitable for the tech audience.
-    7.  **Format:** Output the entire blog post draft in **Markdown format**. Ensure proper syntax.
-    8.  **Completeness:** Cover all sections of the outline comprehensively.
-    9.  **Introduction and Conclusion:** Write compelling intro/conclusions.
-    10. **IGNORE Other Citation Styles:** Only use the \`[ref:ID]\` marker format as specified in Instruction 3.
-
-    **Output only the final Markdown blog post draft with the embedded [ref:ID] markers.** Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the first line of the Markdown (likely the main title).
+  You are an expert technical writer specializing in creating concise, engaging, and informative blog posts about technology topics.
+  
+  Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings. 
+  Your writing must strike a balance between technical depth and public appeal, staying concise and clear.
+  
+  **Topic:**  
+  ${topic}
+  
+  **Blog Post Outline (Follow this structure exactly):**
+  \`\`\`markdown
+  ${outlineMarkdown}
+  \`\`\`
+  
+  **Research Findings (Cite using the provided IDs):**  
+  ${researchFindingsString}
+  
+  **CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
+  
+  1. **Length & Structure:**
+     - Final post should be **no longer than 1200 words** (roughly 6 to 8 minute read).
+     - Each section should be concise — avoid long blocks of text.
+     - Use **short paragraphs**, **clear subheadings**, and **bullet points** where appropriate.
+     - Ensure logical flow across sections based on the outline.
+  
+  2. **Tone & Readability:**
+     - Write in an **engaging, conversational tone** suitable for a broad tech-savvy audience.
+     - Avoid overly academic or dry language. Aim for clarity, simplicity, and usefulness.
+     - Use storytelling, analogies, or real-world examples if appropriate.
+     - The goal is to **hook the reader early** and keep them scrolling.
+  
+  3. **Cite Research with Markers:**
+     - When using research info, insert its ID in the format \`[ref:ref-ID]\` immediately after the sentence.
+     - If multiple sources support the same point, combine them like \`[ref:ref-3, ref:ref-7]\`.
+     - Do **not** cite general knowledge or your own elaboration.
+  
+  4. **Citing Summary:**
+     - Cite only where research is directly used.
+     - Don't cite paragraphs that are purely opinion or elaboration.
+     - Never use other citation formats (numbers, links, footnotes).
+  
+     **Example:**
+     \`\`\`markdown
+     AI has accelerated content generation across industries [ref:ref-2]. This trend is especially prominent in marketing and software development [ref:ref-5, ref:ref-7].
+     \`\`\`
+  
+  5. **Handle Missing/Invalid Research:**  
+     If a section has no matching research (marked as missing/error), write it using general knowledge — **no reference marker** needed in that case.
+  
+  6. **Markdown Output Only:**
+     - Return the post as valid **Markdown**.
+     - Start directly with the blog title (use \`#\` for the main heading).
+     - Do **not** include any extra explanation, commentary, or metadata.
+  
+  **The final result should be enjoyable to read, clearly structured, well-supported by research, and not too long.**
   `;
 
   try {
