@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemeBackground from "@/components/ThemeBackground";
 import { Analytics } from "@vercel/analytics/react";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const notoSans = Noto_Sans({ subsets: ["latin"] });
 
@@ -127,7 +127,7 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
       {GA_MEASUREMENT_ID && (
-        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} /> // Added component <mcreference link="https://icegreeen.medium.com/implementing-google-analytics-ga4-in-next-js-14-779da8df5c9e" index="0">0</mcreference>
+        <GoogleTagManager gtmId={GA_MEASUREMENT_ID} /> 
       )}
     </html>
   );
