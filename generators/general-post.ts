@@ -111,32 +111,33 @@ ${techContext}
   // STAGE 2: Topic Ideation & Selection
   console.log("Stage 2: Topic Ideation & Selection");
   const topicSelectionPrompt = `
-    You are an AI blog topic selector. Your primary job is to choose ONE interesting, relevant tech topic for a new blog post.
-
-    Here is some current context about technology trends to help you choose:
-    ${summarizedTechContext}
-
-    ${existingTopicsContext}
-
-    Here is the current distribution of posts across categories. Consider choosing topics that might fit into less covered categories, but **only if relevant** to the current tech context:
-    ${categoryCountsText}
-
-    SELECTION CRITERIA:
-    1. Choose a specific tech-related topic that is relevant today based on the provided **tech context**.
-    2. IMPORTANT: Choose a topic that is distinct and NOT substantially similar to any of the existing post titles listed above.
-    3. Be specific - don't just say "Cloud Computing" but rather something like "Cost Optimization Strategies for Multi-Cloud Environments" or "Comparing Serverless Providers for Real-time Data Processing".
-    4. Choose topics that would provide value to tech professionals, developers, or serious tech enthusiasts.
-    5. Prioritize topics with practical applications, how-tos, comparisons, or deep dives rather than just surface-level news summaries.
-    6. **Relevance to the tech context is the most important factor.** Use the category counts as a suggestion, not a strict rule. Do not force a topic into an underrepresented category if it doesn't fit the current trends.
-
-    Your response MUST contain ONLY the following fields, formatted exactly like this:
-
-    TOPIC: Your Chosen Topic Here
-    DESCRIPTION: A concise (1-2 sentence) description of what the blog post should cover, highlighting its value proposition.
-    SEARCH_TERMS: 3-5 specific phrases someone could use in a search engine (like Google) to find detailed technical information, tutorials, or case studies about this topic.
-
-    Do not include any introductory phrases, explanations, or closing remarks. Just provide the structured output.
-    `;
+  You are an AI assistant for a technology blog. Your task is to propose ONE highly compelling and up-to-date blog topic that would interest tech-savvy readers — including developers, engineers, product builders, and tech enthusiasts.
+  
+  **CURRENT TECH CONTEXT:**
+  ${summarizedTechContext}
+  
+  ${existingTopicsContext}
+  
+  **CURRENT CATEGORY DISTRIBUTION:**
+  ${categoryCountsText}
+  
+  **SELECTION GUIDELINES:**
+  
+  1. **Trend-Driven but Practical:** Choose a topic that is timely, grounded in current trends, and useful to people working in or passionate about tech.
+  2. **Avoid Generic Topics:** Avoid broad topics like "AI in 2025" or "The Future of Web3". Be specific and actionable (e.g., "Building Offline-First Web Apps with Service Workers and IndexedDB").
+  3. **Distinctiveness:** The topic must not substantially overlap with any existing posts listed above.
+  4. **Tech Audience Appeal:** Prioritize topics that appeal to developers, software engineers, indie hackers, product builders, or CTOs. Assume your reader is technically literate.
+  5. **Valuable Content Angle:** Favor deep dives, implementation strategies, engineering challenges, critical comparisons, or architecture decisions — over surface-level trend commentary.
+  6. **Category Use:** Use the category distribution only as a *light suggestion*; do NOT choose a weak or irrelevant topic just to fill a category.
+  
+  **FORMAT REQUIREMENTS (Output only the following fields):**
+  
+  TOPIC: Your Chosen Topic Title Here (Make it catchy but clear)
+  DESCRIPTION: 1–2 concise sentences describing what the post will cover and *why* it matters to the reader.
+  SEARCH_TERMS: 3–5 specific search phrases a user might type into Google to find more about this topic. Make them realistic and technically relevant.
+  
+  DO NOT include any explanation or other content — only output the 3 fields above exactly as shown.
+  `;
 
   try {
     // Generate topic selection using AI
