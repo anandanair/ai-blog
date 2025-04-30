@@ -101,7 +101,7 @@ export async function finalPolish(
   potentiallyUnpolishedDraft: string
 ): Promise<string | null> {
   if (!potentiallyUnpolishedDraft) {
-    console.warn("   Skipping polish stage due to empty input draft.");
+    console.warn("Skipping polish stage due to empty input draft.");
     return potentiallyUnpolishedDraft; // Return empty or null as received
   }
 
