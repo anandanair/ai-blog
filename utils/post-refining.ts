@@ -17,39 +17,47 @@ export async function refineDraft(
   // --- Craft the Refinement Prompt ---
 
   const refinementPrompt = `
-    You are an expert copy editor and content refiner for a technology blog.
-    Your task is to evaluate and significantly improve the provided blog post draft based on the original outline and topic, while carefully preserving embedded reference markers.
-
-    **Topic:**
-    ${topic}
-
-    **Original Outline (Ensure the refined draft still follows this structure):**
-    \`\`\`markdown
-    ${outlineMarkdown}
-    \`\`\`
-
-    **Original Draft (Contains [ref:ID] markers that MUST be preserved):**
-    \`\`\`markdown
-    ${originalDraft} 
-    \`\`\`
-
-    **Evaluation Criteria & Refinement Instructions:**
-    1.  **Clarity & Conciseness:** Is the language clear, precise, and easy for a technical audience (e.g., developers) to understand? Remove jargon where possible or explain it simply. Eliminate wordiness and redundant phrases. Ensure arguments are presented logically.
-    2.  **Engagement & Flow:** Is the writing engaging? Does the introduction hook the reader? Do paragraphs transition smoothly? Is the tone appropriate (informative yet accessible)? Enhance sentence variety.
-    3.  **Structure & Outline Adherence:** Does the draft strictly follow the provided Original Outline? Are all sections and key points from the outline covered appropriately? Ensure headings match the outline structure.
-    4.  **Completeness & Depth:** While adhering to the outline, does each section feel sufficiently developed? (You don't need external knowledge, evaluate based on the content present). Are the explanations thorough enough?
-    5.  **Grammar & Style:** Correct any grammatical errors, spelling mistakes, punctuation issues, and awkward phrasing. Improve sentence structure for better readability. Maintain a professional and consistent style.
-    6.  **Maintain Core Information:** Do NOT change the core facts or technical information presented in the original draft. Your goal is to improve the *presentation*, clarity, and flow, not the underlying substance.
-    7.  **PRESERVE REFERENCE MARKERS:** The Original Draft contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers link statements to research sources.
-        *   **You MUST preserve these markers exactly as they appear.**
-        *   **DO NOT remove, change, or reformat these \`[ref:ID]\` markers.**
-        *   **Crucially, ensure these markers remain immediately adjacent to the specific sentence or phrase they originally followed.** Even if you rephrase a sentence, the marker associated with its core information must stay directly connected to that rephrased text. 
-    8.  **Markdown Formatting:** Ensure standard Markdown syntax is used correctly throughout (list spacing, heading levels, etc.).
-
-    **Your Action:**
-    Rewrite the *entire* Original Draft, applying improvements based on the criteria above, paying special attention to preserving the \`[ref:ID]\` markers and their exact positions relative to the text they reference. Ensure the final output is a complete, refined blog post in Markdown format, including the preserved markers.
-
-    **Output ONLY the refined Markdown blog post.** Do not include your evaluation notes, introductory phrases ("Here is the refined draft..."), or anything other than the final Markdown content (which must include the original \`[ref:ID]\` markers). Start directly with the first line of the refined post.
+  You are an expert copy editor and content refiner for a professional technology blog. Your task is to improve the quality of the following blog post draft while strictly preserving structure, factual accuracy, and embedded reference markers.
+  
+  **Topic:**
+  ${topic}
+  
+  **Original Outline (The refined draft MUST follow this structure):**
+  \`\`\`markdown
+  ${outlineMarkdown}
+  \`\`\`
+  
+  **Original Draft (Contains important [ref:ID] markers that MUST be preserved):**
+  \`\`\`markdown
+  ${originalDraft}
+  \`\`\`
+  
+  **Refinement Instructions:**
+  
+  1. **Clarity & Conciseness:** Simplify language without losing technical accuracy. Eliminate redundancy and wordiness. Use clear, precise language appropriate for a tech-savvy audience (e.g., developers, engineers).
+  
+  2. **Engagement & Flow:** Improve narrative flow and readability. Hook the reader in the introduction. Ensure smooth transitions between paragraphs. Vary sentence structure and maintain a professional yet engaging tone.
+  
+  3. **Structure & Outline Adherence:** Follow the original outline exactly. Use the same heading structure and ensure all outlined sections and points are fully addressed.
+  
+  4. **Completeness & Depth:** Ensure explanations are well-developed but not overly verbose. Focus on clarity and informativeness without adding unnecessary content.
+  
+  5. **Grammar & Style:** Correct grammar, spelling, punctuation, and awkward phrasing. Improve readability and maintain consistent technical blog style.
+  
+  6. **Preserve Reference Markers:**
+     - Reference markers (e.g., \`[ref:ref-12]\`) **must remain exactly as they appear**.
+     - **Do not delete, rename, or reformat any reference marker.**
+     - If you rephrase a sentence, the marker **must stay directly connected** to the fact or statement it originally followed.
+  
+  7. **Markdown Formatting:** Use standard Markdown syntax consistently:
+     - Correct list indentation
+     - Proper heading hierarchy
+     - No extra spacing or malformed elements
+  
+  **Your Action:**
+  Rewrite the **entire draft** using the above criteria. Produce a refined, high-quality Markdown blog post with all \`[ref:ID]\` markers preserved and correctly placed.
+  
+  **Output ONLY the final Markdown blog post.** Do not include notes, comments, or introductory statements. Start immediately with the first line of the refined content.
   `;
 
   try {
