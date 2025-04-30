@@ -171,24 +171,26 @@ ${techContext}
     console.log("STAGE 3: Generating Blog Post Outline...");
 
     const outlinePrompt = `
-    Generate a detailed blog post outline for the following topic.
-
+    Generate a focused blog post outline for the following tech topic.
+    
     **Topic:** ${selectedTopic}
-
+    
     **Description:** ${topicDescription}
-
-    **Key Areas/Search Terms to Consider:** ${searchTerms}
-
+    
+    **Key Areas / Search Terms to Consider:** ${searchTerms}
+    
     **Instructions:**
-    - Create a logical flow from introduction to conclusion.
-    - Use Markdown format with headings (e.g., ## Section Title) and bullet points (* or -) for sub-topics.
-    - Include an Introduction, several Main Body sections covering key aspects, and a Conclusion.
-    - Break down main points into specific sub-points that suggest areas for research (e.g., instead of just "Benefits", list specific benefits like "* Improved latency for real-time processing", "* Reduced bandwidth costs").
-    - The outline should be comprehensive enough to guide the writing of a ~1000-1500 word blog post.
-
+    - Structure the outline to support a blog post that is approximately **1000–1200 words** (6–8 minute read).
+    - Keep the number of sections **tight and purposeful**: typically 3–4 main sections between the Introduction and Conclusion.
+    - Use **Markdown format** with clear headings (e.g., ## Section Title) and bullet points (* or -) for sub-topics.
+    - Each main section should have **2–4 specific sub-points** that guide research and content creation (e.g., instead of just “Benefits”, write “* Improved latency in edge models”, “* Bandwidth savings from local inference”).
+    - Avoid overly broad outlines. Each section must be distinct and relevant to the topic and search terms.
+    - Ensure logical flow from Introduction → Core Content → Conclusion.
+    - The final outline should be **compact but complete**, making it easy to write a concise, valuable blog post.
+    
     **Output the outline below:**
-    **Important: Output *only* the raw Markdown content for the outline, starting directly with the first heading (e.g., ## Introduction). Do not include any introductory text, concluding remarks, or explanations outside of the Markdown structure itself.**
-  `;
+    Important: Output *only* the raw Markdown content for the outline, starting directly with the first heading (e.g., ## Introduction). Do not include any extra text or explanations.
+    `;
 
     const outlineResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
