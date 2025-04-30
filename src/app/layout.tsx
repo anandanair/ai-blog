@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemeBackground from "@/components/ThemeBackground";
 import { Analytics } from "@vercel/analytics/react";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const notoSans = Noto_Sans({ subsets: ["latin"] });
 
@@ -106,6 +107,8 @@ export const metadata: Metadata = {
   // manifest: '/site.webmanifest',
 };
 
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export default function RootLayout({
   children,
 }: {
@@ -123,6 +126,9 @@ export default function RootLayout({
           </main>
         </ThemeProvider>
       </body>
+      {GA_MEASUREMENT_ID && (
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} /> // Added component <mcreference link="https://icegreeen.medium.com/implementing-google-analytics-ga4-in-next-js-14-779da8df5c9e" index="0">0</mcreference>
+      )}
     </html>
   );
 }
