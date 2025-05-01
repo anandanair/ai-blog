@@ -34,30 +34,41 @@ export async function refineDraft(
   
   **Refinement Instructions:**
   
-  1. **Clarity & Conciseness:** Simplify language without losing technical accuracy. Eliminate redundancy and wordiness. Use clear, precise language appropriate for a tech-savvy audience (e.g., developers, engineers).
+  1. **Clarity & Conciseness:**  
+     Simplify language without losing technical accuracy. Eliminate redundancy and wordiness. Use clear, precise language appropriate for a tech-savvy audience (e.g., developers, engineers).
   
-  2. **Engagement & Flow:** Improve narrative flow and readability. Hook the reader in the introduction. Ensure smooth transitions between paragraphs. Vary sentence structure and maintain a professional yet engaging tone.
+  2. **Engagement & Flow:**  
+     Improve narrative flow and readability. Hook the reader in the introduction. Ensure smooth transitions between paragraphs. Vary sentence structure and maintain a professional yet engaging tone.
   
-  3. **Structure & Outline Adherence:** Follow the original outline exactly. Use the same heading structure and ensure all outlined sections and points are fully addressed.
+  3. **Structure & Outline Adherence:**  
+     Follow the original outline exactly. Use the same heading structure and ensure all outlined sections and points are fully addressed.
   
-  4. **Completeness & Depth:** Ensure explanations are well-developed but not overly verbose. Focus on clarity and informativeness without adding unnecessary content.
+  4. **Completeness & Depth:**  
+     Ensure explanations are well-developed but not overly verbose. Focus on clarity and informativeness without adding unnecessary content.
   
-  5. **Grammar & Style:** Correct grammar, spelling, punctuation, and awkward phrasing. Improve readability and maintain consistent technical blog style.
+  5. **Grammar & Style:**  
+     Correct grammar, spelling, punctuation, and awkward phrasing. Improve readability and maintain consistent technical blog style.
   
-  6. **Preserve Reference Markers:**
-     - Reference markers (e.g., \`[ref:ref-12]\`) **must remain exactly as they appear**.
-     - **Do not delete, rename, or reformat any reference marker.**
-     - If you rephrase a sentence, the marker **must stay directly connected** to the fact or statement it originally followed.
+  6. **Preserve Reference Markers and Semantic Tags:**
+     - Keep all \`[ref:ref-ID]\` markers **unchanged and directly attached** to their corresponding facts.
+     - Do **not** delete, rename, or shift any reference markers from their intended sentences.
+     - Also preserve structural tags:
+       - \`<!-- PULL_QUOTE: “…” -->\`
+       - \`<!-- DIAGRAM: … -->\`
+       - Callout box labels (e.g., **Quick Quiz**, **Pro Tip**)  
+     - Leave any **bolded tweetable insights** intact (typically at the end).
   
-  7. **Markdown Formatting:** Use standard Markdown syntax consistently:
+  7. **Markdown Formatting:**  
+     Use standard Markdown syntax consistently:
      - Correct list indentation
      - Proper heading hierarchy
-     - No extra spacing or malformed elements
+     - No malformed elements, stray characters, or spacing issues
   
-  **Your Action:**
-  Rewrite the **entire draft** using the above criteria. Produce a refined, high-quality Markdown blog post with all \`[ref:ID]\` markers preserved and correctly placed.
+  **Your Action:**  
+  Rewrite the **entire draft** using the above criteria. Produce a refined, high-quality Markdown blog post that maintains all original structure, semantic tags, and reference markers.
   
-  **Output ONLY the final Markdown blog post.** Do not include notes, comments, or introductory statements. Start immediately with the first line of the refined content.
+  **Output ONLY the final Markdown blog post.**  
+  Start directly with the first line of content—no explanations, notes, or extra text.
   `;
 
   try {
@@ -128,8 +139,9 @@ export async function finalPolish(
   **CRITICAL INSTRUCTIONS:**
   1. **Preserve all \`[ref:ID]\` markers exactly** — these are part of the final content and must not be removed, changed, or moved.
   2. **Do NOT rephrase or rewrite any of the remaining content** — your only task is to delete unintended meta-commentary.
-  3. **Maintain all original Markdown formatting**, including headings, lists, emphasis, and code blocks.
-  4. If no meta-commentary is found, return the original input content exactly as it is.
+  3. **Do NOT remove pull quotes, diagram tags, or tweetable insights.** These are part of the final blog experience.
+  4. **Maintain all original Markdown formatting**, including headings, lists, emphasis, and code blocks.
+  5. If no meta-commentary is found, return the original input content exactly as it is.
   
   **Input Markdown (with [ref:ID] markers to preserve):**
   \`\`\`markdown
