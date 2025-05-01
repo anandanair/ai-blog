@@ -2,7 +2,7 @@ import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
 
 // --- Constants ---
 // Set this to true during development/testing to limit API calls
-const IS_TESTING_MODE = true;
+const IS_TESTING_MODE = false;
 const MAX_RESEARCH_POINTS_FOR_TESTING = 3; // Limit API calls during testing
 
 interface SourceInfo {

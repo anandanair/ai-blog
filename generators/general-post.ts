@@ -47,27 +47,26 @@ export async function generateGeneralPost(
 
   // 1.2 Summarize for topic selection
   console.log("1.2 - Summarizing tech context for topic selection");
-  const techContextSummarizePrompt = `You are an expert tech analyst with a sharp eye for trends. I will provide you with a detailed text containing the latest tech discussions, news, and insights sourced from Reddit, GitHub, StackOverflow, HackerNews, and major tech news RSS feeds.
+  const techContextSummarizePrompt = `You are an expert tech analyst. I will provide you a detailed text containing the latest news, trends, and discussions happening in the tech industry. 
 
-  Your tasks:
-  
-  1. Summarize the current state of the tech landscape based on the provided text in 5–10 concise bullet points.
-  2. Identify the **top emerging key themes or trending topics**, grouped if they relate (e.g., AI hardware, dev tools, startup activity).
-  3. Highlight **notable new events, product launches, innovations, or controversies** — especially those that are recent, high-impact, or viral.
-  4. Prioritize **newer and fast-rising topics** over older or already well-established themes.
-  5. Use popularity signals (like upvotes, engagement levels, or mentions across multiple sources) to help determine what's truly trending.
-  6. Avoid vague or generic summaries — include concrete names, events, or technologies where possible.
-  
-  Important Instructions:
-  - Do not make assumptions or add content not present in the input.
-  - Your summary should be clean, engaging, and structured for potential blog content.
-  - Focus on **fresh, high-signal insights**, not just recaps.
-  
-  Here is the tech context:
-  
-  ${techContext}
-  `;
+This text is compiled from sources like Reddit, GitHub, StackOverflow, HackerNews, RSS feeds from major tech news outlets, and other platforms.
 
+Your tasks are:
+
+1. Summarize the overall tech landscape covered in the provided text in 5-10 bullet points.
+2. Identify and list the top emerging **key themes** or **trending topics** from the information. Group similar topics together if necessary.
+3. Highlight any notable events, innovations, or controversies mentioned.
+4. Focus on providing a clean, structured summary that can later be used to decide on blog topics.
+
+Important Instructions:
+- Be concise but insightful.
+- Do not add any extra information not present in the input.
+- Stick to the actual content and context provided.
+
+Here is the tech context:
+
+${techContext}
+`;
   const techContextSummaryRespone = await genAI.models.generateContent({
     model: "gemini-2.5-flash-preview-04-17",
     // model: "gemini-2.0-flash",
@@ -219,66 +218,62 @@ export async function generateGeneralPost(
       researchResults
     );
 
-    console.log("Blog Draft:", blogDraft);
+    // STAGE 6: Content Evaluation & Refinement
+    console.log("Stage 6: Polishing and improving the blog post...");
+    const refinedBlogDraft = await refineDraft(
+      genAI,
+      blogDraft || "",
+      outlineText,
+      selectedTopic
+    );
 
-    return true;
+    // STAGE 7: Final Polish (Removing Meta-Commentary)
+    console.log("Stage 7: Performing final polish...");
+    const polishedDraft = await finalPolish(genAI, refinedBlogDraft || "");
 
-    // // STAGE 6: Content Evaluation & Refinement
-    // console.log("Stage 6: Polishing and improving the blog post...");
-    // const refinedBlogDraft = await refineDraft(
-    //   genAI,
-    //   blogDraft || "",
-    //   outlineText,
-    //   selectedTopic
-    // );
+    // STAGE 8: Generate Metadata
+    console.log("Stage 8: Generating metadata...");
+    const blogMetadata = await generateMetadata(
+      genAI,
+      supabase,
+      polishedDraft || "",
+      selectedTopic
+    );
 
-    // // STAGE 7: Final Polish (Removing Meta-Commentary)
-    // console.log("Stage 7: Performing final polish...");
-    // const polishedDraft = await finalPolish(genAI, refinedBlogDraft || "");
+    // STAGE 9: Markdown Validation
+    console.log("Stage 9: Validating markdown...");
+    const validatedMarkdown = await validateMarkdownSyntax(
+      genAI,
+      polishedDraft || "",
+      selectedTopic
+    );
 
-    // // STAGE 8: Generate Metadata
-    // console.log("Stage 8: Generating metadata...");
-    // const blogMetadata = await generateMetadata(
-    //   genAI,
-    //   supabase,
-    //   polishedDraft || "",
-    //   selectedTopic
-    // );
+    // STAGE 10: Image Generation and Upload
+    console.log("Stage 10: Generating image and uploading...");
+    const imageUrl = await generateAndUploadImage(
+      genAI,
+      supabase,
+      blogMetadata?.imagePrompt || "",
+      blogMetadata?.title || ""
+    );
 
-    // // STAGE 9: Markdown Validation
-    // console.log("Stage 9: Validating markdown...");
-    // const validatedMarkdown = await validateMarkdownSyntax(
-    //   genAI,
-    //   polishedDraft || "",
-    //   selectedTopic
-    // );
+    // STAGE 11: Save to Supabase Database
+    console.log("Stage 11: Saving to Supabase Database...");
 
-    // // STAGE 10: Image Generation and Upload
-    // console.log("Stage 10: Generating image and uploading...");
-    // const imageUrl = await generateAndUploadImage(
-    //   genAI,
-    //   supabase,
-    //   blogMetadata?.imagePrompt || "",
-    //   blogMetadata?.title || ""
-    // );
+    // Prepare research data for storage
+    const researchDetailsForStorage = formatResearchForStorage(researchResults);
 
-    // // STAGE 11: Save to Supabase Database
-    // console.log("Stage 11: Saving to Supabase Database...");
-
-    // // Prepare research data for storage
-    // const researchDetailsForStorage = formatResearchForStorage(researchResults);
-
-    // return await savePostToDatabase(supabase, {
-    //   title: blogMetadata?.title || "",
-    //   slug: generateSlug(blogMetadata?.title || ""),
-    //   description: blogMetadata?.metaDescription || "",
-    //   content: validatedMarkdown,
-    //   category: blogMetadata?.category || 6,
-    //   image_url: imageUrl,
-    //   read_time: blogMetadata?.readTimeMinutes || 0,
-    //   tags: blogMetadata?.tags || [],
-    //   research_details: researchDetailsForStorage,
-    // });
+    return await savePostToDatabase(supabase, {
+      title: blogMetadata?.title || "",
+      slug: generateSlug(blogMetadata?.title || ""),
+      description: blogMetadata?.metaDescription || "",
+      content: validatedMarkdown,
+      category: blogMetadata?.category || 6,
+      image_url: imageUrl,
+      read_time: blogMetadata?.readTimeMinutes || 0,
+      tags: blogMetadata?.tags || [],
+      research_details: researchDetailsForStorage,
+    });
   } catch (error) {
     return false;
   }
@@ -384,63 +379,61 @@ export async function generateDraft(
   // --- 2. Craft the Generation Prompt ---
 
   const generationPrompt = `
-You are an expert technical storyteller who crafts concise, engaging, and informative tech blog posts that hook both engineers and curious readers.
-
-Your task: write a first draft of a blog post based on the provided topic, outline, and research findings—balancing deep insight with broad appeal. Think of yourself as a knowledgeable guide and friendly companion, leading readers through the landscape of modern technology.
-
-**Topic:**  
-${topic}
-
-**Blog Post Outline (Follow this structure exactly):**
-\`\`\`markdown
-${outlineMarkdown}
-\`\`\`
-
-**Research Findings (Cite using the provided IDs):**  
-${researchFindingsString}
-
-**CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
-
-1. **Open with a Hook:**  
-   - Begin with a one-to-two sentence anecdote, stat, or provocative question that draws the reader in (e.g., “Ever wondered how your smartphone handles 4K video in real time?”).
-
-2. **Length & Structure:**  
-   - Keep the final post **≤ 1200 words** (6–8 minute read).  
-   - Use **short paragraphs** (2–4 sentences max), **clear subheadings**, and **bullet lists**.  
-   - After each major section, add a **Key Takeaways** bullet list (2–3 points) to reinforce learning.
-
-3. **Tone & Reader Connection:**  
-   - Write in an **upbeat, conversational voice**—address the reader as “you” occasionally.  
-   - Use everyday analogies (“optimizing code is like tuning your car for peak performance…”).  
-   - Sprinkle in a **“Quick Quiz”** or **“Pro Tip”** callout box to invite interaction.
-
-4. **Visual & Shareable Elements:**  
-   - When you spot a standout insight, wrap it in a pull-quote tag:  
-     <!-- PULL_QUOTE: “Your memorable one-liner here.” -->
-   - For any concept that benefits from a diagram or screenshot, insert a diagram tag:  
-     <!-- DIAGRAM: brief description of what to illustrate (e.g., hybrid edge–cloud split) -->  
-   - At the end of the post (just before the conclusion), output 1–2 **tweetable insights** in bold, like:  
-     **“On-device NPUs now crunch trillions of ops per second.”**  
-
-5. **Citation Rules:**  
-   - Whenever you use a research fact, insert its ID [ref:ref-ID] directly after the sentence.  
-   - Combine multiple IDs like [ref:ref-3, ref:ref-7].  
-   - **No citations** for opinion, storytelling, or general background.
-
-6. **Handling Gaps:**  
-   - If a section has **missing** or **invalid** research, fill with clear, general‐knowledge writing—**omit** citation markers there.
-
-7. **Closing & Call to Action:**  
-   - End with a vivid **future vision** or **challenge** for the reader (e.g., “What will you build with this new tech?”).  
-   - Include a one‐sentence **TL;DR** summary.
-
-8. **Output Format:**  
-   - Return **valid Markdown** only.  
-   - Start immediately with the title (# Your Post Title).  
-   - Do **not** include any extra commentary or metadata.
-
-The post should flow like a friendly yet authoritative tour—grounded in research, brimming with personality, and ready to delight a broad tech audience.  
-`;
+  You are an expert technical writer specializing in creating concise, engaging, and informative blog posts about technology topics.
+  
+  Your task is to write a first draft of a blog post based on the provided topic, outline, and research findings. 
+  Your writing must strike a balance between technical depth and public appeal, staying concise and clear.
+  
+  **Topic:**  
+  ${topic}
+  
+  **Blog Post Outline (Follow this structure exactly):**
+  \`\`\`markdown
+  ${outlineMarkdown}
+  \`\`\`
+  
+  **Research Findings (Cite using the provided IDs):**  
+  ${researchFindingsString}
+  
+  **CRITICAL INSTRUCTIONS FOR WRITING AND CITING:**
+  
+  1. **Length & Structure:**
+     - Final post should be **no longer than 1200 words** (roughly 6 to 8 minute read).
+     - Each section should be concise — avoid long blocks of text.
+     - Use **short paragraphs**, **clear subheadings**, and **bullet points** where appropriate.
+     - Ensure logical flow across sections based on the outline.
+  
+  2. **Tone & Readability:**
+     - Write in an **engaging, conversational tone** suitable for a broad tech-savvy audience.
+     - Avoid overly academic or dry language. Aim for clarity, simplicity, and usefulness.
+     - Use storytelling, analogies, or real-world examples if appropriate.
+     - The goal is to **hook the reader early** and keep them scrolling.
+  
+  3. **Cite Research with Markers:**
+     - When using research info, insert its ID in the format \`[ref:ref-ID]\` immediately after the sentence.
+     - If multiple sources support the same point, combine them like \`[ref:ref-3, ref:ref-7]\`.
+     - Do **not** cite general knowledge or your own elaboration.
+  
+  4. **Citing Summary:**
+     - Cite only where research is directly used.
+     - Don't cite paragraphs that are purely opinion or elaboration.
+     - Never use other citation formats (numbers, links, footnotes).
+  
+     **Example:**
+     \`\`\`markdown
+     AI has accelerated content generation across industries [ref:ref-2]. This trend is especially prominent in marketing and software development [ref:ref-5, ref:ref-7].
+     \`\`\`
+  
+  5. **Handle Missing/Invalid Research:**  
+     If a section has no matching research (marked as missing/error), write it using general knowledge — **no reference marker** needed in that case.
+  
+  6. **Markdown Output Only:**
+     - Return the post as valid **Markdown**.
+     - Start directly with the blog title (use \`#\` for the main heading).
+     - Do **not** include any extra explanation, commentary, or metadata.
+  
+  **The final result should be enjoyable to read, clearly structured, well-supported by research, and not too long.**
+  `;
 
   try {
     // --- 3. Call Gemini API ---
