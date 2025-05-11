@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
   generateAndUploadImage,
@@ -146,15 +146,12 @@ Your task is to propose **ONE compelling blog topic** based on the provided tech
 
 **LATEST TECH INSIGHTS (Summarized for a general audience):**
 ${summarizedTechContext} 
-// This is the output from your revised Step 2, which should already be framed better.
 
 **EXISTING BLOG POST TITLES (to avoid duplication):**
 ${existingTopicsContext} 
-// Ensure these are the titles of your *new style* of posts, or the AI might try to avoid good general audience topics if it sees old technical titles.
 
 **BLOG CATEGORY FOCUS (Optional Guide):**
 ${categoryCountsText} 
-// This is less critical now, as the primary driver is audience appeal.
 
 **TOPIC SELECTION GUIDELINES (for a NON-TECHNICAL audience):**
 
@@ -185,13 +182,39 @@ ${categoryCountsText}
 6.  **Category Consideration (Lightly):**
     *   If a good, audience-appropriate topic aligns with an underrepresented category, that's a bonus, but **never sacrifice audience appeal or relevance for a category.**
 
-**OUTPUT FORMAT REQUIREMENTS (Output only the following fields):**
+**Please provide the information for the following fields:**
+-   **TOPIC_TITLE:** Your Chosen Topic Title Here (Catchy, clear, and for a general audience)
+-   **HOOK_DESCRIPTION:** 1-2 concise sentences that would make a non-technical person want to read this post. Explain what it's about and *why it's interesting or relevant to them*.
+-   **POTENTIAL_SEARCH_QUERIES:** 3-5 simple, natural language search phrases an average person (not a tech expert) might type into Google if they were curious about this subject. (e.g., "how does facial recognition work," "is AI safe," "what's new with smart homes").
 
-TOPIC_TITLE: Your Chosen Topic Title Here (Catchy, clear, and for a general audience)
-HOOK_DESCRIPTION: 1-2 concise sentences that would make a non-technical person want to read this post. Explain what it's about and *why it's interesting or relevant to them*.
-POTENTIAL_SEARCH_QUERIES: 3-5 simple, natural language search phrases an average person (not a tech expert) might type into Google if they were curious about this subject. (e.g., "how does facial recognition work," "is AI safe," "what's new with smart homes").
+**The output will be structured as JSON according to the defined schema.**
+`;
 
-**DO NOT include any other explanation or content — only output the 3 fields above exactly as shown.**`;
+  const topicSelectionResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      TOPIC_TITLE: {
+        // Match the keys you want in your JSON
+        type: Type.STRING,
+        description:
+          "The catchy, clear blog topic title for a general audience.", // Descriptions are good practice
+      },
+      HOOK_DESCRIPTION: {
+        type: Type.STRING,
+        description:
+          "1-2 concise sentences to hook a non-technical reader, explaining relevance.",
+      },
+      POTENTIAL_SEARCH_QUERIES: {
+        type: Type.ARRAY,
+        description:
+          "3-5 simple, natural language search phrases an average person might type.",
+        items: {
+          type: Type.STRING,
+        },
+      },
+    },
+    required: ["TOPIC_TITLE", "HOOK_DESCRIPTION", "POTENTIAL_SEARCH_QUERIES"], // Specify required fields
+  };
 
   try {
     // Generate topic selection using AI
@@ -200,29 +223,72 @@ POTENTIAL_SEARCH_QUERIES: 3-5 simple, natural language search phrases an average
       // model: "gemini-2.0-flash",
       config: {
         systemInstruction: topicSelectionSystemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: topicSelectionResponseSchema,
       },
       contents: topicSelectionPrompt,
     });
 
     // Extract text from the response
-    const topicText = topicSelectionResponse.text || "";
+    const topicJsonString = topicSelectionResponse.text || "";
 
-    // Parse the topic selection using regex to extract key components
-    const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
-    const descriptionMatch = topicText.match(/DESCRIPTION:\s*(.*?)(?:\n|$)/);
-    const searchTermsMatch = topicText.match(/SEARCH_TERMS:\s*(.*?)(?:\n|$)/);
-
-    // Validate that all required components were extracted
-    if (!topicMatch || !descriptionMatch || !searchTermsMatch) {
-      console.error("❌ Failed to parse topic selection");
+    if (!topicJsonString) {
+      console.error("❌ AI did not return any text for topic selection.");
       return false;
     }
 
-    // Extract and clean the topic components
-    const selectedTopic = topicMatch[1].trim();
-    const topicDescription = descriptionMatch[1].trim();
-    const searchTerms = searchTermsMatch[1].trim();
-    console.log("- Selected Topic:", selectedTopic);
+    let selectedTopicData;
+    try {
+      selectedTopicData = JSON.parse(topicJsonString);
+    } catch (e) {
+      console.error(
+        "❌ Failed to parse JSON from AI response for topic selection:",
+        e
+      );
+      console.error("Raw AI response:", topicJsonString);
+      return false;
+    }
+
+    // Validate that all required components were extracted
+    // The schema should enforce this, but an extra check doesn't hurt
+    if (
+      !selectedTopicData.TOPIC_TITLE ||
+      !selectedTopicData.HOOK_DESCRIPTION ||
+      !selectedTopicData.POTENTIAL_SEARCH_QUERIES
+    ) {
+      console.error(
+        "❌ Missing one or more required fields in the parsed JSON topic selection."
+      );
+      console.error("Parsed data:", selectedTopicData);
+      return false;
+    }
+
+    // Now you can access the data directly:
+    const selectedTopic = selectedTopicData.TOPIC_TITLE;
+    const topicDescription = selectedTopicData.HOOK_DESCRIPTION;
+    const searchTerms = selectedTopicData.POTENTIAL_SEARCH_QUERIES; // This will be an array
+
+    console.log("✅ Successfully parsed topic selection:");
+    console.log("Topic Title:", selectedTopic);
+    console.log("Hook Description:", topicDescription);
+    console.log("Search Queries:", searchTerms);
+
+    // Parse the topic selection using regex to extract key components
+    // const topicMatch = topicText.match(/TOPIC:\s*(.*?)(?:\n|$)/);
+    // const descriptionMatch = topicText.match(/DESCRIPTION:\s*(.*?)(?:\n|$)/);
+    // const searchTermsMatch = topicText.match(/SEARCH_TERMS:\s*(.*?)(?:\n|$)/);
+
+    // Validate that all required components were extracted
+    // if (!topicMatch || !descriptionMatch || !searchTermsMatch) {
+    //   console.error("❌ Failed to parse topic selection");
+    //   return false;
+    // }
+
+    // // Extract and clean the topic components
+    // const selectedTopic = topicMatch[1].trim();
+    // const topicDescription = descriptionMatch[1].trim();
+    // const searchTerms = searchTermsMatch[1].trim();
+    // console.log("- Selected Topic:", selectedTopic);
 
     // Stage 3: Outline Generation
     console.log("STAGE 3: Generating Blog Post Outline...");
