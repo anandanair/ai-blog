@@ -618,21 +618,19 @@ ${researchFindingsString}
 
   try {
     // --- 3. Call Gemini API ---
-    const countTokensResponse = await genAI.models.countTokens({
-      model: "gemini-2.5-pro-exp-03-25",
-      // model: "gemini-2.5-flash-preview-04-17",
-      contents: generationPrompt,
-      config: {
-        systemInstruction: generationSystemPrompt,
-      },
-    });
-    console.log("Tokens:", countTokensResponse);
+    // const countTokensResponse = await genAI.models.countTokens({
+    //   model: "gemini-2.5-pro-exp-03-25",
+    //   // model: "gemini-2.5-flash-preview-04-17",
+    //   contents: generationPrompt,
+    // });
+    // console.log("Tokens:", countTokensResponse);
 
     const draftResponse = await genAI.models.generateContent({
       model: "gemini-2.5-pro-exp-03-25",
       // model: "gemini-2.5-flash-preview-04-17",
       contents: generationPrompt,
       config: {
+        systemInstruction: generationSystemPrompt,
         temperature: 0.6,
       },
     });
