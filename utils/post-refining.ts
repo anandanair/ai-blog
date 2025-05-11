@@ -16,55 +16,83 @@ export async function refineDraft(
 ): Promise<string | null> {
   // --- Craft the Refinement Prompt ---
 
+  const refinementSystemPrompt = `
+  You are an exceptional "Clarity Coach" and "Engagement Editor" for a popular technology blog that makes tech understandable and exciting for a **general, non-technical audience.** Your primary role is to take a draft written for this audience and make it even clearer, more engaging, and more enjoyable to read.
+
+Core Refinement Principles:
+- **Ultimate Readability for All:** Is every sentence crystal clear to someone with no tech background? Could anything be simpler?
+- **Boost Engagement:** Does it tell a good story? Is it interesting? Are there opportunities to make it more relatable or add a touch of "wow"?
+- **Jargon Demolition (or Perfect Explanation):** Hunt down any remaining jargon or complex phrasing. Either replace it with simple terms or ensure any necessary technical term (that was intentionally kept and meant to be explained) is defined with an incredibly clear analogy or example.
+- **Smooth Flow & Pacing:** Ensure the post flows like a good conversation, with smooth transitions and a pace that keeps the reader interested.
+- **Preserve the Core (and Citations!):** While enhancing clarity and engagement, you must maintain the original meaning, factual accuracy, the established outline structure, and all '[ref:ID]' citation markers precisely.
+
+You are the final polish that ensures a non-technical reader not only understands the content but also enjoys the experience of learning.
+  `;
+
   const refinementPrompt = `
-  You are an expert copy editor and content refiner for a professional technology blog. Your task is to improve the quality of the following blog post draft while strictly preserving structure, factual accuracy, and embedded reference markers.
-  
-  **Topic:**
-  ${topic}
-  
-  **Original Outline (The refined draft MUST follow this structure):**
-  \`\`\`markdown
-  ${outlineMarkdown}
-  \`\`\`
-  
-  **Original Draft (Contains important [ref:ID] markers that MUST be preserved):**
-  \`\`\`markdown
-  ${originalDraft}
-  \`\`\`
-  
-  **Refinement Instructions:**
-  
-  1. **Clarity & Conciseness:** Simplify language without losing technical accuracy. Eliminate redundancy and wordiness. Use clear, precise language appropriate for a tech-savvy audience (e.g., developers, engineers).
-  
-  2. **Engagement & Flow:** Improve narrative flow and readability. Hook the reader in the introduction. Ensure smooth transitions between paragraphs. Vary sentence structure and maintain a professional yet engaging tone.
-  
-  3. **Structure & Outline Adherence:** Follow the original outline exactly. Use the same heading structure and ensure all outlined sections and points are fully addressed.
-  
-  4. **Completeness & Depth:** Ensure explanations are well-developed but not overly verbose. Focus on clarity and informativeness without adding unnecessary content.
-  
-  5. **Grammar & Style:** Correct grammar, spelling, punctuation, and awkward phrasing. Improve readability and maintain consistent technical blog style.
-  
-  6. **Preserve Reference Markers:**
-     - Reference markers (e.g., \`[ref:ref-12]\`) **must remain exactly as they appear**.
-     - **Do not delete, rename, or reformat any reference marker.**
-     - If you rephrase a sentence, the marker **must stay directly connected** to the fact or statement it originally followed.
-  
-  7. **Markdown Formatting:** Use standard Markdown syntax consistently:
-     - Correct list indentation
-     - Proper heading hierarchy
-     - No extra spacing or malformed elements
-  
-  **Your Action:**
-  Rewrite the **entire draft** using the above criteria. Produce a refined, high-quality Markdown blog post with all \`[ref:ID]\` markers preserved and correctly placed.
-  
-  **Output ONLY the final Markdown blog post.** Do not include notes, comments, or introductory statements. Start immediately with the first line of the refined content.
+  Your task is to significantly improve the quality, clarity, and engagement of the following blog post draft. This draft is intended for a **general, non-technical audience.** You must strictly preserve the original structure, factual accuracy (as supported by any research), and all embedded '[ref:ID]' reference markers.
+
+**Blog Post Topic (for a general audience):**
+${topic}
+
+**Original Outline (The refined draft MUST strictly follow this structure):**
+\`\`\`markdown
+${outlineMarkdown} 
+// The outline already designed for a non-technical audience.
+\`\`\`
+
+**Original Draft (Contains important [ref:ID] markers that MUST be preserved):**
+\`\`\`markdown
+${originalDraft}
+// The draft written in Step 8 for a non-technical audience.
+\`\`\`
+
+**REFINEMENT INSTRUCTIONS (for a NON-TECHNICAL audience):**
+
+1.  **Maximize Clarity & Simplicity:**
+    *   **Is this the simplest way to say it?** Aggressively simplify complex sentences and vocabulary. Replace any lingering jargon or technical terms with everyday language.
+    *   If a technical term *must* be used (per the outline's intent to explain it), is its explanation or analogy **crystal clear and instantly understandable** to a layperson?
+    *   Eliminate redundancy and wordiness. Ensure every word contributes to understanding.
+
+2.  **Enhance Engagement & Flow:**
+    *   **Is it interesting from start to finish?** Strengthen the hook in the introduction if needed.
+    *   Ensure smooth, natural transitions between paragraphs and ideas.
+    *   Vary sentence structure to maintain reader interest.
+    *   **Maintain a friendly, conversational, and enthusiastic tone** throughout. Does it sound like a helpful friend explaining something cool?
+
+3.  **Strict Adherence to Structure & Outline:**
+    *   Follow the 'Original Outline' **exactly**. Use the same heading structure.
+    *   Ensure all outlined sections and points are fully addressed in a way that's clear to the target audience.
+
+4.  **Completeness of Explanation (for a Layperson):**
+    *   Are explanations well-developed enough for someone new to the topic to understand?
+    *   Are there any points where a non-technical reader might get lost or need a bit more (simple) explanation or a better example? Add this *without changing the core facts or adding new research points unless it's a general clarifying statement*.
+
+5.  **Flawless Grammar & Style (for Readability):**
+    *   Correct all grammar, spelling, and punctuation errors.
+    *   Fix any awkward phrasing to improve natural flow.
+    *   Ensure the style is consistently engaging and easy to read (short sentences, clear language).
+
+6.  **CRITICAL: Preserve Reference Markers ([ref:ID]):**
+    *   Reference markers (e.g., '[ref:ref-12]') **MUST remain exactly as they appear in the original draft and in the same position relative to the statement they support.**
+    *   **DO NOT delete, rename, reformat, or move any reference marker.**
+    *   If you rephrase a sentence, the marker **must stay directly connected** to the specific fact, data point, or direct example it originally followed. This is crucial.
+
+7.  **Maintain Markdown Formatting:**
+    *   Ensure standard Markdown syntax is used consistently and correctly (headings, lists, bolding, etc.).
+    *   The output must be clean, valid Markdown.
+
+**Your Action:**
+Carefully rewrite and refine the **entire draft** based on all the above criteria, focusing on making it exceptionally clear and engaging for a non-technical audience. Produce the improved Markdown blog post with all '[ref:ID]' markers perfectly preserved and correctly placed.
+
+**Output ONLY the final refined Markdown blog post.** Do not include notes, comments, or introductory statements. Start immediately with the first line of the refined content.
   `;
 
   try {
     const refinedResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: refinementPrompt,
-      config: { temperature: 0.5 },
+      config: { temperature: 0.5, systemInstruction: refinementSystemPrompt },
     });
     const refinedMarkdown = refinedResponse.text;
 
