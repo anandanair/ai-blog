@@ -564,57 +564,81 @@ Your goal is to draft a blog post that someone with no prior tech knowledge can 
 `;
 
   const generationPrompt = `
-  Your task is to write the first draft of a blog post. This post is based on the provided topic, outline, and research findings, and it's specifically for a **general, non-technical audience.**
+Your task is to write the first draft of a blog post. This post is based on the provided topic, outline, and research findings, and it's specifically for a **general, non-technical audience.**
 
 **Blog Post Topic (Catchy and for a general audience):**
 ${topic}
 
 **Blog Post Outline (Follow this structure for a non-technical reader):**
 \`\`\`markdown
-${outlineMarkdown} 
-// This is the outline from Step 6, already designed for a non-technical audience.
+${outlineMarkdown}
 \`\`\`
 
-**Research Findings (Use these to support explanations and examples. Cite using IDs):**
-${researchFindingsString} 
-// This research from Step 7 should ideally contain relatable examples and simple explanations.
+**Research Findings (Source Material):**
+Below are research findings. Each finding begins with an "ID:" line (e.g., "ID: ref-0", "ID: ref-1"). When you use information from the "Grounded Text:" of a specific finding, you MUST cite its corresponding unique ID.
+\`\`\`
+${researchFindingsString}
+
+// The researchFindingsString you provide is formatted like:
+// ID: ref-0
+// Outline Point: "Some point"
+// Grounded Text: The actual research text for ref-0 is here.
+// ---
+// ID: ref-1
+// Outline Point: "Another point"
+// Grounded Text: The research text for ref-1.
+// (And so on for other IDs like ref-2, ref-3, etc.)
+\`\`\`
 
 **CRITICAL INSTRUCTIONS FOR WRITING AND CITING (for a NON-TECHNICAL audience):**
 
 1.  **Target Audience & Tone:**
     *   **Audience:** Normal, everyday people curious about tech but without a technical background.
-    *   **Tone:** Friendly, conversational, engaging, and enthusiastic. Like explaining something cool and important to a good friend.
-    *   **Language:** Use simple words and short sentences. **Strictly avoid jargon** unless it was explicitly planned in the outline to be explained with an analogy. If so, ensure that explanation is crystal clear.
-    *   **Goal:** Make the reader feel informed and intrigued, not intimidated or bored. Hook them early and explain *why this topic matters to them*.
+    *   **Tone:** Friendly, conversational, engaging, and enthusiastic.
+    *   **Language:** Simple words, short sentences. **Strictly avoid jargon** unless explained.
+    *   **Goal:** Inform and intrigue, not intimidate. Explain *why this topic matters to them*.
 
 2.  **Content & Structure (Based on the Audience-Focused Outline):**
-    *   Follow the provided 'outlineMarkdown' precisely. The outline is designed to explain the topic logically and engagingly to a non-technical reader.
-    *   **Explain concepts simply.** Use analogies and real-world examples frequently, especially those prompted by the outline or present in the research.
-    *   Focus on the "what," "why it's interesting/important," and "how it affects me/us" aspects.
-    *   **Length:** Aim for **800-1200 words** (a 5-7 minute read). Prioritize clarity and engagement over hitting a specific word count.
-    *   Use **short paragraphs**, clear subheadings (from the outline), and bullet points where appropriate to enhance readability for a general audience.
+    *   Follow the \`outlineMarkdown\` precisely.
+    *   **Explain concepts simply.** Use analogies and real-world examples.
+    *   Focus on "what," "why interesting/important," and "how it affects me/us."
+    *   **Length:** Aim for **800-1200 words**.
+    *   Use **short paragraphs**, subheadings, and bullet points for readability.
 
-3.  **Cite Research with Markers (IMPORTANT - RETAIN THIS MECHANISM):**
-    *   When using specific information, facts, or direct examples from the 'researchFindingsString', insert its ID in the format \`[ref:ref-ID]\` *immediately after the sentence or phrase it supports*.
-    *   If multiple research items support the same point, combine them like \`[ref:ref-3, ref:ref-7]\`.
-    *   Cite when you are referencing a specific piece of data, a direct quote (even if paraphrased), or a very specific example drawn from the research.
-    *   Do **not** cite general explanations you create, common knowledge, or your own connecting narrative, even if inspired by the research. The citation is for *verifiable facts/data points* from the provided research.
+3.  **Cite Research with Markers (VERY IMPORTANT - Use the ACTUAL ID from the "ID:" line of each Research Finding):**
+    *   When you incorporate specific information, facts, or direct examples **taken directly from the "Grounded Text:" of a research finding listed above**, you MUST insert the **ACTUAL unique ID** found on its "ID:" line (e.g., \`ref-0\`, \`ref-1\`, \`ref-12\`).
+    *   The citation format you must produce in your output is \`[ref:ACTUAL_ID_HERE]\`. For example, if the research finding you used has "ID: ref-5" at its start, your citation in the text must be exactly \`[ref:ref-5]\`.
+    *   **Do NOT write "[ref:ref-ID]" or "[ref:ID]" or "[ref:THE_ACTUAL_ID_HERE]" literally in your output.** You must replace "ACTUAL_ID_HERE" with the specific ID (like \`ref-0\`, \`ref-1\`, \`ref-2\`, etc.) from the "ID:" line of the research snippet you are citing.
+    *   If multiple research snippets support the same point, combine their actual, specific IDs: e.g., \`[ref:ref-0, ref:ref-3]\`.
+    *   Cite ONLY when referencing a specific piece of data, a direct quote (even if paraphrased), or a very specific example **drawn directly from one of the provided research findings and its associated "Grounded Text:".**
+    *   Do **not** cite general explanations you create, common knowledge, or your own connecting narrative, even if inspired by the research.
 
-    **Example of Citation:**
+    **Clear Example of Correct Citation:**
+    Given 'Research Findings' that include:
+    \`\`\`
+    ID: ref-0
+    Outline Point: "How AI learns"
+    Grounded Text: AI models often learn by processing large datasets.
+    ---
+    ID: ref-1
+    Outline Point: "AI in daily apps"
+    Grounded Text: Many apps use AI for recommendations.
+    \`\`\`
+    Your draft incorporating these should look like:
     \`\`\`markdown
-    Did you know that many of your favorite apps use this kind of technology to suggest what you might like next [ref:ref-2]? In fact, it's becoming common in online shopping and even streaming services [ref:ref-5, ref:ref-7].
+    Artificial intelligence learns in fascinating ways, often by sifting through vast amounts of information [ref:ref-0]. You might even see this in action when your favorite app suggests what you might like next, as many applications now use AI for recommendations [ref:ref-1].
     \`\`\`
 
 4.  **Handling Missing/Invalid Research:**
-    *   If a section of the outline requires information not covered by the provided 'researchFindingsString' (or if research is marked missing/error), write that part using clear, general explanations suitable for the audience. **Do not invent facts or use a reference marker in this case.**
+    *   If a section of the outline requires information not covered by the 'Research Findings' (or if a finding's "Grounded Text:" indicates no data or an error), write that part using clear, general explanations suitable for the audience. **Do not invent facts or use a reference marker in this case.**
 
 5.  **Markdown Output Only:**
     *   Return the entire blog post as valid **Markdown**.
-    *   Start directly with the blog post title (use \`#\` for the main heading, as per the outline's structure).
-    *   Do **not** include any extra explanation, commentary, or metadata outside the blog post content itself.
+    *   Start directly with the blog post title (\`#\` for main heading).
+    *   Do **not** include any extra explanation, commentary, or metadata.
 
-**The final draft should be a joy for a non-technical person to read: easy to understand, clearly structured, genuinely interesting, and well-supported by the provided research where appropriate (and correctly cited).**
-  `;
+**The final draft should be a joy for a non-technical person to read: easy to understand, clearly structured, genuinely interesting, and well-supported by the provided research where appropriate (and correctly cited using the SPECIFIC IDs like [ref:ref-0], [ref:ref-1], etc., from the 'Research Findings').**
+`;
 
   try {
     // --- 3. Call Gemini API ---
