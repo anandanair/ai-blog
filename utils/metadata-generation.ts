@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { calculateReadTime } from "./helpers";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getAllCategories } from "./database";
@@ -123,6 +123,41 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
 **(Use the example JSON output structure provided in the original prompt if needed for field names and types.)**
     `;
 
+  const metadataResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      title: {
+        type: Type.STRING,
+        description:
+          "Compelling, SEO-friendly title (max ~60-70 characters) for a non-technical audience.",
+      },
+      meta_description: {
+        type: Type.STRING,
+        description:
+          "Concise summary for search engines (~150-160 characters) to entice clicks from a general audience.",
+      },
+      image_prompt: {
+        type: Type.STRING,
+        description:
+          "Detailed prompt for an AI image generator, focusing on relatability and clear visual storytelling for a general audience.",
+      },
+      tags: {
+        type: Type.ARRAY,
+        description:
+          "3-7 relevant keywords/tags (JSON array of strings) a non-technical person might search for.",
+        items: {
+          type: Type.STRING,
+        },
+      },
+      category: {
+        type: Type.INTEGER, // Important: Use INTEGER for numeric IDs
+        description:
+          "The ID (integer) of the single main category from the provided list that best represents the post to a general reader.",
+      },
+    },
+    required: ["title", "meta_description", "image_prompt", "tags", "category"],
+  };
+
   try {
     // --- 3. Call Gemini API ---
     const metedataResponse = await genAI.models.generateContent({
@@ -132,6 +167,7 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
         temperature: 0.5,
         responseMimeType: "application/json",
         systemInstruction: metadataSystemPrompt,
+        responseSchema: metadataResponseSchema,
       },
     });
 
