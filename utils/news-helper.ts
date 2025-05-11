@@ -13,7 +13,21 @@ const feedUrls = [
   },
   { url: "https://www.theverge.com/rss/tech/index.xml", source: "The Verge" },
   { url: "https://www.wired.com/feed/tag/ai/latest/rss", source: "Wired AI" },
+  {
+    url: "https://www.wired.com/feed/category/ideas/latest/rss",
+    source: "Wired Ideas",
+  },
+  {
+    url: "https://www.wired.com/feed/category/science/latest/rss",
+    source: "Wired Science",
+  },
+  {
+    url: "https://www.wired.com/feed/category/backchannel/latest/rss",
+    source: "Wired Backchannel",
+  },
   { url: "https://techcrunch.com/feed/", source: "TechCrunch" },
+  { url: "https://www.cnet.com/rss/news/", source: "CNET" },
+  { url: "https://syndication.howstuffworks.com/rss/tech", source: "HowStuffWorks Tech" },
 ];
 
 // Utility function to strip HTML tags
