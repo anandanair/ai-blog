@@ -52,6 +52,7 @@ export default function BlogClient({
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
                         priority
+                        quality={80}
                       />
                     ) : (
                       <div className="h-full bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center">
@@ -98,6 +99,7 @@ export default function BlogClient({
                             width={40}
                             height={40}
                             className="object-cover"
+                            quality={50}
                           />
                         </div>
                       </div>
@@ -157,6 +159,7 @@ export default function BlogClient({
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
                             sizes="(max-width: 768px) 100vw, 400px"
+                            quality={50}
                           />
                         ) : (
                           <div className="h-full bg-gradient-to-br from-indigo-600 to-purple-800 flex items-center justify-center">
@@ -235,6 +238,7 @@ export default function BlogClient({
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              quality={50}
                             />
                           ) : (
                             <div className="h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -281,6 +285,7 @@ export default function BlogClient({
                                   width={32}
                                   height={32}
                                   className="object-cover"
+                                  quality={50}
                                 />
                               </div>
                             </div>
@@ -431,6 +436,7 @@ export default function BlogClient({
                                         fill
                                         className="object-cover"
                                         sizes="64px"
+                                        quality={50}
                                       />
                                     ) : (
                                       <div className="h-full w-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
@@ -500,6 +506,7 @@ export default function BlogClient({
                                   fill
                                   className="object-cover"
                                   sizes="64px"
+                                  quality={50}
                                 />
                               ) : (
                                 <div className="h-full w-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
