@@ -26,6 +26,8 @@ export const getSortedPostsData = cache(
     tags?: string[];
     readTime?: number;
     popularity?: string;
+    page?: number;
+    pageSize?: number;
   }): Promise<PostData[]> => {
     const supabase = await createSupabaseServerClient();
 
@@ -83,6 +85,13 @@ export const getSortedPostsData = cache(
     } else {
       // Default sorting by creation date
       query = query.order("created_at", { ascending: false });
+    }
+
+    // Apply read time filter if provided
+    if (options?.page && options?.pageSize) {
+      const from = (options?.page - 1) * options?.pageSize;
+      const to = from + options?.pageSize - 1;
+      query = query.range(from, to);
     }
 
     const { data, error } = await query;
