@@ -4,8 +4,8 @@ import {
   getTrendingPostsData,
   getFeaturedPosts,
   getAllCategoriesSortedByPostCount,
-} from "@/lib/posts"; // Import getPopularPostsData
-import BlogClient from "@/components/BlogClient";
+} from "@/lib/posts";
+import BlogWrapper from "@/components/BlogWrapper";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -36,12 +36,12 @@ export default async function Home() {
   const categories = await getAllCategoriesSortedByPostCount();
 
   return (
-    <BlogClient
+    <BlogWrapper
       posts={posts}
       featuredPosts={featuredPosts}
       popularPosts={popularPosts}
       trendingPosts={trendingPosts}
       categories={categories}
     />
-  ); // Pass popularPosts
+  );
 }
