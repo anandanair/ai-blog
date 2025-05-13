@@ -25,7 +25,7 @@ export const getSortedPostsData = cache(
     query?: string;
     tags?: string[];
     readTime?: number;
-    popularity?: "trending" | "most_viewed" | "most_recent";
+    popularity?: "trending" | "most_viewed" | "most_recent" | undefined;
     page?: number;
     pageSize?: number;
   }): Promise<PostData[]> => {
