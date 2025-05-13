@@ -150,14 +150,21 @@ export default function PostClient({ postData }: PostClientProps) {
         transition={{ duration: 0.5 }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl">
+          {!isLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-800 animate-pulse rounded-3xl"></div>
+          )}
           {postData.image_url ? ( // Use image_url from PostData
             <div className="absolute inset-0">
               <Image
                 src={postData.image_url} // Use image_url from PostData
                 alt={postData.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                 className="object-cover opacity-40"
                 priority
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOQvhAAAAABJRU5ErkJggg=="
               />
             </div>
           ) : (
