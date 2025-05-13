@@ -2,6 +2,8 @@ import { getPostData, getAllPostIds } from "@/lib/posts";
 import PostClient from "@/components/PostClient";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import PostSkeleton from "@/components/PostSkeleton";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -81,11 +83,7 @@ export async function generateStaticParams() {
   }
 }
 
-// 2. Enable Incremental Static Regeneration (ISR)
-// Revalidate the page data periodically (e.g., every hour)
-// Good balance for daily posts: allows updates without full rebuilds.
-// export const revalidate = 3600; // Revalidate every 60 minutes (in seconds)
-export const revalidate = 86400; // Or revalidate daily (24 * 60 * 60 seconds)
+export const revalidate = 86400;
 
 export default async function Post({ params }: Params) {
   try {
@@ -96,7 +94,11 @@ export default async function Post({ params }: Params) {
       notFound();
     }
 
-    return <PostClient postData={postData} />;
+    return (
+      <Suspense fallback={<PostSkeleton />}>
+        <PostClient postData={postData} />
+      </Suspense>
+    );
   } catch (error) {
     console.error("Error rendering post:", error);
 
