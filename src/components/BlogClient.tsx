@@ -14,9 +14,6 @@ export default function BlogClient({
   trendingPosts,
   categories,
 }: BlogClientProps) {
-  // Latest posts section - show the 6 most recent posts
-  const latestPosts = posts.slice(0, 6);
-
   // Hero post - the most recent post (highest priority)
   const heroPost = featuredPosts[0];
 
@@ -219,7 +216,7 @@ export default function BlogClient({
                   </motion.h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {latestPosts.map((post) => (
+                    {posts.map((post) => (
                       <motion.article
                         key={post.id}
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col h-full"
