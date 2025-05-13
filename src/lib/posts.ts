@@ -25,41 +25,57 @@ export const getSortedPostsData = cache(
     query?: string;
     tags?: string[];
     readTime?: number;
-    popularity?: string;
+    popularity?: "trending" | "most_viewed" | "most_recent";
     page?: number;
     pageSize?: number;
   }): Promise<PostData[]> => {
     const supabase = await createSupabaseServerClient();
 
-    let query = supabase
+    let queryBuilder = supabase
       .from("posts")
       .select(
         "slug, title, description, created_at, image_url, author, read_time, tags, views, post_categories!fk_category(title)"
       )
-      .eq("status", "published")
-      .order("created_at", { ascending: false });
+      .eq("status", "published");
+    // .order("created_at", { ascending: false });
 
     if (options?.category) {
-      query = query.eq("category", options.category);
+      queryBuilder = queryBuilder.eq("category", options.category);
     }
 
     // Apply text search if provided
     if (options?.query && options.query.trim() !== "") {
-      query = query.or(
-        `title.ilike.%${options.query}%,description.ilike.%${options.query}%`
-      );
+      const searchTerm = options.query.trim();
+      const ftsQuery = searchTerm
+        .split(" ")
+        .filter((s) => s)
+        .join(" & "); // Example: 'hello world' -> 'hello & world'
+      queryBuilder = queryBuilder.textSearch("fts_document", ftsQuery, {
+        // type: 'plain', // or 'phrase' or 'websearch'
+        // config: 'english' // if your tsvector column is language-specific
+      });
+      // query = query.or(
+      //   `title.ilike.%${options.query}%,description.ilike.%${options.query}%`
+      // );
     }
 
     // Apply tags filter if provided
     if (options?.tags && options.tags.length > 0) {
       // Using overlaps for array comparison - checks if tags column contains any of the provided tags
-      query = query.overlaps("tags", options.tags);
+      queryBuilder = queryBuilder.overlaps("tags", options.tags);
     }
 
     // Apply read time filter if provided
-    if (options?.readTime) {
-      query = query.lte("read_time", options.readTime);
+    if (options?.readTime && options.readTime > 0) {
+      queryBuilder = queryBuilder.lte("read_time", options.readTime);
     }
+
+    // Apply sorting
+    // Default sort order
+    let primarySortColumn = "created_at";
+    let primarySortAscending = false;
+    let secondarySortColumn: string | null = null;
+    let secondarySortAscending = false;
 
     // Apply sorting based on popularity
     if (options?.popularity) {
@@ -68,33 +84,64 @@ export const getSortedPostsData = cache(
           // For trending, we might want to get posts from the last 7 days with high views
           const sevenDaysAgo = new Date();
           sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-          query = query
-            .gte("created_at", sevenDaysAgo.toISOString())
-            .order("views", { ascending: false });
+          queryBuilder = queryBuilder.gte(
+            "created_at",
+            sevenDaysAgo.toISOString()
+          );
+          // .order("views", { ascending: false });
+          primarySortColumn = "views";
+          primarySortAscending = false;
+          secondarySortColumn = "created_at";
+          secondarySortAscending = false;
+          break;
           break;
         case "most_viewed":
-          query = query.order("views", { ascending: false });
+          // query = query.order("views", { ascending: false });
+          primarySortColumn = "views";
+          primarySortAscending = false;
+          secondarySortColumn = "created_at"; // As a tie-breaker
+          secondarySortAscending = false;
           break;
         case "most_recent":
-          query = query.order("created_at", { ascending: false });
+          // query = query.order("created_at", { ascending: false });
+          // Default is already most_recent
+          primarySortColumn = "created_at";
+          primarySortAscending = false;
+          secondarySortColumn = null; // No specific secondary needed beyond DB's internal tie-breaking
           break;
-        default:
-          // Default sorting by creation date
-          query = query.order("created_at", { ascending: false });
+        // default:
+        // Default sorting by creation date
+        // query = query.order("created_at", { ascending: false });
       }
-    } else {
-      // Default sorting by creation date
-      query = query.order("created_at", { ascending: false });
     }
 
-    // Apply read time filter if provided
-    if (options?.page && options?.pageSize) {
+    // else {
+    //   // Default sorting by creation date
+    //   query = query.order("created_at", { ascending: false });
+    // }
+
+    queryBuilder = queryBuilder.order(primarySortColumn, {
+      ascending: primarySortAscending,
+    });
+    if (secondarySortColumn) {
+      queryBuilder = queryBuilder.order(secondarySortColumn, {
+        ascending: secondarySortAscending,
+      });
+    }
+
+    // Apply pagination
+    if (
+      options?.page &&
+      options?.pageSize &&
+      options.page > 0 &&
+      options.pageSize > 0
+    ) {
       const from = (options?.page - 1) * options?.pageSize;
       const to = from + options?.pageSize - 1;
-      query = query.range(from, to);
+      queryBuilder = queryBuilder.range(from, to);
     }
 
-    const { data, error } = await query;
+    const { data, error } = await queryBuilder;
 
     if (error) {
       console.error("Error fetching sorted posts:", error);
@@ -117,7 +164,7 @@ export const getSortedPostsData = cache(
         author: post.author,
         author_image: getAuthorImage(post.author), // Add author image based on author name
         read_time: post.read_time,
-        tags: post.tags,
+        tags: post.tags as string[] | null,
         views: post.views,
       };
     });
