@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 3600;
+
 export default async function Home() {
   const posts = await getSortedPostsData();
   const popularPosts = await getPopularPostsData(5);
