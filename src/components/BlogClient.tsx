@@ -180,6 +180,7 @@ export default function BlogClient({
 
                         <Link
                           href={`/posts/${post.id}`}
+                          prefetch={true}
                           className="block group"
                         >
                           <h3 className="text-lg font-bold mb-2 group-hover:text-purple-300 transition-colors duration-200 line-clamp-2">
@@ -259,6 +260,7 @@ export default function BlogClient({
 
                           <Link
                             href={`/posts/${post.id}`}
+                            prefetch={true}
                             className="block group mb-3"
                           >
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200">
@@ -296,6 +298,7 @@ export default function BlogClient({
                             <div className="ml-auto">
                               <Link
                                 href={`/posts/${post.id}`}
+                                prefetch={true}
                                 className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-sm font-medium"
                               >
                                 Read more
@@ -444,6 +447,7 @@ export default function BlogClient({
                                 <div>
                                   <Link
                                     href={`/posts/${post.id}`}
+                                    prefetch={true}
                                     className="text-sm font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 line-clamp-2 transition-colors duration-200"
                                   >
                                     {post.title}
@@ -485,6 +489,7 @@ export default function BlogClient({
                         >
                           <Link
                             href={`/posts/${post.id}`}
+                            prefetch={true}
                             className="flex p-4 group"
                           >
                             <div className="flex-shrink-0 relative w-16 h-16 rounded-lg overflow-hidden mr-4">
