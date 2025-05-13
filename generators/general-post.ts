@@ -332,7 +332,7 @@ ${searchTerms}
     *   Use clear Markdown headings (e.g., '## Catchy Section Title') and bullet points ('*' or '-') for sub-topics within each section.
 
 3.  **Section Content - Focus on Explanation & Impact:**
-    *   **Introduction (## Hook 'Em In):**
+    *   **Introduction:**
         *   Start with a relatable question, scenario, or surprising fact connected to the topic.
         *   Briefly state what the post is about in *very simple terms*.
         *   Clearly tell the reader *why this topic is interesting or relevant to them* (connect to the 'Hook Description').
