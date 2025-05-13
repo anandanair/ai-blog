@@ -53,7 +53,7 @@ export default function PostsClient({
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredPosts.map((post) => (
+                  {filteredPosts.map((post, index) => (
                     <article
                       key={post.id}
                       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col h-full"
@@ -68,6 +68,7 @@ export default function PostsClient({
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, 33vw"
+                            priority={index < 3}
                           />
                         ) : (
                           <div className="h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -97,6 +98,7 @@ export default function PostsClient({
 
                         <Link
                           href={`/posts/${post.id}`}
+                          prefetch={true}
                           className="block group mb-3"
                         >
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200">
@@ -133,6 +135,7 @@ export default function PostsClient({
                           <div className="ml-auto">
                             <Link
                               href={`/posts/${post.id}`}
+                              prefetch={true}
                               className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-sm font-medium"
                             >
                               Read more
