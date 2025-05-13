@@ -5,20 +5,31 @@ import Link from "next/link";
 import Image from "next/image";
 import { PostData, Category } from "@/types";
 import SearchBar from "./SearchBar";
+import Pagination from "./Pagination";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface PostsClientProps {
   posts: PostData[];
   categories: Category[];
   tags: { id: string; name: string }[];
+  totalPosts: number;
+  currentPage: number;
+  pageSize: number;
 }
 
 export default function PostsClient({
   posts,
   categories,
   tags,
+  totalPosts,
+  currentPage,
+  pageSize,
 }: PostsClientProps) {
   const [filteredPosts, setFilteredPosts] = useState<PostData[]>(posts);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Reset filtered posts when original posts change
@@ -28,6 +39,21 @@ export default function PostsClient({
   // Handle filter state from SearchBar component
   const handleFiltersOpenChange = (isOpen: boolean) => {
     setIsFiltersOpen(isOpen);
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalPosts / pageSize);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    // Create a new URLSearchParams object from the current search params
+    const params = new URLSearchParams(searchParams.toString());
+
+    // Update the page parameter
+    params.set("page", page.toString());
+
+    // Navigate to the new URL with updated search params
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
@@ -146,6 +172,13 @@ export default function PostsClient({
                     </article>
                   ))}
                 </div>
+
+                {/* Add pagination component */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </>
           ) : (

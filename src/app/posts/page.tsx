@@ -38,6 +38,10 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   // Handle popularity
   const popularityParam = params.popularity as string | undefined;
 
+  // Handle pagination parameters
+  const pageParam = params.page ? Number(params.page) : 1;
+  const pageSizeParam = params.pageSize ? Number(params.pageSize) : 9; // Default to 9 posts per page
+
   // Call getSortedPostsData with all parameters
   const posts = await getSortedPostsData({
     category: categoryParam,
@@ -45,11 +49,32 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
     tags: tagsParam,
     readTime: readTimeParam,
     popularity: popularityParam,
+    page: pageParam,
+    pageSize: pageSizeParam,
   });
 
+  // Get total posts count for pagination
+  const allPosts = await getSortedPostsData({
+    category: categoryParam,
+    query: queryParam,
+    tags: tagsParam,
+    readTime: readTimeParam,
+    popularity: popularityParam,
+  });
+
+  const totalPosts = allPosts.length;
   const categories = await getAllCategoriesSortedByPostCount();
   const tags = await getAllUniqueTags(); // Fetch real tags from posts
 
   // Pass data to client component
-  return <PostsClient posts={posts} categories={categories} tags={tags} />;
+  return (
+    <PostsClient
+      posts={posts}
+      categories={categories}
+      tags={tags}
+      totalPosts={totalPosts}
+      currentPage={pageParam}
+      pageSize={pageSizeParam}
+    />
+  );
 }
