@@ -29,11 +29,14 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function Home() {
-  const posts = await getSortedPostsData();
-  const popularPosts = await getPopularPostsData(5);
-  const trendingPosts = await getTrendingPostsData(10, 7);
-  const featuredPosts = await getFeaturedPosts(3);
-  const categories = await getAllCategoriesSortedByPostCount();
+  const [posts, popularPosts, trendingPosts, featuredPosts, categories] =
+    await Promise.all([
+      getSortedPostsData({ page: 1, pageSize: 6 }),
+      getPopularPostsData(5),
+      getTrendingPostsData(10, 7),
+      getFeaturedPosts(3),
+      getAllCategoriesSortedByPostCount(),
+    ]);
 
   return (
     <BlogWrapper
