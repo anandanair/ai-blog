@@ -19,6 +19,53 @@ function getAuthorImage(authorName: string | null): string {
   return authorImages[authorName] || "/images/authors/default.png";
 }
 
+export const getHomePostsData = cache(
+  async (options?: { limit?: number }): Promise<PostData[]> => {
+    const supabase = await createSupabaseServerClient();
+
+    let queryBuilder = supabase
+      .from("posts")
+      .select(
+        "slug, title, description, created_at, image_url, author, read_time, tags, views, post_categories!fk_category(title)"
+      )
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+
+    // Apply limit
+    if (options?.limit) {
+      queryBuilder = queryBuilder.limit(options?.limit);
+    }
+
+    const { data, error } = await queryBuilder;
+
+    if (error) {
+      console.error("Error fetching sorted posts:", error);
+      return [];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    return data.map((post) => {
+      const category = post.post_categories as unknown as { title: string };
+      return {
+        id: post.slug,
+        title: post.title,
+        description: post.description,
+        created_at: post.created_at,
+        image_url: post.image_url,
+        category: category.title,
+        author: post.author,
+        author_image: getAuthorImage(post.author), // Add author image based on author name
+        read_time: post.read_time,
+        tags: post.tags as string[] | null,
+        views: post.views,
+      };
+    });
+  }
+);
+
 export const getSortedPostsData = cache(
   async (options?: {
     category?: number;

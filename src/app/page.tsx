@@ -1,5 +1,5 @@
 import {
-  getSortedPostsData,
+  getHomePostsData,
   getPopularPostsData,
   getTrendingPostsData,
   getFeaturedPosts,
@@ -31,7 +31,7 @@ export const revalidate = 3600;
 export default async function Home() {
   const [posts, popularPosts, trendingPosts, featuredPosts, categories] =
     await Promise.all([
-      getSortedPostsData({ page: 1, pageSize: 6 }),
+      getHomePostsData({ limit: 6 }),
       getPopularPostsData(5),
       getTrendingPostsData(10, 7),
       getFeaturedPosts(3),
