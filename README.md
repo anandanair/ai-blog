@@ -142,7 +142,4 @@ As this is a private repository, contributions are likely managed internally. If
 
 ## License
 
-Private - All Rights Reserved.
-
-(If you intend to use a specific open-source license later, you can replace the above line with, for example, "This project is licensed under the MIT License - see the LICENSE file for details.")
-
+MIT License - All Rights Reserved.
