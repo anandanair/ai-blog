@@ -11,7 +11,6 @@ import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 import ReferenceTooltip from "./ReferenceTooltip";
 import { incrementPostViews } from "@/lib/posts.client";
-import RecommendedPosts from './RecommendedPosts'; // Import RecommendedPosts
 
 // Helper component to process references in any text content
 const ProcessReferences = ({
@@ -113,40 +112,8 @@ export default function PostClient({ postData }: PostClientProps) {
   useEffect(() => {
     if (postData.id) {
       incrementPostViews(postData.id);
-
-      // Track reading history
-      const MAX_HISTORY_ITEMS = 20; // Max items to keep in history for posts and categories each
-      const storedHistory = localStorage.getItem('readingHistory');
-      let readingHistory: string[] = storedHistory ? JSON.parse(storedHistory) : [];
-
-      // Add current post ID to history
-      if (!readingHistory.includes(postData.id)) {
-        readingHistory.push(postData.id);
-      }
-
-      // Add current post's category to history (if it has one)
-      if (postData.category) {
-        const categoryKey = `category:${postData.category}`;
-        if (!readingHistory.includes(categoryKey)) {
-          readingHistory.push(categoryKey);
-        }
-      }
-      
-      // Remove duplicates and limit history size
-      // A more sophisticated approach might involve separate lists for posts and categories
-      // or weighting items by recency. For now, a single list with mixed types.
-      const uniqueHistory = Array.from(new Set(readingHistory));
-      
-      if (uniqueHistory.length > MAX_HISTORY_ITEMS) {
-        // Simple FIFO eviction, could be smarter (e.g. evict least relevant)
-         readingHistory = uniqueHistory.slice(uniqueHistory.length - MAX_HISTORY_ITEMS);
-      } else {
-        readingHistory = uniqueHistory;
-      }
-
-      localStorage.setItem('readingHistory', JSON.stringify(readingHistory));
     }
-  }, [postData.id, postData.category]);
+  }, [postData.id]);
 
   // --- Prepare Research Lookup Map ---
   const researchDataMap = useMemo(() => {
@@ -656,12 +623,6 @@ export default function PostClient({ postData }: PostClientProps) {
           </Link>
         </motion.div>
       </article>
-
-      {/* Recommended Posts Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-8 md:px-16 py-8">
-        {/* Pass current post ID to avoid recommending the same post */}
-        <RecommendedPosts />
-      </div>
 
       {/* Floating scroll to top button */}
       <motion.button
