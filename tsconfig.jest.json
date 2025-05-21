@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json", // Extend the main tsconfig
+  "compilerOptions": {
+    "jsx": "react-jsx", // or "react", depending on project setup. "react-jsx" is common for newer setups.
+    "esModuleInterop": true, // Recommended for Jest compatibility
+    "allowSyntheticDefaultImports": true, // Recommended for Jest compatibility
+    // "baseUrl": ".", // Ensure paths are resolved correctly if using path aliases
+    // "paths": {
+    //   "@/*": ["src/*"] // Ensure this matches your main tsconfig and jest.config.js
+    // }
+  },
+  "include": [
+    "next-env.d.ts", // Include Next.js type definitions
+    "**/*.ts",       // Include all .ts files
+    "**/*.tsx",      // Include all .tsx files
+    "__mocks__/**/*", // Include mocks
+    "jest.setup.js"   // Include Jest setup file
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
+}
