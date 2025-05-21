@@ -1,11 +1,12 @@
 import fs from "fs";
 import RSS from "rss";
+// Removed import path from 'path';
 // Import directly from the .ts files - verify path and function name
 import dotenv from "dotenv";
-import { getAllPostsForRss, initSupabase } from "../utils/database";
+import { getAllPostsForRss, initSupabase } from "../src/utils/database";
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: './.env.local' }); // Reverted to simpler path
 
 async function generateRssFeed() {
   // Use environment variable for site URL, provide a default fallback

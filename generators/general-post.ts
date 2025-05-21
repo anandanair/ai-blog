@@ -5,20 +5,20 @@ import {
   extractMarkdownContent,
   generateSlug,
   formatResearchForStorage,
-} from "../utils/helpers";
+} from "../src/utils/ai-helpers"; // Updated path and filename
 import {
   getCategoryPostCounts,
   getExistingPostTitles,
   savePostToDatabase,
-} from "../utils/database";
-import { getCurrentTechContext } from "../utils/topic-selection";
+} from "../src/utils/database";
+import { getCurrentTechContext } from "../src/utils/topic-selection";
 import {
   GroundedResearchResult,
   researchTopicWithGrounding,
-} from "../utils/topic-research";
-import { finalPolish, refineDraft } from "../utils/post-refining";
-import { validateMarkdownSyntax } from "../utils/post-validation";
-import { generateMetadata } from "../utils/metadata-generation";
+} from "../src/utils/topic-research";
+import { finalPolish, refineDraft } from "../src/utils/post-refining";
+import { validateMarkdownSyntax } from "../src/utils/post-validation";
+import { generateMetadata } from "../src/utils/metadata-generation";
 
 /**
  * Generates a general blog post using a multi-stage approach:

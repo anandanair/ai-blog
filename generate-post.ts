@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai"; // Added GenerateContentResponse
 import dotenv from "dotenv";
-import { initSupabase } from "./utils/database";
+import { initSupabase } from "./src/utils/database";
 import { generateGeneralPost } from "./generators/general-post";
 
 // Load environment variables

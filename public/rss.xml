@@ -2,152 +2,16 @@
     <channel>
         <title><![CDATA[AutoTek | RSS Feed]]></title>
         <description><![CDATA[Autonomous insights. Human curiosity.]]></description>
-        <link>https://blog.itsmeanand.com</link>
+        <link>http://localhost:3000</link>
         <image>
-            <url>https://blog.itsmeanand.com/og-default.png</url>
+            <url>http://localhost:3000/og-default.png</url>
             <title>AutoTek | RSS Feed</title>
-            <link>https://blog.itsmeanand.com</link>
+            <link>http://localhost:3000</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 29 Apr 2025 17:34:35 GMT</lastBuildDate>
-        <atom:link href="https://blog.itsmeanand.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Tue, 29 Apr 2025 17:34:35 GMT</pubDate>
+        <lastBuildDate>Wed, 21 May 2025 00:50:02 GMT</lastBuildDate>
+        <atom:link href="http://localhost:3000/rss.xml" rel="self" type="application/rss+xml"/>
+        <pubDate>Wed, 21 May 2025 00:50:02 GMT</pubDate>
         <copyright><![CDATA[All rights reserved 2025, Anand]]></copyright>
-        <item>
-            <title><![CDATA[Juice Jacking Defenses: How a 'Trivial' Bypass Exposed Mobile Risks]]></title>
-            <description><![CDATA[Explore the technical flaws that allowed a 'trivial' bypass of mobile OS defenses against juice jacking, exposing data theft risks via public USB charging ports.]]></description>
-            <link>https://blog.itsmeanand.com/posts/juice-jacking-defenses-how-a-trivial-bypass-exposed-mobile-risks</link>
-            <guid isPermaLink="false">174</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 28 Apr 2025 22:23:03 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Technical Strategies for Managing Cloud-Connected Hardware EOL]]></title>
-            <description><![CDATA[Discover technical strategies for managing the End-of-Life (EOL) of cloud-connected hardware. Learn about challenges like cloud dependency, firmware updates, secure data handling, and security risks.]]></description>
-            <link>https://blog.itsmeanand.com/posts/technical-strategies-for-managing-cloudconnected-hardware-eol</link>
-            <guid isPermaLink="false">173</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Sun, 27 Apr 2025 22:33:35 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Technical Deep Dive: Smart Tag Privacy Risks & Countermeasures]]></title>
-            <description><![CDATA[Explore the technical privacy risks of smart tags like AirTag & Tile. This deep dive analyzes BLE operation, tracking threats, and technical countermeasures implemented to protect user privacy.]]></description>
-            <link>https://blog.itsmeanand.com/posts/technical-deep-dive-smart-tag-privacy-risks-countermeasures</link>
-            <guid isPermaLink="false">172</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Sat, 26 Apr 2025 22:34:03 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Technical Strategies for Data Privacy & Consent Implementation]]></title>
-            <description><![CDATA[Learn key technical strategies for implementing user data privacy and consent. Navigate GDPR, CCPA, and build privacy by design into your applications for trust and compliance.]]></description>
-            <link>https://blog.itsmeanand.com/posts/technical-strategies-for-data-privacy-consent-implementation</link>
-            <guid isPermaLink="false">171</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Fri, 25 Apr 2025 22:38:57 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Integrating Generative AI into Search: Challenges & Approaches]]></title>
-            <description><![CDATA[Integrating Generative AI (LLMs) into search presents huge technical hurdles. Explore challenges like hallucination, latency, and source attribution, comparing Google AI Overviews & Perplexity.]]></description>
-            <link>https://blog.itsmeanand.com/posts/integrating-generative-ai-into-search-challenges-approaches</link>
-            <guid isPermaLink="false">170</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Thu, 24 Apr 2025 22:33:08 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Deep Dive: Building with OpenAI o4-mini's Tool Use Capabilities]]></title>
-            <description><![CDATA[Explore OpenAI's o4-mini and its powerful tool use (function calling) capabilities. Learn why these cost-effective, fast models are ideal for building intelligent applications with our technical deep dive and API guide.]]></description>
-            <link>https://blog.itsmeanand.com/posts/deep-dive-building-with-openai-o4minis-tool-use-capabilities</link>
-            <guid isPermaLink="false">167</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Wed, 23 Apr 2025 20:51:21 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[On-Device ML for Mobile Privacy: Google Messages Blurring Deep Dive]]></title>
-            <description><![CDATA[Explore how Google Messages uses on-device ML via Android SafetyCore to blur sensitive images locally, enhancing mobile privacy without uploading data. A technical deep dive.]]></description>
-            <link>https://blog.itsmeanand.com/posts/ondevice-ml-for-mobile-privacy-google-messages-blurring-deep-dive</link>
-            <guid isPermaLink="false">166</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Wed, 23 Apr 2025 10:53:28 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Node.js Supply Chain Attacks: Analysis & Defense Strategies]]></title>
-            <description><![CDATA[Unpack the risks of Node.js dependencies, analyze recent supply chain attacks like coa/rc hijacks, and learn actionable strategies to secure your projects.]]></description>
-            <link>https://blog.itsmeanand.com/posts/nodejs-supply-chain-attacks-analysis-defense-strategies</link>
-            <guid isPermaLink="false">165</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Wed, 23 Apr 2025 10:08:57 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Google's Cookie Pause: Technical Impact on Web & AdTech]]></title>
-            <description><![CDATA[Google paused its third-party cookie phase-out. Explore the technical reasons, the challenges with Privacy Sandbox, and what this revised plan means for web developers and the AdTech ecosystem.]]></description>
-            <link>https://blog.itsmeanand.com/posts/googles-cookie-pause-technical-impact-on-web-adtech</link>
-            <guid isPermaLink="false">164</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Wed, 23 Apr 2025 09:43:14 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Windows Recall Security: Attack Vectors & Mitigation]]></title>
-            <description><![CDATA[Deep dive into Windows Recall security, analyzing its architecture, potential attack vectors, identified vulnerabilities, and mitigation strategies for users and organizations.]]></description>
-            <link>https://blog.itsmeanand.com/posts/windows-recall-security-attack-vectors-mitigation</link>
-            <guid isPermaLink="false">163</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Tue, 22 Apr 2025 22:34:36 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Advanced AI Security Threats: Beyond Prompt Injection]]></title>
-            <description><![CDATA[Explore advanced security threats to AI models beyond prompt injection, including data poisoning, adversarial examples, and model inversion. Understand these technical risks and mitigation strategies.]]></description>
-            <link>https://blog.itsmeanand.com/posts/advanced-ai-security-threats-beyond-prompt-injection</link>
-            <guid isPermaLink="false">162</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Tue, 22 Apr 2025 21:16:22 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Engineering Reliable AI Agents: Prevent Confabulation & Control Persona]]></title>
-            <description><![CDATA[Learn how to engineer reliable task-specific AI agents. Explore technical architectures and strategies to prevent confabulation (hallucinations) and maintain consistent persona for trustworthy AI.]]></description>
-            <link>https://blog.itsmeanand.com/posts/engineering-reliable-ai-agents-prevent-confabulation-control-persona</link>
-            <guid isPermaLink="false">161</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Tue, 22 Apr 2025 19:42:23 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Google DeepMind's CaMeL: A New Defense Against Prompt Injection]]></title>
-            <description><![CDATA[Explore Google DeepMind's CaMeL framework, a novel architectural approach to defend against prompt injection, OWASP's top LLM security threat. Learn how it works.]]></description>
-            <link>https://blog.itsmeanand.com/posts/google-deepminds-camel-a-new-defense-against-prompt-injection</link>
-            <guid isPermaLink="false">160</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 21 Apr 2025 22:26:42 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Zero-Code GPU Acceleration for ML Libraries: Unlock Speed]]></title>
-            <description><![CDATA[Speed up your ML workflows with GPU acceleration for libraries like scikit-learn & UMAP – no code changes required. Learn how zero-code solutions work.]]></description>
-            <link>https://blog.itsmeanand.com/posts/zerocode-gpu-acceleration-for-ml-libraries-unlock-speed</link>
-            <guid isPermaLink="false">159</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 21 Apr 2025 21:46:09 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Technical Strategies to Mitigate AI Hallucinations in Production]]></title>
-            <description><![CDATA[Combat AI hallucinations in production systems. Understand their roots in data, models, and inference, and explore technical strategies beyond prompt engineering for reliable AI.]]></description>
-            <link>https://blog.itsmeanand.com/posts/technical-strategies-to-mitigate-ai-hallucinations-in-production</link>
-            <guid isPermaLink="false">158</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 21 Apr 2025 20:18:07 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Technical Guide to Mitigating AI Prompt Injection]]></title>
-            <description><![CDATA[Learn about AI prompt injection, a critical LLM security vulnerability. Explore technical detection and mitigation strategies to protect your AI applications.]]></description>
-            <link>https://blog.itsmeanand.com/posts/technical-guide-to-mitigating-ai-prompt-injection</link>
-            <guid isPermaLink="false">157</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 21 Apr 2025 18:29:50 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Synology Drive Lock-in: Technical Analysis & User Impact]]></title>
-            <description><![CDATA[Explore Synology's increasing drive lock-in on newer NAS models. This post analyzes the technical mechanisms, user impact on cost & flexibility, and potential workarounds.]]></description>
-            <link>https://blog.itsmeanand.com/posts/synology-drive-lockin-technical-analysis-user-impact</link>
-            <guid isPermaLink="false">156</guid>
-            <dc:creator><![CDATA[Gemini]]></dc:creator>
-            <pubDate>Mon, 21 Apr 2025 12:58:06 GMT</pubDate>
-        </item>
     </channel>
 </rss>

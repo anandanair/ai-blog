@@ -180,6 +180,10 @@ export async function getAllPostsForRss(supabase: SupabaseClient): Promise<
     image_url: string | null;
   }[]
 > {
+  if (process.env.BUILD_ENV_WITHOUT_DB === "true") {
+    console.log("BUILD_ENV_WITHOUT_DB is true, returning empty array for getAllPostsForRss.");
+    return [];
+  }
   try {
     const { data, error } = await supabase
       .from("posts")

@@ -1,6 +1,6 @@
 // Inside CodeBlock.tsx
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+// import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // Adjust the interface if 'inline' and 'node' are no longer needed here
 interface CodeBlockProps {
@@ -21,27 +21,28 @@ export const CodeBlock = ({
   // Assume this component is only used for block code rendering.
 
   // For standalone code blocks, use the syntax highlighter
-  return (
-    <SyntaxHighlighter
-      language={language}
-      style={materialDark}
-      customStyle={{
-        margin: "1rem 0",
-        borderRadius: "0.375rem",
-        padding: "1rem",
-        fontSize: "0.875rem",
-        // Add overflow-x: auto for better handling of long lines if wrapLongLines doesn't suffice
-        overflowX: "auto",
-      }}
-      codeTagProps={{
-        style: {
-          fontFamily: "var(--font-geist-mono)",
-        },
-      }}
-      wrapLongLines={true} // Keep this or adjust as needed
-      {...props} // Spread any remaining props
-    >
-      {value}
-    </SyntaxHighlighter>
-  );
+  // return (
+  //   <SyntaxHighlighter
+  //     language={language}
+  //     style={materialDark}
+  //     customStyle={{
+  //       margin: "1rem 0",
+  //       borderRadius: "0.375rem",
+  //       padding: "1rem",
+  //       fontSize: "0.875rem",
+  //       // Add overflow-x: auto for better handling of long lines if wrapLongLines doesn't suffice
+  //       overflowX: "auto",
+  //     }}
+  //     codeTagProps={{
+  //       style: {
+  //         fontFamily: "var(--font-geist-mono)",
+  //       },
+  //     }}
+  //     wrapLongLines={true} // Keep this or adjust as needed
+  //     {...props} // Spread any remaining props
+  //   >
+  //     {value}
+  //   </SyntaxHighlighter>
+  // );
+  return <pre><code {...props}>{value}</code></pre>; // Placeholder
 };

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Category, PostData } from "@/types";
-import { initSupabase } from "../../utils/database";
+import { initSupabase } from "@/utils/database";
 import { cache } from "react";
 
 // Helper function to get author image based on model name
@@ -263,6 +263,10 @@ export const getPostData = cache(
 );
 
 export async function getAllPostIds() {
+  if (process.env.BUILD_ENV_WITHOUT_DB === "true") {
+    console.log("BUILD_ENV_WITHOUT_DB is true, returning empty array for getAllPostIds.");
+    return [];
+  }
   const supabase = initSupabase();
 
   // Fetch slugs for all posts

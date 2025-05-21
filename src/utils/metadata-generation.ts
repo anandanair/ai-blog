@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { calculateReadTime } from "./helpers";
+import { calculateReadTime } from "./ai-helpers";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getAllCategories } from "./database";
 
