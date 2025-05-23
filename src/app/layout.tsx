@@ -94,7 +94,6 @@ export const metadata: Metadata = {
     },
   },
   // If you generate a sitemap (recommended!), uncomment the line below
-  // sitemap: `${siteUrl}/sitemap.xml`,
 
   // Favicon links (place these in your /public folder)
   icons: {

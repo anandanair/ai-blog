@@ -70,6 +70,33 @@ export async function generateMetadata(
       description: metaDescription,
       images: [imageUrl], // Must be an absolute URL
     },
+    other: {
+      'application/ld+json': JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: postData.title,
+        description: metaDescription,
+        image: imageUrl,
+        author: {
+          '@type': 'Person',
+          name: postData.author || 'AutoTek Team',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'AutoTek',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${siteUrl}android-chrome-512x512.png`, // Corrected path
+          },
+        },
+        datePublished: new Date(postData.created_at).toISOString(),
+        dateModified: new Date(postData.created_at).toISOString(), // Using created_at as updated_at is not available
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': postUrl,
+        },
+      }),
+    },
   };
 }
 
