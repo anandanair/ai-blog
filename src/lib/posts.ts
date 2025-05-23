@@ -258,7 +258,89 @@ export const getPostData = cache(
       read_time: data.read_time,
       research_details: data.research_details,
       views: data.views,
+      relatedPosts: [], // Initialize with empty array
     };
+
+    // Fetch related posts if the main post was found
+    if (postWithDetails) {
+      postWithDetails.relatedPosts = await getRelatedPosts(
+        postWithDetails.category,
+        postWithDetails.id,
+        3 // Limit to 3 related posts
+      );
+    }
+
+    return postWithDetails;
+  }
+);
+
+// Function to get related posts
+export const getRelatedPosts = cache(
+  async (
+    categoryTitle: string,
+    currentPostId: string,
+    limit: number = 3
+  ): Promise<PostData[]> => {
+    const supabase = await createSupabaseServerClient();
+
+    // First, get the category ID from the category title
+    const { data: categoryData, error: categoryError } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("title", categoryTitle)
+      .single();
+
+    if (categoryError || !categoryData) {
+      console.error(
+        `Error fetching category ID for title ${categoryTitle}:`,
+        categoryError
+      );
+      return [];
+    }
+    const categoryId = categoryData.id;
+
+    // Then, fetch related posts
+    const { data, error } = await supabase
+      .from("posts")
+      .select(
+        "slug, title, description, created_at, image_url, post_categories!inner(title), author, read_time, tags, views"
+      )
+      .eq("status", "published")
+      .eq("post_categories.category_id", categoryId) // Filter by category ID through the join table
+      .not("slug", "eq", currentPostId) // Exclude the current post
+      .order("views", { ascending: false }) // Order by views (popularity)
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching related posts:", error);
+      return [];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    return data.map((post) => {
+      // Ensure post_categories is correctly typed for accessing title
+      const postCategory = post.post_categories as unknown as { title: string }[];
+      const category = postCategory.length > 0 ? postCategory[0].title : "Uncategorized";
+
+
+      return {
+        id: post.slug,
+        title: post.title,
+        description: post.description,
+        created_at: post.created_at,
+        image_url: post.image_url,
+        category: category, // Simplified: get the first category title
+        author: post.author,
+        author_image: getAuthorImage(post.author),
+        read_time: post.read_time,
+        tags: post.tags as string[] | null,
+        views: post.views,
+        // No 'relatedPosts' for related posts themselves to avoid recursion
+      };
+    });
   }
 );
 

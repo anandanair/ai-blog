@@ -11,6 +11,16 @@ import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 import ReferenceTooltip from "./ReferenceTooltip";
 import { incrementPostViews } from "@/lib/posts.client";
+import CommentsSection from "./CommentsSection"; // Import the CommentsSection component
+import {
+  TwitterShareButton,
+  LinkedinShareButton,
+  RedditShareButton,
+  TwitterIcon,
+  LinkedinIcon,
+  RedditIcon,
+} from 'react-share';
+import RelatedPosts from './RelatedPosts'; // Import the RelatedPosts component
 
 // Helper component to process references in any text content
 const ProcessReferences = ({
@@ -98,6 +108,7 @@ interface PostClientProps {
 export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -132,7 +143,11 @@ export default function PostClient({ postData }: PostClientProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsLoaded(true);
+    setCurrentUrl(window.location.href); // Set current URL on mount
   }, []);
+
+  const shareUrl = process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/posts/${postData.slug}` : currentUrl;
+
 
   return (
     <div className="min-h-screen">
@@ -566,35 +581,19 @@ export default function PostClient({ postData }: PostClientProps) {
           transition={{ delay: 0.7, duration: 0.5 }}
         >
           <div className="mb-4 sm:mb-0">
-            <span className="text-gray-500 dark:text-gray-400">
-              Share this article:
-            </span>
-            <div className="flex space-x-4 mt-2">
-              {/* Social share buttons (non-functional in this example) */}
-              {["twitter", "facebook", "linkedin"].map((social) => (
-                <motion.button
-                  key={social}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
-                >
-                  <span className="sr-only">Share on {social}</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                </motion.button>
-              ))}
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+              Share this article
+            </h3>
+            <div className="flex space-x-3 mt-2">
+              <TwitterShareButton url={shareUrl} title={postData.title}>
+                <TwitterIcon size={32} round />
+              </TwitterShareButton>
+              <LinkedinShareButton url={shareUrl} title={postData.title}>
+                <LinkedinIcon size={32} round />
+              </LinkedinShareButton>
+              <RedditShareButton url={shareUrl} title={postData.title}>
+                <RedditIcon size={32} round />
+              </RedditShareButton>
             </div>
           </div>
 
@@ -622,6 +621,18 @@ export default function PostClient({ postData }: PostClientProps) {
             </motion.button>
           </Link>
         </motion.div>
+
+        {/* Comments Section */}
+        <div className="px-4 sm:px-8 md:px-16 py-8">
+          <CommentsSection post_slug={postData.slug} />
+        </div>
+
+        {/* Related Posts Section */}
+        {postData.relatedPosts && postData.relatedPosts.length > 0 && (
+          <div className="px-4 sm:px-8 md:px-16 py-8">
+            <RelatedPosts posts={postData.relatedPosts} />
+          </div>
+        )}
       </article>
 
       {/* Floating scroll to top button */}
