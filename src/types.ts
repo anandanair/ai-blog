@@ -37,6 +37,7 @@ export interface PostData {
     point: string;
     data: GroundedResearchResult;
   }> | null;
+  relatedPosts?: Array<PostData>;
 }
 
 export interface BlogClientProps {

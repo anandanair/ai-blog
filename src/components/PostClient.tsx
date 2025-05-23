@@ -19,8 +19,8 @@ import {
   TwitterIcon,
   LinkedinIcon,
   RedditIcon,
-} from 'react-share';
-import RelatedPosts from './RelatedPosts'; // Import the RelatedPosts component
+} from "react-share";
+import RelatedPosts from "./RelatedPosts"; // Import the RelatedPosts component
 
 // Helper component to process references in any text content
 const ProcessReferences = ({
@@ -108,7 +108,7 @@ interface PostClientProps {
 export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState('');
+  const [currentUrl, setCurrentUrl] = useState("");
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -146,8 +146,9 @@ export default function PostClient({ postData }: PostClientProps) {
     setCurrentUrl(window.location.href); // Set current URL on mount
   }, []);
 
-  const shareUrl = process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/posts/${postData.slug}` : currentUrl;
-
+  const shareUrl = process.env.NEXT_PUBLIC_SITE_URL
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/posts/${postData.id}`
+    : currentUrl;
 
   return (
     <div className="min-h-screen">
@@ -624,7 +625,7 @@ export default function PostClient({ postData }: PostClientProps) {
 
         {/* Comments Section */}
         <div className="px-4 sm:px-8 md:px-16 py-8">
-          <CommentsSection post_slug={postData.slug} />
+          <CommentsSection post_slug={postData.id} />
         </div>
 
         {/* Related Posts Section */}

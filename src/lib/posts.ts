@@ -226,7 +226,7 @@ export const getPostData = cache(
     const { data, error } = await supabase
       .from("posts")
       .select(
-        "slug, title, description, content, created_at, image_url, post_categories!fk_category(title), tags, author, read_time, research_details, views"
+        "slug, title, description, content, created_at, image_url, post_categories!fk_category(title), tags, author, read_time, research_details, views, category"
       )
       .eq("slug", id)
       .eq("status", "published") // Adjust status as needed
@@ -244,7 +244,7 @@ export const getPostData = cache(
     const category = data.post_categories as unknown as { title: string };
 
     // Return the combined data
-    return {
+    let postWithDetails: PostData = {
       id: data.slug,
       content: data.content,
       title: data.title,
@@ -264,7 +264,7 @@ export const getPostData = cache(
     // Fetch related posts if the main post was found
     if (postWithDetails) {
       postWithDetails.relatedPosts = await getRelatedPosts(
-        postWithDetails.category,
+        data.category,
         postWithDetails.id,
         3 // Limit to 3 related posts
       );
@@ -277,36 +277,20 @@ export const getPostData = cache(
 // Function to get related posts
 export const getRelatedPosts = cache(
   async (
-    categoryTitle: string,
+    categoryId: string,
     currentPostId: string,
     limit: number = 3
   ): Promise<PostData[]> => {
     const supabase = await createSupabaseServerClient();
 
-    // First, get the category ID from the category title
-    const { data: categoryData, error: categoryError } = await supabase
-      .from("categories")
-      .select("id")
-      .eq("title", categoryTitle)
-      .single();
-
-    if (categoryError || !categoryData) {
-      console.error(
-        `Error fetching category ID for title ${categoryTitle}:`,
-        categoryError
-      );
-      return [];
-    }
-    const categoryId = categoryData.id;
-
     // Then, fetch related posts
     const { data, error } = await supabase
       .from("posts")
       .select(
-        "slug, title, description, created_at, image_url, post_categories!inner(title), author, read_time, tags, views"
+        "slug, title, description, created_at, image_url, post_categories!fk_category(title), author, read_time, tags, views"
       )
       .eq("status", "published")
-      .eq("post_categories.category_id", categoryId) // Filter by category ID through the join table
+      .eq("category", categoryId)
       .not("slug", "eq", currentPostId) // Exclude the current post
       .order("views", { ascending: false }) // Order by views (popularity)
       .limit(limit);
@@ -321,10 +305,7 @@ export const getRelatedPosts = cache(
     }
 
     return data.map((post) => {
-      // Ensure post_categories is correctly typed for accessing title
-      const postCategory = post.post_categories as unknown as { title: string }[];
-      const category = postCategory.length > 0 ? postCategory[0].title : "Uncategorized";
-
+      const category = post.post_categories as unknown as { title: string };
 
       return {
         id: post.slug,
@@ -332,7 +313,7 @@ export const getRelatedPosts = cache(
         description: post.description,
         created_at: post.created_at,
         image_url: post.image_url,
-        category: category, // Simplified: get the first category title
+        category: category.title,
         author: post.author,
         author_image: getAuthorImage(post.author),
         read_time: post.read_time,
