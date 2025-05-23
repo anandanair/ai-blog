@@ -53,13 +53,17 @@ export async function generateMetadata(
   // --- 2. Craft LLM Prompt for other metadata ---
   // Using JSON output instruction for easier parsing (works well with Gemini 1.5+)
   const metadataSystemPrompt = `
-  You are a "Digital Content Optimizer" with a special talent for crafting metadata that attracts and engages a **general, non-technical audience** for a technology blog. Your goal is to make tech topics sound irresistible and easily discoverable by everyday people curious about technology's impact on their lives.
+  You are a "Digital Content Optimizer" and SEO Specialist with a special talent for crafting metadata that attracts and engages a **general, non-technical audience** for a technology blog. Your goal is to make tech topics sound irresistible, easily discoverable by search engines, and compelling for users to click on in search results.
 
 Core Principles for Metadata:
 - **Audience First, Always:** Think like someone who isn't a tech expert. What words would they use? What would make them curious?
 - **Clarity and Intrigue:** Titles and descriptions must be instantly understandable and spark interest. Avoid jargon.
+- **SEO Best Practices:**
+    - **Keyword Integration:** Naturally weave 1-2 primary keywords (relevant to the blog post's main topic) into titles and meta descriptions. These keywords should be terms the target audience is likely to search for.
+    - **Search Intent:** Craft titles and descriptions that align with what a user hopes to find when searching for the topic.
+    - **Click-Through Rate (CTR) Focus:** Make metadata compelling enough to encourage clicks from search engine results pages (SERPs).
 - **Visual Appeal (for Image Prompts):** Image prompts should aim for visuals that are conceptually relevant, aesthetically pleasing, and relatable or thought-provoking for a general viewer, not just abstract tech representations.
-- **Discoverability (for Tags/Keywords):** Use terms that average people might actually search for when looking for information on the topic.
+- **Discoverability (for Tags/Keywords):** Use a mix of broad and long-tail keywords that average people might actually search for. Long-tail keywords are more specific phrases that indicate a clearer intent.
 - **Honest Representation:** Metadata should accurately reflect the blog post's content, which is designed to be accessible and informative for a non-technical reader.
 `;
 
@@ -86,16 +90,18 @@ Generate the following metadata fields based *only* on the provided draft and th
 
 1.  **title:**
     *   A compelling, clear, and intriguing title (max ~60-70 characters).
-    *   It should make a non-technical person curious and want to click.
+    *   It should make a non-technical person curious and want to click. **Integrate 1-2 primary keywords naturally** that someone would search for regarding this topic.
+    *   Prioritize front-loading important keywords if possible without sacrificing readability.
     *   Use simple language; **avoid technical jargon.**
-    *   Think: "What question does this answer?" or "What surprising thing will I learn?"
-    *   *Examples:* "Is Your Smart TV Spying on You? The Simple Truth," "The Secret Tech That Decides Your Next Binge-Watch," "Could AI Be Your Next Doctor? What You Need to Know."
+    *   Think: "What question does this answer for a searcher?" or "What surprising, valuable insight will I gain quickly?"
+    *   *Examples (assuming keywords like 'smart TV privacy', 'streaming algorithm', 'AI healthcare'):* "Smart TV Privacy: Is Yours Spying on You? The Simple Truth," "Streaming Algorithms: The Secret Tech Deciding Your Next Binge-Watch," "AI in Healthcare: Could Your Next Doctor Be an Algorithm?"
 
 2.  **meta_description:**
     *   A concise summary for search engine results (~150-160 characters).
-    *   It must entice clicks from a **general audience.**
-    *   Clearly state what the post is about in simple terms and highlight *why it's interesting or relevant to them*.
-    *   *Example for "AI Doctor":* "Wondering if AI could diagnose illnesses? Discover how artificial intelligence is changing healthcare and what it means for your future doctor visits."
+    *   It must entice clicks from a **general audience and clearly signal relevance to search engines.**
+    *   **Naturally include 1-2 important keywords** that expand on the title's topic.
+    *   Clearly state what the post is about in simple terms, highlight *why it's interesting or relevant to them*, and include a call to action if appropriate (e.g., "Learn more," "Discover how").
+    *   *Example for "AI Doctor" (keywords: 'AI diagnosis', 'future of healthcare'):* "Curious about AI diagnosis? Discover how artificial intelligence is revolutionizing the future of healthcare and what it means for your doctor visits. Learn more."
 
 3.  **image_prompt:**
     *   A detailed prompt for an AI image generator to create a visually engaging and conceptually relevant image for a **general audience.**
@@ -106,11 +112,15 @@ Generate the following metadata fields based *only* on the provided draft and th
     *   *Example for "Smart TV Spying":* "Stylized illustration of a sleek modern TV with a large, curious cartoon eye looking out from the screen. A slightly concerned but intrigued person is peeking from behind a sofa. Colors are a mix of domestic comfort and a hint of technological mystery."
 
 4.  **tags:**
-    *   A list of 3-7 relevant keywords or tags as a JSON array of strings.
-    *   These should be terms a **non-technical person might actually use** when searching for information on this topic or related concepts.
-    *   Include a mix of broader concepts and more specific (but still simple) terms.
-    *   *Examples for "AI Doctor":* '["ai in healthcare", "medical technology", "future of medicine", "artificial intelligence", "health tech"]'
-    *   *Examples for "Smart TV Spying":* '["smart tv privacy", "data collection", "tv spying", "tech privacy", "internet of things"]'
+    *   A list of 5-7 relevant keywords or tags as a JSON array of strings.
+    *   These should be terms a **non-technical person might actually use** when searching.
+    *   Include a mix of:
+        *   **Broad keywords** (e.g., "artificial intelligence").
+        *   **Specific/Long-tail keywords** (e.g., "how AI is used in medical diagnosis", "risks of smart TV data collection"). These are longer phrases that indicate clearer user intent.
+        *   Keywords that cover the **problem** the post solves or the **question** it answers.
+    *   Ensure tags are directly relevant to the core content of the post.
+    *   *Examples for "AI Doctor":* '["ai in healthcare", "medical technology", "future of medicine", "how AI is used in medical diagnosis", "artificial intelligence diagnosis", "health tech innovations"]'
+    *   *Examples for "Smart TV Spying":* '["smart tv privacy", "data collection risks", "tv spying explained", "tech privacy concerns", "internet of things security", "how to protect your smart TV"]'
 
 5.  **category:**
     *   The **ID** (integer) of the single main category from the "Available Categories" list that best represents the post's primary topic area *to a general reader.*
