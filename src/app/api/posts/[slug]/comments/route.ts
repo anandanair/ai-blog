@@ -48,9 +48,9 @@ export async function GET(
 // POST handler to submit a new comment
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> } // Change type to Promise
 ) {
-  const postSlug = params.slug;
+  const { slug: postSlug } = await params; // Await params and destructure slug
 
   if (!postSlug) {
     return NextResponse.json(
