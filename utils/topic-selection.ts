@@ -22,20 +22,23 @@ export async function getCurrentTechContext(): Promise<string> {
     techContext += "\n\nTrending topics from Reddit tech communities:\n";
     techContext += redditTopics;
 
-    // Part 3: Get GitHub trending repositories
-    const githubTopics = await getGitHubTrending();
-    techContext += "\n\nTrending repositories on GitHub:\n";
-    techContext += githubTopics;
+    // Removed due to too technical
+    // // Part 3: Get GitHub trending repositories
+    // const githubTopics = await getGitHubTrending();
+    // techContext += "\n\nTrending repositories on GitHub:\n";
+    // techContext += githubTopics;
 
-    // Part 5: Get developer topics from Stack Overflow
-    const stackOverflowTopics = await getStackOverflowTopics();
-    techContext += "\n\nHot topics on Stack Overflow:\n";
-    techContext += stackOverflowTopics;
+    // Removed due to too technical
+    // // Part 5: Get developer topics from Stack Overflow
+    // const stackOverflowTopics = await getStackOverflowTopics();
+    // techContext += "\n\nHot topics on Stack Overflow:\n";
+    // techContext += stackOverflowTopics;
 
-    // Part 6: Get AI research topics
-    const aiResearchTopics = await getAIResearchTopics();
-    techContext += "\n\nRecent AI research topics:\n";
-    techContext += aiResearchTopics;
+    // Removed due to too technical
+    // // Part 6: Get AI research topics
+    // const aiResearchTopics = await getAIResearchTopics();
+    // techContext += "\n\nRecent AI research topics:\n";
+    // techContext += aiResearchTopics;
 
     return techContext;
   } catch (error) {
@@ -63,8 +66,8 @@ export async function getHackerNewsTopics(): Promise<string> {
       "https://hacker-news.firebaseio.com/v0/topstories.json"
     );
 
-    // Get the IDs of the top 5 stories
-    const topStoryIds = topStoriesResponse.data.slice(0, 5);
+    // Get the IDs of the top 1 story
+    const topStoryIds = topStoriesResponse.data.slice(0, 1);
 
     // Fetch details for each story
     let hackerNewsContext = "From HackerNews:\n";
@@ -155,12 +158,12 @@ export async function getRedditTopics(): Promise<string> {
     const accessToken = await getRedditAccessToken();
     const techSubreddits = [
       "technews",
-      "programming",
+      // "programming",
       "technology",
-      "webdev",
-      "MachineLearning",
-      "datascience",
-      "ArtificialInteligence",
+      // "webdev",
+      // "MachineLearning",
+      // "datascience",
+      // "ArtificialInteligence",
       "gadgets",
       "gaming",
     ];

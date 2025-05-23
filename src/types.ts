@@ -14,15 +14,22 @@ export interface ResearchDetailItem {
   data: GroundedResearchResult;
 }
 
+export interface Category {
+  id: number;
+  title: string;
+  post_count: number;
+}
+
 export interface PostData {
   id: string;
   title: string;
   description?: string | null;
   created_at: string;
   image_url?: string | null;
-  category?: string | null;
-  tool_name?: string | null;
+  category: string | null;
   content?: string;
+  tags?: string[] | null;
+  views: number | null;
   author?: string | null;
   author_image?: string | null;
   read_time?: number | null;
@@ -32,8 +39,10 @@ export interface PostData {
   }> | null;
 }
 
-export type AiTool = PostData; // Assuming AiTool has the same structure as PostData
-
 export interface BlogClientProps {
   posts: PostData[];
+  featuredPosts: PostData[];
+  popularPosts: PostData[];
+  trendingPosts: PostData[];
+  categories: Category[];
 }

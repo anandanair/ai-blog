@@ -6,10 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { PostData, ResearchDetailItem, SourceInfo } from "@/types"; // Import the PostData type
+import { PostData, ResearchDetailItem } from "@/types"; // Import the PostData type
 import { formatDate } from "@/utils/helpers";
 import { CodeBlock } from "./CodeBlock";
 import ReferenceTooltip from "./ReferenceTooltip";
+import { incrementPostViews } from "@/lib/posts.client";
 
 // Helper component to process references in any text content
 const ProcessReferences = ({
@@ -97,7 +98,6 @@ interface PostClientProps {
 export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [expandedSources, setExpandedSources] = useState(false);
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -109,33 +109,11 @@ export default function PostClient({ postData }: PostClientProps) {
     ["0%", "100%"]
   );
 
-  // --- Process Research Details ---
-  const { uniqueSources, searchSuggestionsHtml } = useMemo(() => {
-    const sourcesMap = new Map<string, SourceInfo>();
-    const suggestions: string[] = [];
-
-    if (postData.research_details) {
-      postData.research_details.forEach((detail) => {
-        // Collect unique sources based on URI
-        if (detail.data.sources) {
-          detail.data.sources.forEach((source) => {
-            if (source.uri && !sourcesMap.has(source.uri)) {
-              sourcesMap.set(source.uri, source);
-            }
-          });
-        }
-        // Collect renderedContent HTML
-        if (detail.data.renderedContent) {
-          suggestions.push(detail.data.renderedContent);
-        }
-      });
+  useEffect(() => {
+    if (postData.id) {
+      incrementPostViews(postData.id);
     }
-
-    return {
-      uniqueSources: Array.from(sourcesMap.values()),
-      searchSuggestionsHtml: suggestions,
-    };
-  }, [postData.research_details]); // Dependency array
+  }, [postData.id]);
 
   // --- Prepare Research Lookup Map ---
   const researchDataMap = useMemo(() => {
@@ -172,14 +150,21 @@ export default function PostClient({ postData }: PostClientProps) {
         transition={{ duration: 0.5 }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl">
+          {!isLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-800 animate-pulse rounded-3xl"></div>
+          )}
           {postData.image_url ? ( // Use image_url from PostData
             <div className="absolute inset-0">
               <Image
                 src={postData.image_url} // Use image_url from PostData
                 alt={postData.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                 className="object-cover opacity-40"
                 priority
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOQvhAAAAABJRU5ErkJggg=="
               />
             </div>
           ) : (

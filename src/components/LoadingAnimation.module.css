@@ -1,0 +1,110 @@
+.loaderContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.particlesContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(52, 152, 219, 0.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loaderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.loaderContent:hover {
+  transform: translateY(-5px);
+}
+
+.loaderIcon {
+  margin-bottom: 30px;
+  filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.5));
+}
+
+.clockFace {
+  stroke-dasharray: 126;
+  stroke-dashoffset: 0;
+}
+
+.clockHand {
+  transform-origin: center;
+}
+
+.loaderText {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  display: flex;
+  letter-spacing: 1px;
+}
+
+.dots {
+  display: flex;
+}
+
+.dots span {
+  opacity: 0.3;
+  margin-left: 3px;
+  font-size: 28px;
+  color: #3498db;
+}
+
+.loaderSubtext {
+  font-size: 16px;
+  color: #7f8c8d;
+  max-width: 320px;
+  text-align: center;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+.progressBarContainer {
+  width: 250px;
+  height: 6px;
+  background-color: #ecf0f1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+}

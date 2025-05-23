@@ -92,7 +92,33 @@ export async function researchTopicWithGrounding(
 
   for (const [index, point] of pointsToSearch.entries()) {
     // --- 3a. Craft Research Prompt (Remains the same) ---
-    const researchPrompt = `Regarding the topic "${topic}", provide detailed information, facts, examples, or explanations for the following specific point: "${point}". Focus on providing verifiable and current information. If you use external search, please indicate.`;
+    const systemPrompt = `
+    You are a research assistant specializing in finding information that can be used to explain technology and its impact to a **general, non-technical audience.** When gathering details, prioritize facts, examples, and explanations that are:
+- Easily understandable.
+- Relatable to everyday experiences.
+- Illustrative of real-world applications or consequences.
+- Surprising or particularly interesting from a human perspective.
+`;
+
+    const researchPrompt = `
+    Regarding the topic "${topic}" (which is aimed at a **general, non-technical audience**):
+
+I need detailed information, facts, real-world examples, simple explanations, or analogies for the following specific point from our blog post outline:
+
+**Outline Point to Research:** "${point}"
+
+**Your Task:**
+Provide verifiable and current information related to this point. Specifically, look for:
+
+1.  **Core Facts/Data:** Key statistics or essential factual information.
+2.  **Simple Explanations/Definitions:** If the point involves a technical concept, find ways to explain it in very simple terms or provide analogies a layperson would understand.
+3.  **Relatable Examples:** Concrete examples of how this point manifests in the real world, in products people use, or in situations they might encounter. How does this affect an ordinary person?
+4.  **Interesting Details or "Wow" Factors:** Any surprising facts, historical context (if relevant and simple), or particularly illustrative anecdotes related to this point that would capture the interest of a non-technical reader.
+
+Focus on information that will help explain this point clearly and engagingly to someone without a deep tech background.
+
+If you use external search (which is expected), please ensure the information is current and from credible sources.
+    `;
 
     console.log(
       `[${index + 1}/${pointsToSearch.length}] 🔍 Researching: "${point}"`
@@ -104,6 +130,7 @@ export async function researchTopicWithGrounding(
         model: "gemini-2.5-flash-preview-04-17",
         contents: [researchPrompt],
         config: {
+          systemInstruction: systemPrompt,
           safetySettings,
           temperature: 0.5,
           tools: [{ googleSearch: {} }],

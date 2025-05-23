@@ -16,47 +16,83 @@ export async function refineDraft(
 ): Promise<string | null> {
   // --- Craft the Refinement Prompt ---
 
+  const refinementSystemPrompt = `
+  You are an exceptional "Clarity Coach" and "Engagement Editor" for a popular technology blog that makes tech understandable and exciting for a **general, non-technical audience.** Your primary role is to take a draft written for this audience and make it even clearer, more engaging, and more enjoyable to read.
+
+Core Refinement Principles:
+- **Ultimate Readability for All:** Is every sentence crystal clear to someone with no tech background? Could anything be simpler?
+- **Boost Engagement:** Does it tell a good story? Is it interesting? Are there opportunities to make it more relatable or add a touch of "wow"?
+- **Jargon Demolition (or Perfect Explanation):** Hunt down any remaining jargon or complex phrasing. Either replace it with simple terms or ensure any necessary technical term (that was intentionally kept and meant to be explained) is defined with an incredibly clear analogy or example.
+- **Smooth Flow & Pacing:** Ensure the post flows like a good conversation, with smooth transitions and a pace that keeps the reader interested.
+- **Preserve the Core (and Citations!):** While enhancing clarity and engagement, you must maintain the original meaning, factual accuracy, the established outline structure, and all '[ref:ID]' citation markers precisely.
+
+You are the final polish that ensures a non-technical reader not only understands the content but also enjoys the experience of learning.
+  `;
+
   const refinementPrompt = `
-    You are an expert copy editor and content refiner for a technology blog.
-    Your task is to evaluate and significantly improve the provided blog post draft based on the original outline and topic, while carefully preserving embedded reference markers.
+  Your task is to significantly improve the quality, clarity, and engagement of the following blog post draft. This draft is intended for a **general, non-technical audience.** You must strictly preserve the original structure, factual accuracy (as supported by any research), and all embedded '[ref:ID]' reference markers.
 
-    **Topic:**
-    ${topic}
+**Blog Post Topic (for a general audience):**
+${topic}
 
-    **Original Outline (Ensure the refined draft still follows this structure):**
-    \`\`\`markdown
-    ${outlineMarkdown}
-    \`\`\`
+**Original Outline (The refined draft MUST strictly follow this structure):**
+\`\`\`markdown
+${outlineMarkdown} 
+// The outline already designed for a non-technical audience.
+\`\`\`
 
-    **Original Draft (Contains [ref:ID] markers that MUST be preserved):**
-    \`\`\`markdown
-    ${originalDraft} 
-    \`\`\`
+**Original Draft (Contains important [ref:ID] markers that MUST be preserved):**
+\`\`\`markdown
+${originalDraft}
+// The draft written in Step 8 for a non-technical audience.
+\`\`\`
 
-    **Evaluation Criteria & Refinement Instructions:**
-    1.  **Clarity & Conciseness:** Is the language clear, precise, and easy for a technical audience (e.g., developers) to understand? Remove jargon where possible or explain it simply. Eliminate wordiness and redundant phrases. Ensure arguments are presented logically.
-    2.  **Engagement & Flow:** Is the writing engaging? Does the introduction hook the reader? Do paragraphs transition smoothly? Is the tone appropriate (informative yet accessible)? Enhance sentence variety.
-    3.  **Structure & Outline Adherence:** Does the draft strictly follow the provided Original Outline? Are all sections and key points from the outline covered appropriately? Ensure headings match the outline structure.
-    4.  **Completeness & Depth:** While adhering to the outline, does each section feel sufficiently developed? (You don't need external knowledge, evaluate based on the content present). Are the explanations thorough enough?
-    5.  **Grammar & Style:** Correct any grammatical errors, spelling mistakes, punctuation issues, and awkward phrasing. Improve sentence structure for better readability. Maintain a professional and consistent style.
-    6.  **Maintain Core Information:** Do NOT change the core facts or technical information presented in the original draft. Your goal is to improve the *presentation*, clarity, and flow, not the underlying substance.
-    7.  **PRESERVE REFERENCE MARKERS:** The Original Draft contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers link statements to research sources.
-        *   **You MUST preserve these markers exactly as they appear.**
-        *   **DO NOT remove, change, or reformat these \`[ref:ID]\` markers.**
-        *   **Crucially, ensure these markers remain immediately adjacent to the specific sentence or phrase they originally followed.** Even if you rephrase a sentence, the marker associated with its core information must stay directly connected to that rephrased text. 
-    8.  **Markdown Formatting:** Ensure standard Markdown syntax is used correctly throughout (list spacing, heading levels, etc.).
+**REFINEMENT INSTRUCTIONS (for a NON-TECHNICAL audience):**
 
-    **Your Action:**
-    Rewrite the *entire* Original Draft, applying improvements based on the criteria above, paying special attention to preserving the \`[ref:ID]\` markers and their exact positions relative to the text they reference. Ensure the final output is a complete, refined blog post in Markdown format, including the preserved markers.
+1.  **Maximize Clarity & Simplicity:**
+    *   **Is this the simplest way to say it?** Aggressively simplify complex sentences and vocabulary. Replace any lingering jargon or technical terms with everyday language.
+    *   If a technical term *must* be used (per the outline's intent to explain it), is its explanation or analogy **crystal clear and instantly understandable** to a layperson?
+    *   Eliminate redundancy and wordiness. Ensure every word contributes to understanding.
 
-    **Output ONLY the refined Markdown blog post.** Do not include your evaluation notes, introductory phrases ("Here is the refined draft..."), or anything other than the final Markdown content (which must include the original \`[ref:ID]\` markers). Start directly with the first line of the refined post.
+2.  **Enhance Engagement & Flow:**
+    *   **Is it interesting from start to finish?** Strengthen the hook in the introduction if needed.
+    *   Ensure smooth, natural transitions between paragraphs and ideas.
+    *   Vary sentence structure to maintain reader interest.
+    *   **Maintain a friendly, conversational, and enthusiastic tone** throughout. Does it sound like a helpful friend explaining something cool?
+
+3.  **Strict Adherence to Structure & Outline:**
+    *   Follow the 'Original Outline' **exactly**. Use the same heading structure.
+    *   Ensure all outlined sections and points are fully addressed in a way that's clear to the target audience.
+
+4.  **Completeness of Explanation (for a Layperson):**
+    *   Are explanations well-developed enough for someone new to the topic to understand?
+    *   Are there any points where a non-technical reader might get lost or need a bit more (simple) explanation or a better example? Add this *without changing the core facts or adding new research points unless it's a general clarifying statement*.
+
+5.  **Flawless Grammar & Style (for Readability):**
+    *   Correct all grammar, spelling, and punctuation errors.
+    *   Fix any awkward phrasing to improve natural flow.
+    *   Ensure the style is consistently engaging and easy to read (short sentences, clear language).
+
+6.  **CRITICAL: Preserve Reference Markers ([ref:ID]):**
+    *   Reference markers (e.g., '[ref:ref-12]') **MUST remain exactly as they appear in the original draft and in the same position relative to the statement they support.**
+    *   **DO NOT delete, rename, reformat, or move any reference marker.**
+    *   If you rephrase a sentence, the marker **must stay directly connected** to the specific fact, data point, or direct example it originally followed. This is crucial.
+
+7.  **Maintain Markdown Formatting:**
+    *   Ensure standard Markdown syntax is used consistently and correctly (headings, lists, bolding, etc.).
+    *   The output must be clean, valid Markdown.
+
+**Your Action:**
+Carefully rewrite and refine the **entire draft** based on all the above criteria, focusing on making it exceptionally clear and engaging for a non-technical audience. Produce the improved Markdown blog post with all '[ref:ID]' markers perfectly preserved and correctly placed.
+
+**Output ONLY the final refined Markdown blog post.** Do not include notes, comments, or introductory statements. Start immediately with the first line of the refined content.
   `;
 
   try {
     const refinedResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash-preview-04-17",
       contents: refinementPrompt,
-      config: { temperature: 0.5 },
+      config: { temperature: 0.5, systemInstruction: refinementSystemPrompt },
     });
     const refinedMarkdown = refinedResponse.text;
 
@@ -101,34 +137,34 @@ export async function finalPolish(
   potentiallyUnpolishedDraft: string
 ): Promise<string | null> {
   if (!potentiallyUnpolishedDraft) {
-    console.warn("   Skipping polish stage due to empty input draft.");
+    console.warn("Skipping polish stage due to empty input draft.");
     return potentiallyUnpolishedDraft; // Return empty or null as received
   }
 
   // --- Craft the Polishing Prompt ---
 
   const polishPrompt = `
-  You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown text by REMOVING any sentences or paragraphs that are NOT part of the actual blog post content intended for the reader, while carefully preserving specific reference markers.
-
-  Specifically, REMOVE text that matches these descriptions:
-  - Notes about the writing process itself (e.g., "Note: I focused on...", "As requested...", "This section covers...")
-  - Commentary on the instructions received (e.g., "Based on the outline provided...", "The research indicated...")
-  - Apologies or explanations for missing information (e.g., "I couldn't find specific data on...", "Further research would be needed for...")
-  - Self-correction remarks or alternative phrasings considered (e.g., "Alternatively, one could say...", "A better way might be...")
-  - Any other meta-commentary or text clearly not intended for the final published blog post reader.
-
+  You are a meticulous final proofreader. Your ONLY task is to clean up the provided Markdown blog post by removing any **meta-commentary** that does not belong in the final published article, while preserving the intended content and reference markers.
+  
+  **REMOVE any text that fits the following types of non-content:**
+  - Comments about the writing process (e.g., "Note: I focused on...", "This draft covers...")
+  - Explanations of instructions followed (e.g., "Based on the outline provided...")
+  - Apologies or limitations (e.g., "I couldn't find exact data...", "More research might be needed...")
+  - Self-corrections or alternate phrasing (e.g., "Another way to put this is...", "Alternatively...")
+  - Any sentence or paragraph clearly not written for the final reader of the blog post
+  
   **CRITICAL INSTRUCTIONS:**
-  1.  **PRESERVE REFERENCE MARKERS:** The Input Text contains important reference markers in the format \`[ref:ID]\` (e.g., \`[ref:ref-12]\`). These markers are PART OF THE INTENDED CONTENT and MUST NOT BE REMOVED OR ALTERED. They are *not* meta-commentary.
-  2.  **DO NOT rewrite, rephrase, or change the actual blog post content** (other than removing the specific types of meta-commentary listed above).
-  3.  **Preserve all original Markdown formatting** of the remaining content, including the exact placement and formatting of the \`[ref:ID]\` markers.
-  4.  If the input text contains NO meta-commentary (only blog content and markers), return the input text exactly as is.
-
-  **Input Text (Contains [ref:ID] markers to preserve, may need meta-commentary removed):**
+  1. **Preserve all \`[ref:ID]\` markers exactly** — these are part of the final content and must not be removed, changed, or moved.
+  2. **Do NOT rephrase or rewrite any of the remaining content** — your only task is to delete unintended meta-commentary.
+  3. **Maintain all original Markdown formatting**, including headings, lists, emphasis, and code blocks.
+  4. If no meta-commentary is found, return the original input content exactly as it is.
+  
+  **Input Markdown (with [ref:ID] markers to preserve):**
   \`\`\`markdown
   ${potentiallyUnpolishedDraft}
   \`\`\`
-
-  **Output ONLY the cleaned Markdown content including the preserved [ref:ID] markers.** Do not include any explanations, introductions, or confirmations. Start directly with the first line of the cleaned content.
+  
+  **Output ONLY the cleaned Markdown content — no comments, notes, or introductions. Start directly with the first line of the cleaned blog post.**
   `;
 
   try {

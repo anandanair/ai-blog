@@ -29,7 +29,7 @@ export default function Navbar() {
       className="fixed w-full flex justify-center z-50 transition-transform duration-300"
       style={{ transform: visible ? "translateY(0)" : "translateY(-100%)" }}
     >
-      <nav className="mt-4 w-11/12 max-w-6xl mx-auto rounded-full bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-lg relative overflow-hidden border border-white/20 dark:border-gray-700/30">
+      <nav className="mt-8 w-11/12 max-w-6xl mx-auto rounded-full bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-lg relative overflow-hidden border border-white/20 dark:border-gray-700/30">
         {/* Enhanced glassmorphic effect with inner shadow */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5"></div>
 
@@ -55,7 +55,7 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
-                  href="/blog"
+                  href="/posts"
                   className="border-transparent text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Blog
@@ -126,7 +126,7 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
-                href="/blog"
+                href="/posts"
                 className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
               >
                 Blog
