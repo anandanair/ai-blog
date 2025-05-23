@@ -19,6 +19,8 @@ import {
   TwitterIcon,
   LinkedinIcon,
   RedditIcon,
+  WhatsappShareButton,
+  WhatsappIcon,
 } from "react-share";
 import RelatedPosts from "./RelatedPosts"; // Import the RelatedPosts component
 
@@ -109,6 +111,7 @@ export default function PostClient({ postData }: PostClientProps) {
   const articleRef = useRef<HTMLElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+  const [copied, setCopied] = useState(false);
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
@@ -149,6 +152,13 @@ export default function PostClient({ postData }: PostClientProps) {
   const shareUrl = process.env.NEXT_PUBLIC_SITE_URL
     ? `${process.env.NEXT_PUBLIC_SITE_URL}/posts/${postData.id}`
     : currentUrl;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reset copied state after 2 seconds
+    });
+  };
 
   return (
     <div className="min-h-screen">
@@ -589,12 +599,53 @@ export default function PostClient({ postData }: PostClientProps) {
               <TwitterShareButton url={shareUrl} title={postData.title}>
                 <TwitterIcon size={32} round />
               </TwitterShareButton>
-              <LinkedinShareButton url={shareUrl} title={postData.title}>
+              <LinkedinShareButton
+                title={postData.title}
+                summary={postData.description || ""}
+                source="AutoTek"
+                url={shareUrl}
+              >
                 <LinkedinIcon size={32} round />
               </LinkedinShareButton>
-              <RedditShareButton url={shareUrl} title={postData.title}>
-                <RedditIcon size={32} round />
-              </RedditShareButton>
+              <WhatsappShareButton url={shareUrl} title={postData.title}>
+                <WhatsappIcon size={32} round />
+              </WhatsappShareButton>
+              {/* Copy Link Button */}
+              <button
+                onClick={handleCopyLink}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Copy link to clipboard"
+              >
+                {copied ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-green-600 dark:text-green-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 
