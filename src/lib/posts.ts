@@ -220,7 +220,8 @@ export const getSortedPostsData = cache(
 
 export const getPostData = cache(
   async (id: string): Promise<PostData | null> => {
-    const supabase = await createSupabaseServerClient();
+    // const supabase = await createSupabaseServerClient();
+    const supabase = initSupabase();
 
     // Fetch a single post by its slug
     const { data, error } = await supabase
