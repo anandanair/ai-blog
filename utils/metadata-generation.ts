@@ -161,9 +161,10 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
   try {
     // --- 3. Call Gemini API ---
     const metedataResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: "gemini-2.5-flash-preview-05-20",
       contents: metadataPrompt,
       config: {
+        thinkingConfig: { thinkingBudget: 0 },
         temperature: 0.5,
         responseMimeType: "application/json",
         systemInstruction: metadataSystemPrompt,

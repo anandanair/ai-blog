@@ -81,10 +81,11 @@ export async function validateMarkdownSyntax(
 
   try {
     const validationResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-pro-exp-03-25",
-      // model: "gemini-2.5-flash-preview-04-17",
+      // model: "gemini-2.5-pro-exp-03-25",
+      model: "gemini-2.5-flash-preview-05-20",
       contents: validationPrompt,
       config: {
+        // thinkingConfig: { thinkingBudget: 0 },
         temperature: 0.1,
       },
     });
