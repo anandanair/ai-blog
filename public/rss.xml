@@ -9,10 +9,442 @@
             <link>https://blog.itsmeanand.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 29 Apr 2025 17:34:35 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 26 May 2025 20:05:37 GMT</lastBuildDate>
         <atom:link href="https://blog.itsmeanand.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Tue, 29 Apr 2025 17:34:35 GMT</pubDate>
+        <pubDate>Mon, 26 May 2025 20:05:37 GMT</pubDate>
         <copyright><![CDATA[All rights reserved 2025, Anand]]></copyright>
+        <item>
+            <title><![CDATA[The Digital Ghost: What Happens When Your Old Gadgets Die?]]></title>
+            <description><![CDATA[Don't just toss old gadgets! Learn why deleting files isn't enough and how to truly wipe your personal data before selling, donating, or recycling your devices.]]></description>
+            <link>https://blog.itsmeanand.com/posts/the-digital-ghost-what-happens-when-your-old-gadgets-die</link>
+            <guid isPermaLink="false">230</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 26 May 2025 19:54:18 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Can Your AI Helper Be Tricked? What You Need to Know]]></title>
+            <description><![CDATA[Discover the surprising ways AI in your everyday tech can be tricked and why understanding this helps you use your digital assistants and smart gadgets safely.]]></description>
+            <link>https://blog.itsmeanand.com/posts/can-your-ai-helper-be-tricked-what-you-need-to-know</link>
+            <guid isPermaLink="false">229</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 26 May 2025 10:32:21 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Don't Toss It! Why Fixing Your Gadgets Is Getting Easier]]></title>
+            <description><![CDATA[Broken gadget? Don't buy new! Discover how the 'Right to Repair' movement is making it easier & cheaper to fix your tech, saving you money and helping the planet.]]></description>
+            <link>https://blog.itsmeanand.com/posts/dont-toss-it-why-fixing-your-gadgets-is-getting-easier</link>
+            <guid isPermaLink="false">228</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 25 May 2025 22:23:48 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Why Your Smart Gadget Stops Working Too Soon]]></title>
+            <description><![CDATA[Ever wonder why your smart gadget stops working or loses features? It needs updates! Discover why tech companies stop supporting older devices and what it means for you.]]></description>
+            <link>https://blog.itsmeanand.com/posts/why-your-smart-gadget-stops-working-too-soon</link>
+            <guid isPermaLink="false">227</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 25 May 2025 10:25:51 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Are City Cameras Watching You? What AI Surveillance Means]]></title>
+            <description><![CDATA[Public cameras are getting smarter with AI. Discover what AI surveillance means for cities, your daily life, and your privacy. Are you being watched?]]></description>
+            <link>https://blog.itsmeanand.com/posts/are-city-cameras-watching-you-what-ai-surveillance-means</link>
+            <guid isPermaLink="false">226</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 24 May 2025 22:25:13 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[The Internet Explained: What Happens When You Click?]]></title>
+            <description><![CDATA[Ever wonder what happens when you click a link online? This simple guide breaks down how the internet works in easy-to-understand terms for everyone.]]></description>
+            <link>https://blog.itsmeanand.com/posts/the-internet-explained-what-happens-when-you-click</link>
+            <guid isPermaLink="false">225</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 24 May 2025 10:25:29 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[That Little AI Helper Popping Up in Your Apps]]></title>
+            <description><![CDATA[Discover how AI is quietly appearing in your favorite apps like email and docs to help you write faster, summarize text, and beat writer's block. Learn what it means for your daily tasks.]]></description>
+            <link>https://blog.itsmeanand.com/posts/that-little-ai-helper-popping-up-in-your-apps</link>
+            <guid isPermaLink="false">224</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 23 May 2025 22:26:05 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Tech Stress? How 'Calm Technology' Can Help You Relax]]></title>
+            <description><![CDATA[Feeling overwhelmed by your gadgets? Learn how 'Calm Technology' can make your devices less demanding, reduce stress, and bring more peace to your digital life.]]></description>
+            <link>https://blog.itsmeanand.com/posts/tech-stress-how-calm-technology-can-help-you-relax</link>
+            <guid isPermaLink="false">223</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 23 May 2025 10:31:48 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Smart Glasses: The Future? Hype, Hope, & Privacy Worries]]></title>
+            <description><![CDATA[Smart glasses are back! But are they useful tech or a privacy nightmare? Learn what they do and the big questions they raise for your daily life.]]></description>
+            <link>https://blog.itsmeanand.com/posts/smart-glasses-the-future-hype-hope-privacy-worries</link>
+            <guid isPermaLink="false">222</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 22 May 2025 22:25:22 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[iPhone Designer's New Goal: Get You Off Your Screen]]></title>
+            <description><![CDATA[Jony Ive, the designer behind the iPhone, is exploring screenless tech. Learn why he thinks it's the future and what it could mean for your daily life, reducing screen time.]]></description>
+            <link>https://blog.itsmeanand.com/posts/iphone-designers-new-goal-get-you-off-your-screen</link>
+            <guid isPermaLink="false">221</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 22 May 2025 10:33:21 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Does Your Computer Remember Everything You Do? The Truth About Recall]]></title>
+            <description><![CDATA[A new Windows feature called Recall records everything you do on your PC. Learn what it is, why privacy experts are worried, and how to turn it off to protect your digital life.]]></description>
+            <link>https://blog.itsmeanand.com/posts/does-your-computer-remember-everything-you-do-the-truth-about-recall</link>
+            <guid isPermaLink="false">220</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 21 May 2025 22:24:44 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Will AI Take Your Job? What's Really Happening]]></title>
+            <description><![CDATA[Worried about AI taking your job? Discover how AI is really changing work, which tasks are affected, and the human skills that matter most in the future.]]></description>
+            <link>https://blog.itsmeanand.com/posts/will-ai-take-your-job-whats-really-happening</link>
+            <guid isPermaLink="false">219</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 21 May 2025 10:31:17 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[When AI Makes Up Facts: Why Online Info Gets Weird]]></title>
+            <description><![CDATA[Discover why AI sometimes makes up information (called 'hallucinations') and how these fake facts are appearing in articles and online. Learn how to spot them.]]></description>
+            <link>https://blog.itsmeanand.com/posts/when-ai-makes-up-facts-why-online-info-gets-weird</link>
+            <guid isPermaLink="false">218</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 20 May 2025 22:26:06 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Is That Really Your Friend Calling? It Could Be an AI Scam]]></title>
+            <description><![CDATA[Learn about AI voice cloning scams that sound just like people you know. Discover how they work and get essential tips to spot fake calls and protect yourself.]]></description>
+            <link>https://blog.itsmeanand.com/posts/is-that-really-your-friend-calling-it-could-be-an-ai-scam</link>
+            <guid isPermaLink="false">217</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 20 May 2025 10:26:43 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fighting Fake Online: New Law Helps Stop Harmful Deepfakes]]></title>
+            <description><![CDATA[Worried about fake photos & videos online? Discover how a new US law is helping victims fight back against harmful deepfakes and get them taken down.]]></description>
+            <link>https://blog.itsmeanand.com/posts/fighting-fake-online-new-law-helps-stop-harmful-deepfakes</link>
+            <guid isPermaLink="false">216</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 19 May 2025 22:24:54 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Who Makes the Rules for AI? Why It Matters to You]]></title>
+            <description><![CDATA[AI affects your job, loans, and what you see online. Learn why the global debate over who makes the rules for artificial intelligence is shaping your future.]]></description>
+            <link>https://blog.itsmeanand.com/posts/who-makes-the-rules-for-ai-why-it-matters-to-you</link>
+            <guid isPermaLink="false">215</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 19 May 2025 10:30:32 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[When AI Acts Weird: Why Your Tech Messes Up]]></title>
+            <description><![CDATA[Ever wonder why your smart tech acts weird? Learn the simple reasons AI sometimes makes mistakes, from smart speakers to autocorrect, and what it means for your daily life.]]></description>
+            <link>https://blog.itsmeanand.com/posts/when-ai-acts-weird-why-your-tech-messes-up</link>
+            <guid isPermaLink="false">214</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 18 May 2025 22:23:46 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[The App Store War: How Apple vs Fortnite Affects Your Phone]]></title>
+            <description><![CDATA[The legal battle between Apple and Fortnite isn't just about a game. Learn how this fight over the App Store could change app prices, choices, and security on your phone.]]></description>
+            <link>https://blog.itsmeanand.com/posts/the-app-store-war-how-apple-vs-fortnite-affects-your-phone</link>
+            <guid isPermaLink="false">213</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 18 May 2025 10:25:18 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Your Phone's Secret Offline Brain]]></title>
+            <description><![CDATA[Discover how your smartphone is getting a powerful AI brain right on the device. Learn how this makes your phone faster, more private, and works even without internet.]]></description>
+            <link>https://blog.itsmeanand.com/posts/your-phones-secret-offline-brain</link>
+            <guid isPermaLink="false">212</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 17 May 2025 22:24:18 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[The Surprising Energy Cost of AI: Why It Matters to You]]></title>
+            <description><![CDATA[Discover the hidden energy cost behind AI tools like voice assistants & image generators. Learn how powering AI impacts electricity grids, the environment, and your digital life.]]></description>
+            <link>https://blog.itsmeanand.com/posts/the-surprising-energy-cost-of-ai-why-it-matters-to-you</link>
+            <guid isPermaLink="false">211</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 17 May 2025 10:27:25 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Oops! When AI Gets It Wrong: Funny Tech Fails Explained]]></title>
+            <description><![CDATA[Ever seen AI do something weird? Discover why chatbots, games, and other tech make funny, unexpected mistakes, what it means for you, and why it's surprisingly common.]]></description>
+            <link>https://blog.itsmeanand.com/posts/oops-when-ai-gets-it-wrong-funny-tech-fails-explained</link>
+            <guid isPermaLink="false">210</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 16 May 2025 22:26:09 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Who Really Owns Your Smart Gadgets? The Surprising Truth]]></title>
+            <description><![CDATA[When you buy a smartphone or smart TV, do you really own it? Discover the surprising control tech companies keep over your devices and what it means for you.]]></description>
+            <link>https://blog.itsmeanand.com/posts/who-really-owns-your-smart-gadgets-the-surprising-truth</link>
+            <guid isPermaLink="false">208</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 15 May 2025 22:25:33 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Could Your Phone Get 'Secret Service' Security?]]></title>
+            <description><![CDATA[Google's Advanced Protection offers extreme phone security for high-risk users. Learn how this 'digital fort knox' works and how its tech could make *your* phone safer in the future.]]></description>
+            <link>https://blog.itsmeanand.com/posts/could-your-phone-get-secret-service-security</link>
+            <guid isPermaLink="false">207</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 15 May 2025 10:27:01 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Can AI Be Tricked? Why It Matters for Your Money]]></title>
+            <description><![CDATA[Discover the surprising ways artificial intelligence can be fooled by simple tricks. Learn why this hidden weakness matters for your online money and personal data.]]></description>
+            <link>https://blog.itsmeanand.com/posts/can-ai-be-tricked-why-it-matters-for-your-money</link>
+            <guid isPermaLink="false">206</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 15 May 2025 09:40:02 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[AI Can Now Design Real Objects You Can Actually Make]]></title>
+            <description><![CDATA[AI isn't just making digital art anymore! Discover how artificial intelligence is now designing real, physical objects you can build, and what it means for the future of products and design.]]></description>
+            <link>https://blog.itsmeanand.com/posts/ai-can-now-design-real-objects-you-can-actually-make</link>
+            <guid isPermaLink="false">205</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 13 May 2025 03:31:46 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[When Your Favorite App Goes Bust: What Happens to Your Data?]]></title>
+            <description><![CDATA[Ever wonder what happens to your photos, messages, and personal info when a tech company you use goes bankrupt? Learn if your data is sold, deleted, or ends up in limbo.]]></description>
+            <link>https://blog.itsmeanand.com/posts/when-your-favorite-app-goes-bust-what-happens-to-your-data</link>
+            <guid isPermaLink="false">203</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 12 May 2025 10:37:55 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[The TikTok Trend Breaking School Laptops]]></title>
+            <description><![CDATA[Discover how a viral TikTok trend is leading students to damage school laptops and why this costs real money and affects learning. Understand the impact of online trends.]]></description>
+            <link>https://blog.itsmeanand.com/posts/the-tiktok-trend-breaking-school-laptops</link>
+            <guid isPermaLink="false">202</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 11 May 2025 22:22:05 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Could Using AI Make You Look Less Capable at Work?]]></title>
+            <description><![CDATA[You use AI to boost productivity, but could it make colleagues question your skills? Learn how to use AI smartly at work without accidentally hurting your professional image.]]></description>
+            <link>https://blog.itsmeanand.com/posts/could-using-ai-make-you-look-less-capable-at-work</link>
+            <guid isPermaLink="false">201</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 11 May 2025 19:25:56 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Say Goodbye to Slow Airplane Wi-Fi: It's Getting Way Faster]]></title>
+            <description><![CDATA[Frustrated by slow Wi-Fi on flights? Discover why airplane internet has been terrible and how new satellite tech is finally making it fast enough for streaming, video calls, and more.]]></description>
+            <link>https://blog.itsmeanand.com/posts/say-goodbye-to-slow-airplane-wifi-its-getting-way-faster</link>
+            <guid isPermaLink="false">200</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 11 May 2025 19:01:08 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Strategies for Black-Box AI Models]]></title>
+            <description><![CDATA[Learn practical engineering strategies to manage the opacity of black-box AI models. Explore architectural patterns, testing, and monitoring techniques for building reliable systems.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-strategies-for-blackbox-ai-models</link>
+            <guid isPermaLink="false">199</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 11 May 2025 10:22:58 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Resilience Against Open Source Instability]]></title>
+            <description><![CDATA[Modern technology relies heavily on open source, facing risks from underfunding and burnout. Learn technical strategies like SBOMs, scanning, and architectural patterns to build resilience against OSS instability.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-resilience-against-open-source-instability</link>
+            <guid isPermaLink="false">198</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 10 May 2025 22:17:50 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Under Restriction: Navigating Chip Controls & Tech Scrutiny]]></title>
+            <description><![CDATA[Explore how engineers are adapting tech design, supply chains, and strategy in an era of geopolitical chip controls, investment scrutiny, and market fragmentation. Build resilience.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-under-restriction-navigating-chip-controls-tech-scrutiny</link>
+            <guid isPermaLink="false">197</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 10 May 2025 10:23:24 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Compliant AI: Explainable & Auditable Systems]]></title>
+            <description><![CDATA[Learn how to engineer AI systems that meet regulatory demands for transparency, fairness, and accountability. Explore strategies for building explainable, auditable, and safe AI models.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-compliant-ai-explainable-auditable-systems</link>
+            <guid isPermaLink="false">196</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 09 May 2025 22:20:39 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Navigating VMware Licensing Shifts: A Post-Broadcom Guide for Architects]]></title>
+            <description><![CDATA[Broadcom's acquisition of VMware brings major licensing changes. Learn how enterprise architects and engineers can navigate cost pressures, re-evaluate infrastructure, and explore alternatives.]]></description>
+            <link>https://blog.itsmeanand.com/posts/navigating-vmware-licensing-shifts-a-postbroadcom-guide-for-architects</link>
+            <guid isPermaLink="false">195</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 09 May 2025 10:25:42 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Resilience: Architecting Systems Against Platform 'Enshittification']]></title>
+            <description><![CDATA[Learn how to architect resilient systems that withstand platform 'enshittification'. Explore strategies like abstraction, graceful degradation, and reducing vendor lock-in to protect your application.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-resilience-architecting-systems-against-platform-enshittification</link>
+            <guid isPermaLink="false">194</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 08 May 2025 22:20:21 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Beyond 'AI Slop': Engineering Open Source for Quality]]></title>
+            <description><![CDATA[Discover how open source projects can leverage AI while combating 'AI slop' through robust engineering controls and strong community strategies for sustainable quality.]]></description>
+            <link>https://blog.itsmeanand.com/posts/beyond-ai-slop-engineering-open-source-for-quality</link>
+            <guid isPermaLink="false">193</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 08 May 2025 10:25:03 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fighting 'AI Slop': Engineering Quality in Open Source]]></title>
+            <description><![CDATA[Combatting the rise of low-quality 'AI slop' in open source. Learn how maintainers can engineer quality through enhanced processes, code review, and smart tooling.]]></description>
+            <link>https://blog.itsmeanand.com/posts/fighting-ai-slop-engineering-quality-in-open-source</link>
+            <guid isPermaLink="false">192</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 07 May 2025 22:20:57 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Reliable AI for Autonomous Vehicles: Lessons from Failures]]></title>
+            <description><![CDATA[Learn why reliable predictive AI is critical for autonomous vehicles, explore lessons from robotaxi failures, and discover engineering strategies for building safer systems.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-reliable-ai-for-autonomous-vehicles-lessons-from-failures</link>
+            <guid isPermaLink="false">191</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 07 May 2025 10:25:25 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Adapting Mobile Architectures for App Store Regulatory Compliance]]></title>
+            <description><![CDATA[Explore the engineering challenges of adapting mobile app architectures to comply with diverse app store regulations, including alternative payments, and discover effective architectural strategies.]]></description>
+            <link>https://blog.itsmeanand.com/posts/adapting-mobile-architectures-for-app-store-regulatory-compliance</link>
+            <guid isPermaLink="false">190</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 06 May 2025 22:20:03 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Defenses Against Malicious AI Agents]]></title>
+            <description><![CDATA[Explore the unique threats posed by malicious AI agents and learn essential engineering principles and advanced strategies for building robust defenses against autonomous AI threats.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-defenses-against-malicious-ai-agents</link>
+            <guid isPermaLink="false">189</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 06 May 2025 10:24:52 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Defenses Against E-commerce Supply Chain Attacks]]></title>
+            <description><![CDATA[Learn how to engineer robust defenses against large-scale e-commerce supply chain attacks by securing dependencies, CI/CD, third parties, and runtime environments.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-defenses-against-ecommerce-supply-chain-attacks</link>
+            <guid isPermaLink="false">188</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 05 May 2025 22:19:38 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Secure FIDO/WebAuthn Relying Parties]]></title>
+            <description><![CDATA[Explore the backend engineering challenges of building a secure FIDO/WebAuthn Relying Party for passwordless authentication, covering credential management and protocol verification.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-secure-fidowebauthn-relying-parties</link>
+            <guid isPermaLink="false">187</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 05 May 2025 10:24:34 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering AI into Developer Workflow: Strategies]]></title>
+            <description><![CDATA[Master integrating AI tools like Copilot into your developer workflow for productivity gains. Learn strategies for coding, debugging, testing, and ensuring quality & security in AI-augmented development.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-ai-into-developer-workflow-strategies</link>
+            <guid isPermaLink="false">186</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 04 May 2025 22:17:54 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Beyond LCD: Engineering Software for Color E Ink Displays]]></title>
+            <description><![CDATA[Explore the unique challenges of engineering software for color E Ink displays. Learn strategies for tackling slow refresh rates, limited color, and ghosting.]]></description>
+            <link>https://blog.itsmeanand.com/posts/beyond-lcd-engineering-software-for-color-e-ink-displays</link>
+            <guid isPermaLink="false">185</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sun, 04 May 2025 10:21:47 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Long-Running AI Agents: Architecture & State Management]]></title>
+            <description><![CDATA[Building autonomous AI agents requires managing state across time and handling failures. Explore architectural patterns, state persistence, and resilience strategies for long-running AI workflows.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-longrunning-ai-agents-architecture-state-management</link>
+            <guid isPermaLink="false">184</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 03 May 2025 22:18:48 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Passkey Adoption: Challenges & Strategies]]></title>
+            <description><![CDATA[Explore the engineering challenges and strategies for integrating passkeys. Learn about WebAuthn, backend complexities, and UX design for a passwordless future.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-passkey-adoption-challenges-strategies</link>
+            <guid isPermaLink="false">183</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Sat, 03 May 2025 10:22:24 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Authentication Resilience: Defending Against MFA Bypass Attacks]]></title>
+            <description><![CDATA[Learn how modern attackers bypass traditional MFA and discover essential engineering strategies, including FIDO2, session binding, and conditional access, to build resilient authentication systems.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-authentication-resilience-defending-against-mfa-bypass-attacks</link>
+            <guid isPermaLink="false">182</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 02 May 2025 22:19:17 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering External Payments: Navigating Mobile App Platform Rules]]></title>
+            <description><![CDATA[Explore the engineering challenges and architectural shifts required to implement external payment options in mobile apps amidst evolving platform rules like the DMA.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-external-payments-navigating-mobile-app-platform-rules</link>
+            <guid isPermaLink="false">181</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Fri, 02 May 2025 10:24:10 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[AI's New Frontier: Defending Software Supply Chains from Automated Threats]]></title>
+            <description><![CDATA[Explore how AI is transforming software supply chain attacks with automation and sophistication. Learn essential engineering defenses to build resilience against these advanced threats.]]></description>
+            <link>https://blog.itsmeanand.com/posts/ais-new-frontier-defending-software-supply-chains-from-automated-threats</link>
+            <guid isPermaLink="false">180</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 01 May 2025 22:19:15 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Trust: Securing Biometric Digital Identity Systems]]></title>
+            <description><![CDATA[Explore the challenges and solutions for securing biometric-linked digital identity. Learn about data protection, liveness detection, privacy by design, and emerging technologies.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-trust-securing-biometric-digital-identity-systems</link>
+            <guid isPermaLink="false">179</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Thu, 01 May 2025 10:23:19 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Large AI Models on Mobile: Architecture & Challenges]]></title>
+            <description><![CDATA[Explore the architecture & engineering challenges of integrating large AI models like Apple Intelligence & Gemini Nano directly onto mobile devices, covering performance, privacy, & resource management.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-large-ai-models-on-mobile-architecture-challenges</link>
+            <guid isPermaLink="false">178</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 30 Apr 2025 22:18:54 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Engineering Reliable Predictive AI Systems for Real-World IoT]]></title>
+            <description><![CDATA[Bridge the gap between lab accuracy and real-world reliability for AIoT. Explore engineering challenges in data, models, deployment, and uncertainty management for critical IoT systems.]]></description>
+            <link>https://blog.itsmeanand.com/posts/engineering-reliable-predictive-ai-systems-for-realworld-iot</link>
+            <guid isPermaLink="false">177</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 30 Apr 2025 17:15:57 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Technical Guide: Leveraging Open-Source AI Models for Development]]></title>
+            <description><![CDATA[Unlock the power of open-source AI models for your development projects. This technical guide covers selecting, deploying, and fine-tuning models like Llama, offering cost savings, flexibility, and control.]]></description>
+            <link>https://blog.itsmeanand.com/posts/technical-guide-leveraging-opensource-ai-models-for-development</link>
+            <guid isPermaLink="false">176</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Wed, 30 Apr 2025 10:53:08 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Analyzing Security Risks Introduced by AI Code Dependencies]]></title>
+            <description><![CDATA[AI coding assistants boost speed but risk security via dependencies. Explore dangers like hallucinated packages, outdated versions, and insecure use, plus mitigation strategies.]]></description>
+            <link>https://blog.itsmeanand.com/posts/analyzing-security-risks-introduced-by-ai-code-dependencies</link>
+            <guid isPermaLink="false">175</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Tue, 29 Apr 2025 22:28:49 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Juice Jacking Defenses: How a 'Trivial' Bypass Exposed Mobile Risks]]></title>
             <description><![CDATA[Explore the technical flaws that allowed a 'trivial' bypass of mobile OS defenses against juice jacking, exposing data theft risks via public USB charging ports.]]></description>
