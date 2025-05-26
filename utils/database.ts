@@ -208,3 +208,17 @@ export async function getAllPostsForRss(supabase: SupabaseClient): Promise<
     return []; // Return an empty array on failure
   }
 }
+
+export async function getAllPostsForSitemap(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug, created_at") // Ensure 'updated_at' exists or use 'created_at'
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching posts for sitemap:", error);
+    return [];
+  }
+  return data || [];
+}

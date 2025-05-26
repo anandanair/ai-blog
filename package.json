@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build  && npx tsx ./scripts/generate-rss.ts",
+    "build": "next build  && npx tsx ./scripts/generate-rss.ts && npx tsx ./scripts/generate-sitemap.ts",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sitemap": "npx tsx ./scripts/generate-sitemap.ts"
   },
   "dependencies": {
     "@google/genai": "^0.8.0",
