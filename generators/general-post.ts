@@ -168,6 +168,7 @@ ${categoryCountsText}
 3.  **Fresh & Distinctive (for this audience):**
     *   The topic should feel fresh and not like something they've read a hundred times in overly technical terms.
     *   It must not substantially overlap with the *intent* and *angle* of existing posts listed above, especially if those posts are already aimed at a general audience.
+    *   **Actively seek out diverse areas of technology. If the tech summary seems heavily weighted towards certain fields, try to find compelling general-audience angles in other less-covered tech domains if possible.**
 
 4.  **Focus on "What it Means for ME/US":**
     *   Prioritize topics that clearly explain the benefits, drawbacks, interesting uses, or societal implications of a technology.
@@ -180,8 +181,9 @@ ${categoryCountsText}
         *   Discussion of benefits, risks, or cool future possibilities.
     *   Avoid deep technical dives, engineering strategies, or code-level discussions.
 
-6.  **Category Consideration (Lightly):**
-    *   If a good, audience-appropriate topic aligns with an underrepresented category, that's a bonus, but **never sacrifice audience appeal or relevance for a category.**
+6.  **Strategic Category Selection:**
+    *   **Review the 'BLOG CATEGORY FOCUS'. If a compelling, audience-appropriate topic aligns with an underrepresented category, prioritize it.** While audience appeal is paramount, actively try to diversify category distribution when a strong topic allows.
+    *   **If multiple strong topic ideas emerge, lean towards one that helps balance out the category counts, especially if it avoids heavily saturated categories like AI & Machine Learning or Cybersecurity, unless the angle is exceptionally novel for a general reader.**
 
 **Please provide the information for the following fields:**
 -   **TOPIC_TITLE:** Your Chosen Topic Title Here (Catchy, clear, and for a general audience)
