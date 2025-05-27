@@ -29,7 +29,11 @@ export default function Navbar() {
       className="fixed w-full flex justify-center z-50 transition-transform duration-300"
       style={{ transform: visible ? "translateY(0)" : "translateY(-100%)" }}
     >
-      <nav className="mt-8 w-11/12 max-w-6xl mx-auto rounded-full bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-lg relative overflow-hidden border border-white/20 dark:border-gray-700/30">
+      <nav
+        className={`mt-8 w-11/12 max-w-6xl mx-auto bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-lg relative overflow-hidden border border-white/20 dark:border-gray-700/30 ${
+          isMenuOpen ? "rounded-3xl" : "rounded-full"
+        }`}
+      >
         {/* Enhanced glassmorphic effect with inner shadow */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5"></div>
 
@@ -116,33 +120,37 @@ export default function Navbar() {
         </div>
 
         {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1 px-4 backdrop-blur-lg bg-white/30 dark:bg-gray-900/30 rounded-b-3xl border-t border-white/20 dark:border-gray-700/30">
-              <Link
-                href="/"
-                className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Home
-              </Link>
-              <Link
-                href="/posts"
-                className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Blog
-              </Link>
-              <Link
-                href="/news"
-                className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Latest News
-              </Link>
-              <div className="px-3 py-2">
-                <ThemeToggle />
-              </div>
+        <div
+          className={`sm:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+            isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          }
+          `}
+        >
+          {/* Removed isMenuOpen && from here */}
+          <div className="pt-2 pb-3 space-y-1 px-4 backdrop-blur-lg bg-white/30 dark:bg-gray-900/30 rounded-b-3xl border-t border-white/20 dark:border-gray-700/30">
+            <Link
+              href="/"
+              className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
+            >
+              Home
+            </Link>
+            <Link
+              href="/posts"
+              className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
+            >
+              Blog
+            </Link>
+            <Link
+              href="/news"
+              className="text-gray-700 dark:text-gray-200 hover:bg-white/20 dark:hover:bg-gray-700/30 block px-3 py-2 rounded-md text-base font-medium"
+            >
+              Latest News
+            </Link>
+            <div className="px-3 py-2">
+              <ThemeToggle />
             </div>
           </div>
-        )}
+        </div>
       </nav>
     </div>
   );
