@@ -66,8 +66,8 @@ export async function getHackerNewsTopics(): Promise<string> {
       "https://hacker-news.firebaseio.com/v0/topstories.json"
     );
 
-    // Get the IDs of the top 1 story
-    const topStoryIds = topStoriesResponse.data.slice(0, 1);
+    // Get the IDs of the top 3 stories
+    const topStoryIds = topStoriesResponse.data.slice(0, 3);
 
     // Fetch details for each story
     let hackerNewsContext = "From HackerNews:\n";
