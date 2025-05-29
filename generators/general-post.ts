@@ -59,16 +59,18 @@ Always prioritize:
 
 Your goal is to help identify potential blog topics that will resonate with people who are interested in technology's impact on their lives but don't necessarily understand the deep technical details.`;
 
-  const techContextSummarizePrompt = `I will provide you with a compilation of recent tech news, trends, and discussions from various online sources.
+  const techContextSummarizePrompt = `
+I will provide you with a compilation of recent tech news, trends, and discussions from various online sources.
 
 Based on your role as a "Tech Translator for Everyone," process this information to achieve the following:
 
 1.  **Overall Tech Snapshot (for a layperson):** In 3-5 bullet points, provide a high-level summary of what's buzzing in the tech world *from the perspective of how it might affect or interest an average person*.
 
-2.  **Identify Emerging "Wow" or "Why Should I Care?" Topics:**
-    *   List 3-5 key developments, trends, or innovations from the text that have strong potential to capture the interest of a non-technical reader.
+2.  **Identify a DIVERSE Range of Emerging "Wow" or "Why Should I Care?" Topics:**
+    *   List 3-5 key developments, trends, or innovations from the text that have strong potential to capture the interest of a non-technical reader. **Aim for variety in the types of technologies or impact areas highlighted.**
     *   For each, briefly explain **what it is** (in very simple terms) and **why an average person might find it interesting, exciting, useful, or concerning.**
-    *   Group similar developments if they point to a larger, relatable trend.
+    *   If possible, try to identify at least one topic from a less obvious or less mainstream tech area mentioned in the context.
+    *   Group similar developments if they point to a larger, relatable trend, but ensure the overall list of trends is diverse.
 
 3.  **Spotlight on Impact:**
     *   Highlight any specific events, products, or controversies mentioned that have clear real-world implications or have sparked public discussion beyond the tech community.
@@ -77,7 +79,7 @@ Based on your role as a "Tech Translator for Everyone," process this information
 Important Reminders for this Specific Task:
 *   The output should be clean, structured, and directly usable for brainstorming blog topics for a general audience.
 *   Do not add any extra information not present in the input.
-*   Stick to the actual content and context provided, but *interpret and frame it* through the lens you've been given (Tech Translator for Everyone).
+*   Stick to the actual content and context provided, but *interpret and frame it* through the lens you've been given (Tech Translator for Everyone). **Emphasize breadth and diversity in the identified topics.**
 
 Here is the tech context:
 
@@ -143,32 +145,31 @@ Core Principles for Topic Selection:
 You are NOT trying to impress tech experts. You ARE trying to make technology accessible and fascinating for everyone.`;
 
   const topicSelectionPrompt = `
-Your task is to propose **ONE compelling blog topic** based on the provided tech context. This topic must be highly engaging for a **general, non-technical audience** – people who are curious about technology but don't have a deep technical background.
+Your task is to propose **ONE compelling blog topic** based on the provided tech context. This topic must be highly engaging for a **general, non-technical audience** – people who are curious about technology but don't have a deep technical background. **Crucially, the chosen topic must be thematically distinct from recently generated topics.**
 
 **LATEST TECH INSIGHTS (Summarized for a general audience):**
-${summarizedTechContext} 
+${summarizedTechContext}
 
-**EXISTING BLOG POST TITLES (to avoid duplication):**
-${existingTopicsContext} 
+**EXISTING BLOG POST TITLES (to avoid duplication of general themes):**
+${existingTopicsContext}
 
 **BLOG CATEGORY FOCUS (Optional Guide):**
-${categoryCountsText} 
+${categoryCountsText}
 
 **TOPIC SELECTION GUIDELINES (for a NON-TECHNICAL audience):**
 
-1.  **Broad Appeal & Curiosity:**
+1.  **Thematic Novelty & Broad Appeal:**
+    *   **PRIORITY 1: The topic MUST explore a technology area, angle, or theme that is significantly different from the 'EXISTING BLOG POST TITLES'. For example, if recent topics heavily featured 'old gadgets' or 'AI vulnerabilities', actively seek a different theme.**
     *   Choose a topic that answers a question an average person might have, explains a common tech interaction, or reveals a surprising aspect of how tech impacts daily life, work, or society.
     *   Think: "What would make someone click and read, even if they don't consider themselves 'into tech'?"
 
 2.  **Simple & Intriguing Framing:**
     *   The topic title should be catchy, use plain language, and clearly hint at the value or interest for the reader.
     *   Avoid technical jargon or overly niche concepts in the title.
-    *   *Examples of good angles:* "The Secret Tech That Powers Your Food Delivery," "Is Your Smart Speaker *Really* Listening? What You Need to Know," "Could This AI Write Your Next Email? The Future of [X]", "What Happens When Self-Driving Cars Make Mistakes?"
 
-3.  **Fresh & Distinctive (for this audience):**
-    *   The topic should feel fresh and not like something they've read a hundred times in overly technical terms.
-    *   It must not substantially overlap with the *intent* and *angle* of existing posts listed above, especially if those posts are already aimed at a general audience.
-    *   **Actively seek out diverse areas of technology. If the tech summary seems heavily weighted towards certain fields, try to find compelling general-audience angles in other less-covered tech domains if possible.**
+3.  **Fresh & Distinctive (Beyond Recent Topics):**
+    *   The topic should feel fresh.
+    *   It must not substantially overlap with the *intent* and *angle* of 'EXISTING BLOG POST TITLES', especially if those posts are already aimed at a general audience.
 
 4.  **Focus on "What it Means for ME/US":**
     *   Prioritize topics that clearly explain the benefits, drawbacks, interesting uses, or societal implications of a technology.
@@ -182,13 +183,13 @@ ${categoryCountsText}
     *   Avoid deep technical dives, engineering strategies, or code-level discussions.
 
 6.  **Strategic Category Selection:**
-    *   **Review the 'BLOG CATEGORY FOCUS'. If a compelling, audience-appropriate topic aligns with an underrepresented category, prioritize it.** While audience appeal is paramount, actively try to diversify category distribution when a strong topic allows.
-    *   **If multiple strong topic ideas emerge, lean towards one that helps balance out the category counts, especially if it avoids heavily saturated categories like AI & Machine Learning or Cybersecurity, unless the angle is exceptionally novel for a general reader.**
+    *   Review the 'BLOG CATEGORY FOCUS'. If a compelling, audience-appropriate topic aligns with an underrepresented category (and meets the thematic novelty requirement), prioritize it.
+    *   If multiple strong topic ideas emerge, lean towards one that helps balance out the category counts and strongly differs from recent topics.
 
 **Please provide the information for the following fields:**
--   **TOPIC_TITLE:** Your Chosen Topic Title Here (Catchy, clear, and for a general audience)
+-   **TOPIC_TITLE:** Your Chosen Topic Title Here (Catchy, clear, for a general audience, and thematically novel)
 -   **HOOK_DESCRIPTION:** 1-2 concise sentences that would make a non-technical person want to read this post. Explain what it's about and *why it's interesting or relevant to them*.
--   **POTENTIAL_SEARCH_QUERIES:** 3-5 simple, natural language search phrases an average person (not a tech expert) might type into Google if they were curious about this subject. (e.g., "how does facial recognition work," "is AI safe," "what's new with smart homes").
+-   **POTENTIAL_SEARCH_QUERIES:** 3-5 simple, natural language search phrases an average person (not a tech expert) might type into Google if they were curious about this subject.
 
 **The output will be structured as JSON according to the defined schema.**
 `;
