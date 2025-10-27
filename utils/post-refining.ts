@@ -90,7 +90,7 @@ Carefully rewrite and refine the **entire draft** based on all the above criteri
 
   try {
     const refinedResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-preview-05-20",
+      model: "gemini-2.5-flash",
       contents: refinementPrompt,
       config: {
         temperature: 0.5,
@@ -173,7 +173,7 @@ export async function finalPolish(
 
   try {
     const polishResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-preview-05-20",
+      model: "gemini-2.5-flash",
       contents: polishPrompt,
       config: {
         thinkingConfig: { thinkingBudget: 0 },

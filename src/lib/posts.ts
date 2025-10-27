@@ -96,14 +96,9 @@ export const getSortedPostsData = cache(
       const ftsQuery = searchTerm
         .split(" ")
         .filter((s) => s)
-        .join(" & "); // Example: 'hello world' -> 'hello & world'
+        .join(" & "); 
       queryBuilder = queryBuilder.textSearch("fts_document", ftsQuery, {
-        // type: 'plain', // or 'phrase' or 'websearch'
-        // config: 'english' // if your tsvector column is language-specific
       });
-      // query = query.or(
-      //   `title.ilike.%${options.query}%,description.ilike.%${options.query}%`
-      // );
     }
 
     // Apply tags filter if provided

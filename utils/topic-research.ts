@@ -127,7 +127,7 @@ If you use external search (which is expected), please ensure the information is
     try {
       // --- 3b. Call Gemini API with Grounding Enabled (v2.0 style) ---
       const researchResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash-preview-05-20",
+        model: "gemini-2.5-flash",
         contents: [researchPrompt],
         config: {
           thinkingConfig: { thinkingBudget: 0 },
