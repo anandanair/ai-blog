@@ -87,7 +87,6 @@ ${techContext}
 `;
   const techContextSummaryRespone = await genAI.models.generateContent({
     model: "gemini-2.5-flash",
-    // model: "gemini-2.0-flash",
     config: {
       thinkingConfig: { thinkingBudget: 0 },
       systemInstruction: techContextSummarizeSystemPrompt,
@@ -224,7 +223,6 @@ ${categoryCountsText}
     // Generate topic selection using AI
     const topicSelectionResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash",
-      // model: "gemini-2.0-flash",
       config: {
         thinkingConfig: { thinkingBudget: 0 },
         systemInstruction: topicSelectionSystemPrompt,
@@ -367,7 +365,6 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
 
     const outlineResponse = await genAI.models.generateContent({
       model: "gemini-2.5-flash",
-      // model: "gemini-2.0-flash",
       config: {
         thinkingConfig: { thinkingBudget: 0 },
         systemInstruction: outlineSystemPrompt,
@@ -648,19 +645,10 @@ ${researchFindingsString}
 
   try {
     // --- 3. Call Gemini API ---
-    // const countTokensResponse = await genAI.models.countTokens({
-    //   model: "gemini-2.5-pro-exp-03-25",
-    //   // model: "gemini-2.5-flash-preview-04-17",
-    //   contents: generationPrompt,
-    // });
-    // console.log("Tokens:", countTokensResponse);
-
     const draftResponse = await genAI.models.generateContent({
-      // model: "gemini-2.5-pro-exp-03-25",
       model: "gemini-2.5-flash",
       contents: generationPrompt,
       config: {
-        // thinkingConfig: { thinkingBudget: 0 },
         systemInstruction: generationSystemPrompt,
         temperature: 0.6,
       },
