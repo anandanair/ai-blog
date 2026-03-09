@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
   generateAndUploadImage,
@@ -86,9 +86,9 @@ Here is the tech context:
 ${techContext}
 `;
   const techContextSummaryRespone = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.1-flash-lite-preview",
     config: {
-      thinkingConfig: { thinkingBudget: 0 },
+      thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
       systemInstruction: techContextSummarizeSystemPrompt,
     },
     contents: techContextSummarizePrompt,
@@ -222,9 +222,9 @@ ${categoryCountsText}
   try {
     // Generate topic selection using AI
     const topicSelectionResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       config: {
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         systemInstruction: topicSelectionSystemPrompt,
         responseMimeType: "application/json",
         responseSchema: topicSelectionResponseSchema,
@@ -364,9 +364,9 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
     `;
 
     const outlineResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       config: {
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         systemInstruction: outlineSystemPrompt,
       },
       contents: outlinePrompt,
@@ -646,11 +646,12 @@ ${researchFindingsString}
   try {
     // --- 3. Call Gemini API ---
     const draftResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: generationPrompt,
       config: {
         systemInstruction: generationSystemPrompt,
-        temperature: 0.6,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+        temperature: 1,
       },
     });
     const draftMarkdown = draftResponse.text;

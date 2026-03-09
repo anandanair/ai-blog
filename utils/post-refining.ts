@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 /**
  * Stage 6: Evaluates and refines the blog post draft using an LLM.
@@ -90,12 +90,12 @@ Carefully rewrite and refine the **entire draft** based on all the above criteri
 
   try {
     const refinedResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       contents: refinementPrompt,
       config: {
         temperature: 0.5,
         systemInstruction: refinementSystemPrompt,
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
       },
     });
     const refinedMarkdown = refinedResponse.text;
@@ -173,10 +173,10 @@ export async function finalPolish(
 
   try {
     const polishResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       contents: polishPrompt,
       config: {
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         temperature: 0.1,
       },
     });

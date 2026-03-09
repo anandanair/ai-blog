@@ -1,6 +1,6 @@
 import { lint as lintSync } from "markdownlint/sync";
 import { applyFixes } from "markdownlint";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 /**
  * Stage 8 : Uses AI to validate and potentially fix common Markdown formatting issues.
@@ -82,10 +82,10 @@ export async function validateMarkdownSyntax(
   try {
     const validationResponse = await genAI.models.generateContent({
       // model: "gemini-2.5-pro-exp-03-25",
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       contents: validationPrompt,
       config: {
-        // thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         temperature: 0.1,
       },
     });

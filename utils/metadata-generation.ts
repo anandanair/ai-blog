@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import { calculateReadTime } from "./helpers";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getAllCategories } from "./database";
@@ -161,10 +161,10 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
   try {
     // --- 3. Call Gemini API ---
     const metedataResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       contents: metadataPrompt,
       config: {
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         temperature: 0.5,
         responseMimeType: "application/json",
         systemInstruction: metadataSystemPrompt,

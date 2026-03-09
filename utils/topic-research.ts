@@ -1,4 +1,9 @@
-import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
+import {
+  GoogleGenAI,
+  HarmBlockThreshold,
+  HarmCategory,
+  ThinkingLevel,
+} from "@google/genai";
 
 // --- Constants ---
 // Set this to true during development/testing to limit API calls
@@ -45,16 +50,16 @@ const safetySettings = [
 export async function researchTopicWithGrounding(
   genAI: GoogleGenAI,
   outlineMarkdown: string,
-  topic: string
+  topic: string,
 ): Promise<Map<string, GroundedResearchResult>> {
   console.log(
-    "\n🔍 Starting Research Stage using Gemini 2.5 Flash with Grounding Search..."
+    "\n🔍 Starting Research Stage using Gemini 2.5 Flash with Grounding Search...",
   );
   console.log(`📝 Topic: "${topic}"`);
 
   if (IS_TESTING_MODE) {
     console.warn(
-      `🧪 TESTING MODE ACTIVE: Research limited to ${MAX_RESEARCH_POINTS_FOR_TESTING} points.`
+      `🧪 TESTING MODE ACTIVE: Research limited to ${MAX_RESEARCH_POINTS_FOR_TESTING} points.`,
     );
   }
 
@@ -76,7 +81,7 @@ export async function researchTopicWithGrounding(
       trimmedLine.startsWith("## ")
     ) {
       allResearchPoints.push(
-        trimmedLine.substring(trimmedLine.indexOf(" ") + 1).trim()
+        trimmedLine.substring(trimmedLine.indexOf(" ") + 1).trim(),
       );
     }
   });
@@ -87,7 +92,7 @@ export async function researchTopicWithGrounding(
     : allResearchPoints; // Use all points if not testing
 
   console.log(
-    `🔎 Found ${allResearchPoints.length} research points, processing ${pointsToSearch.length} points.`
+    `🔎 Found ${allResearchPoints.length} research points, processing ${pointsToSearch.length} points.`,
   );
 
   for (const [index, point] of pointsToSearch.entries()) {
@@ -121,16 +126,16 @@ If you use external search (which is expected), please ensure the information is
     `;
 
     console.log(
-      `[${index + 1}/${pointsToSearch.length}] 🔍 Researching: "${point}"`
+      `[${index + 1}/${pointsToSearch.length}] 🔍 Researching: "${point}"`,
     );
 
     try {
       // --- 3b. Call Gemini API with Grounding Enabled (v2.0 style) ---
       const researchResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.1-flash-lite-preview",
         contents: [researchPrompt],
         config: {
-          thinkingConfig: { thinkingBudget: 0 },
+          thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
           systemInstruction: systemPrompt,
           safetySettings,
           temperature: 0.5,
@@ -179,7 +184,7 @@ If you use external search (which is expected), please ensure the information is
       }
     } catch (error: any) {
       console.error(
-        `❌ Error researching "${point}": ${error?.message || error}`
+        `❌ Error researching "${point}": ${error?.message || error}`,
       );
       if (error.response?.candidates?.[0]?.finishReason === "SAFETY") {
         console.error("  ⛔ Blocked due to safety settings");
@@ -192,7 +197,7 @@ If you use external search (which is expected), please ensure the information is
   }
 
   console.log(
-    `\n✅ Research Stage Completed: ${researchData.size}/${pointsToSearch.length} points processed successfully.`
+    `\n✅ Research Stage Completed: ${researchData.size}/${pointsToSearch.length} points processed successfully.`,
   );
   return researchData;
 }
