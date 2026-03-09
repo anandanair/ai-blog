@@ -1,5 +1,6 @@
 import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { generateContentWithRateLimit } from "../utils/rate-limiter";
 import {
   generateAndUploadImage,
   extractMarkdownContent,
@@ -85,7 +86,7 @@ Here is the tech context:
 
 ${techContext}
 `;
-  const techContextSummaryRespone = await genAI.models.generateContent({
+  const techContextSummaryRespone = await generateContentWithRateLimit(genAI, {
     model: "gemini-3.1-flash-lite-preview",
     config: {
       thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
@@ -221,7 +222,7 @@ ${categoryCountsText}
 
   try {
     // Generate topic selection using AI
-    const topicSelectionResponse = await genAI.models.generateContent({
+    const topicSelectionResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3.1-flash-lite-preview",
       config: {
         thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
@@ -363,7 +364,7 @@ ${searchTerms}
 Important: Output *only* the raw Markdown content for the outline, starting directly with the first heading (e.g., '## Hook 'Em In: Why [Topic] is More Interesting Than You Think!'). Do not include any extra text or explanations.
     `;
 
-    const outlineResponse = await genAI.models.generateContent({
+    const outlineResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3.1-flash-lite-preview",
       config: {
         thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
@@ -645,7 +646,7 @@ ${researchFindingsString}
 
   try {
     // --- 3. Call Gemini API ---
-    const draftResponse = await genAI.models.generateContent({
+    const draftResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3-flash-preview",
       contents: generationPrompt,
       config: {

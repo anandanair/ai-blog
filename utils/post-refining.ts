@@ -1,4 +1,5 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { generateContentWithRateLimit } from "./rate-limiter";
 
 /**
  * Stage 6: Evaluates and refines the blog post draft using an LLM.
@@ -89,7 +90,7 @@ Carefully rewrite and refine the **entire draft** based on all the above criteri
   `;
 
   try {
-    const refinedResponse = await genAI.models.generateContent({
+    const refinedResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3.1-flash-lite-preview",
       contents: refinementPrompt,
       config: {
@@ -172,7 +173,7 @@ export async function finalPolish(
   `;
 
   try {
-    const polishResponse = await genAI.models.generateContent({
+    const polishResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3.1-flash-lite-preview",
       contents: polishPrompt,
       config: {

@@ -2,6 +2,7 @@ import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import { calculateReadTime } from "./helpers";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getAllCategories } from "./database";
+import { generateContentWithRateLimit } from "./rate-limiter";
 
 // Define this in a types file or at the top
 export interface BlogPostMetadata {
@@ -160,7 +161,7 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
 
   try {
     // --- 3. Call Gemini API ---
-    const metedataResponse = await genAI.models.generateContent({
+    const metedataResponse = await generateContentWithRateLimit(genAI, {
       model: "gemini-3.1-flash-lite-preview",
       contents: metadataPrompt,
       config: {

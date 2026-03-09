@@ -1,6 +1,7 @@
 import { lint as lintSync } from "markdownlint/sync";
 import { applyFixes } from "markdownlint";
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { generateContentWithRateLimit } from "./rate-limiter";
 
 /**
  * Stage 8 : Uses AI to validate and potentially fix common Markdown formatting issues.
@@ -80,7 +81,7 @@ export async function validateMarkdownSyntax(
   };
 
   try {
-    const validationResponse = await genAI.models.generateContent({
+    const validationResponse = await generateContentWithRateLimit(genAI, {
       // model: "gemini-2.5-pro-exp-03-25",
       model: "gemini-3.1-flash-lite-preview",
       contents: validationPrompt,

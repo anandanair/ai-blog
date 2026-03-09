@@ -4,6 +4,7 @@ import {
   HarmCategory,
   ThinkingLevel,
 } from "@google/genai";
+import { generateContentWithRateLimit } from "./rate-limiter";
 
 // --- Constants ---
 // Set this to true during development/testing to limit API calls
@@ -131,7 +132,7 @@ If you use external search (which is expected), please ensure the information is
 
     try {
       // --- 3b. Call Gemini API with Grounding Enabled (v2.0 style) ---
-      const researchResponse = await genAI.models.generateContent({
+      const researchResponse = await generateContentWithRateLimit(genAI, {
         model: "gemini-3.1-flash-lite-preview",
         contents: [researchPrompt],
         config: {
@@ -193,6 +194,14 @@ If you use external search (which is expected), please ensure the information is
         groundedText: `Error fetching research: ${error?.message}`,
         sources: [],
       });
+    }
+
+    // Add a small explicit delay in the console to show pacing between research queries
+    if (index < pointsToSearch.length - 1) {
+      console.log(
+        `  ⏳ Waiting 5 seconds before researching the next point...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 

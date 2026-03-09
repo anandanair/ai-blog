@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenAI, Modality } from "@google/genai";
 import { GroundedResearchResult } from "./topic-research";
+import { generateContentWithRateLimit } from "./rate-limiter";
 
 const AVERAGE_WPM = 225;
 
@@ -50,8 +51,9 @@ export async function generateAndUploadImage(
   console.log(`⏳ Generating image`);
   // console.log(`⏳ Generating image for: "${imageDescription}"`);
   try {
-    const imageGenResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-image",
+    const imageGenResponse = await generateContentWithRateLimit(genAI, {
+      // model: "gemini-2.5-flash-image",
+      model: "imagen-4.0-fast-generate-001",
       contents: `Generate an image for: ${imageDescription}`,
       config: {
         responseModalities: [Modality.TEXT, Modality.IMAGE],
