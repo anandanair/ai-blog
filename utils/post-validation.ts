@@ -19,7 +19,7 @@ import { GoogleGenAI } from "@google/genai";
 export async function validateMarkdownSyntax(
   genAI: GoogleGenAI,
   markdownContent: string,
-  contentIdentifier: string = "blogPostDraft"
+  contentIdentifier: string = "blogPostDraft",
 ): Promise<string> {
   // AI Validation
   const validationPrompt = `You are a Markdown formatting validator and fixer.
@@ -104,7 +104,7 @@ export async function validateMarkdownSyntax(
 
     if (errors && errors.length > 0) {
       console.warn(
-        `❌ Markdown validation found ${errors.length} issue(s) in "${contentIdentifier}":`
+        `❌ Markdown validation found ${errors.length} issue(s) in "${contentIdentifier}":`,
       );
 
       // Try applying fixes
@@ -118,7 +118,7 @@ export async function validateMarkdownSyntax(
   } catch (error: any) {
     console.error(
       `❌ An unexpected error occurred during Markdown validation:`,
-      error?.message || error
+      error?.message || error,
     );
     return markdownContent;
   }

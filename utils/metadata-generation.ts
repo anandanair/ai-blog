@@ -15,7 +15,7 @@ export interface BlogPostMetadata {
 
 /**
  * Stage 7: Generates metadata for the blog post.
- * @param genAI Initialized GoogleGenerativeAI client.
+ * @param genAI Initialized GoogleGenAI client.
  * @param supabase Initialized Supabase client.
  * @param refinedBlogDraft The final refined Markdown content of the post.
  * @param topic The original topic for context.
@@ -25,7 +25,7 @@ export async function generateMetadata(
   genAI: GoogleGenAI,
   supabase: SupabaseClient,
   refinedBlogDraft: string,
-  topic: string
+  topic: string,
 ): Promise<BlogPostMetadata | null> {
   // --- 0. Fetch Categories ---
   let categories: { id: number; title: string }[] = []; // Use id: number
@@ -212,7 +212,7 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
       !categories.some((cat) => cat.id === parsedMetadata.category)
     ) {
       console.warn(
-        `⚠️ LLM returned category ID ${parsedMetadata.category} which is not in the fetched list.`
+        `⚠️ LLM returned category ID ${parsedMetadata.category} which is not in the fetched list.`,
       );
     }
 
@@ -239,7 +239,7 @@ Do NOT include any other text, explanations, or markdown formatting outside the 
   } catch (error: any) {
     console.error(
       "❌ Error generating metadata from LLM:",
-      error?.message || error
+      error?.message || error,
     );
     const candidate = error.response?.candidates?.[0];
     if (candidate?.finishReason === "SAFETY") {

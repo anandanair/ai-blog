@@ -28,13 +28,13 @@ import { generateMetadata } from "../utils/metadata-generation";
  * 4. Post refinement and validation
  * 5. Image generation and database storage
  *
- * @param genAI - Google Generative AI client instance
+ * @param genAI - Google GenAI client instance
  * @param supabase - Supabase client for database operations
  * @returns Promise<boolean> - Success status of the post generation process
  */
 export async function generateGeneralPost(
   genAI: GoogleGenAI,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ): Promise<boolean> {
   console.log("\n--- Generating General Post ---");
 
@@ -246,7 +246,7 @@ ${categoryCountsText}
     } catch (e) {
       console.error(
         "❌ Failed to parse JSON from AI response for topic selection:",
-        e
+        e,
       );
       console.error("Raw AI response:", topicJsonString);
       return false;
@@ -260,7 +260,7 @@ ${categoryCountsText}
       !selectedTopicData.POTENTIAL_SEARCH_QUERIES
     ) {
       console.error(
-        "❌ Missing one or more required fields in the parsed JSON topic selection."
+        "❌ Missing one or more required fields in the parsed JSON topic selection.",
       );
       console.error("Parsed data:", selectedTopicData);
       return false;
@@ -380,7 +380,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
     const researchResults = await researchTopicWithGrounding(
       genAI,
       outlineText,
-      selectedTopic
+      selectedTopic,
     );
 
     // Stage 5: Draft Generation
@@ -389,7 +389,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
       genAI,
       selectedTopic,
       outlineText,
-      researchResults
+      researchResults,
     );
 
     // STAGE 6: Content Evaluation & Refinement
@@ -398,7 +398,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
       genAI,
       blogDraft || "",
       outlineText,
-      selectedTopic
+      selectedTopic,
     );
 
     // STAGE 7: Final Polish (Removing Meta-Commentary)
@@ -411,7 +411,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
       genAI,
       supabase,
       polishedDraft || "",
-      selectedTopic
+      selectedTopic,
     );
 
     // STAGE 9: Markdown Validation
@@ -419,7 +419,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
     const validatedMarkdown = await validateMarkdownSyntax(
       genAI,
       polishedDraft || "",
-      selectedTopic
+      selectedTopic,
     );
 
     // STAGE 10: Image Generation and Upload
@@ -428,7 +428,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
       genAI,
       supabase,
       blogMetadata?.imagePrompt || "",
-      blogMetadata?.title || ""
+      blogMetadata?.title || "",
     );
 
     // STAGE 11: Save to Supabase Database
@@ -455,7 +455,7 @@ Important: Output *only* the raw Markdown content for the outline, starting dire
 
 /**
  * Stage 5: Generates the first draft of the blog post using the outline and research findings.
- * @param genAI Initialized GoogleGenerativeAI client.
+ * @param genAI Initialized GoogleGenAI client.
  * @param topic The main topic of the blog post.
  * @param outlineMarkdown The structured outline in Markdown.
  * @param researchResults Map containing grounded research for outline points.
@@ -465,7 +465,7 @@ export async function generateDraft(
   genAI: GoogleGenAI,
   topic: string,
   outlineMarkdown: string,
-  researchResults: Map<string, GroundedResearchResult>
+  researchResults: Map<string, GroundedResearchResult>,
 ): Promise<string | null> {
   // --- 1. Prepare Research Input for Prompt ---
   let researchFindingsString = "RESEARCH FINDINGS (Cite using ID):\n\n";
@@ -507,7 +507,7 @@ export async function generateDraft(
         (entry) =>
           `ID: ${entry.id}\nOutline Point: "${entry.point}"\nGrounded Text: ${
             entry.text
-          } ${entry.sourcesText || ""}\n`
+          } ${entry.sourcesText || ""}\n`,
       )
       .join("\n");
   } else {
@@ -670,13 +670,13 @@ ${researchFindingsString}
   } catch (error: any) {
     console.error(
       "❌ Error generating blog post draft:",
-      error?.message || error
+      error?.message || error,
     );
     if (error.response?.candidates?.[0]?.finishReason === "SAFETY") {
       console.error("   -> Blocked due to safety settings.");
     } else if (error.response?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
       console.error(
-        "   -> Draft generation stopped due to maximum token limit."
+        "   -> Draft generation stopped due to maximum token limit.",
       );
     }
     return null;

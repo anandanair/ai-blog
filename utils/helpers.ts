@@ -32,7 +32,7 @@ export async function generateAndUploadImage(
   genAI: GoogleGenAI,
   supabase: SupabaseClient,
   imageDescription: string,
-  title: string
+  title: string,
 ): Promise<string | null> {
   let publicImageUrl: string | null = null;
   const baseImageFileName = generateFileName(title);
@@ -42,7 +42,7 @@ export async function generateAndUploadImage(
 
   if (!imageDescription) {
     console.warn(
-      "⚠️ No image description provided. Skipping image generation."
+      "⚠️ No image description provided. Skipping image generation.",
     );
     return null;
   }
@@ -51,7 +51,7 @@ export async function generateAndUploadImage(
   // console.log(`⏳ Generating image for: "${imageDescription}"`);
   try {
     const imageGenResponse = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: "gemini-2.5-flash-image",
       contents: `Generate an image for: ${imageDescription}`,
       config: {
         responseModalities: [Modality.TEXT, Modality.IMAGE],
@@ -59,14 +59,14 @@ export async function generateAndUploadImage(
     });
 
     const imagePart = imageGenResponse.candidates?.[0]?.content?.parts?.find(
-      (part) => part.inlineData
+      (part) => part.inlineData,
     );
     if (imagePart?.inlineData?.data) {
       const imageData = imagePart.inlineData.data;
       const buffer = Buffer.from(imageData, "base64");
 
       console.log(
-        `⏳ Uploading image to Supabase Storage`
+        `⏳ Uploading image to Supabase Storage`,
         // `⏳ Uploading image to Supabase Storage: ${imageBucket}/${imagePathInBucket}`
       );
 
@@ -95,7 +95,7 @@ export async function generateAndUploadImage(
     } else {
       console.warn("⚠️ Image generation response did not contain image data.");
       const textPart = imageGenResponse.candidates?.[0]?.content?.parts?.find(
-        (part) => part.text
+        (part) => part.text,
       );
       if (textPart?.text) {
         console.log(`Image generation model text response: ${textPart.text}`);
@@ -117,13 +117,13 @@ export function parsePostResponse(text: string, type: "general" | "tool") {
   const readTimeMatch = text.match(/READ_TIME:\s*(\d+)(?=\n|$)/);
   const tagsMatch = text.match(/TAGS:\s*(.*?)(?=\n|$)/);
   const contentMatch = text.match(
-    /CONTENT:\s*([\s\S]*?)(?=\n(?:TOOL_NAME:|TITLE:|DESCRIPTION:|IMAGE_DESCRIPTION:|READ_TIME:|TAGS:)|$)/
+    /CONTENT:\s*([\s\S]*?)(?=\n(?:TOOL_NAME:|TITLE:|DESCRIPTION:|IMAGE_DESCRIPTION:|READ_TIME:|TAGS:)|$)/,
   );
 
   // Basic validation
   if (!titleMatch || !descMatch || !imageDescMatch || !contentMatch) {
     console.error(
-      "❌ Failed to parse essential fields (Title, Desc, ImageDesc, Content) from Gemini response."
+      "❌ Failed to parse essential fields (Title, Desc, ImageDesc, Content) from Gemini response.",
     );
     return null;
   }
@@ -175,9 +175,9 @@ export function parsePostResponse(text: string, type: "general" | "tool") {
     content = content.replace(
       new RegExp(
         `^(?:#+\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\n+)`,
-        "i"
+        "i",
       ),
-      ""
+      "",
     );
   }
 
@@ -224,7 +224,7 @@ export function calculateReadTime(text: string): number {
 
 // Helper function (can be in utils or near savePostToDatabase)
 export function formatResearchForStorage(
-  researchResults: Map<string, GroundedResearchResult>
+  researchResults: Map<string, GroundedResearchResult>,
 ): Array<{ point: string; data: GroundedResearchResult }> | null {
   if (!researchResults || researchResults.size === 0) {
     return null; // Or return [] if you prefer an empty array

@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 /**
  * Stage 6: Evaluates and refines the blog post draft using an LLM.
- * @param genAI Initialized GoogleGenerativeAI client.
+ * @param genAI Initialized GoogleGenAI client.
  * @param originalDraft The Markdown draft generated in Stage 5.
  * @param outlineMarkdown The original outline used for generation.
  * @param topic The main topic of the blog post.
@@ -12,7 +12,7 @@ export async function refineDraft(
   genAI: GoogleGenAI,
   originalDraft: string,
   outlineMarkdown: string,
-  topic: string
+  topic: string,
 ): Promise<string | null> {
   // --- Craft the Refinement Prompt ---
 
@@ -116,7 +116,7 @@ Carefully rewrite and refine the **entire draft** based on all the above criteri
   } catch (error: any) {
     console.error(
       "❌ Error refining blog post draft:",
-      error?.message || error
+      error?.message || error,
     );
     const candidate = error.response?.candidates?.[0];
     if (candidate?.finishReason === "SAFETY") {
@@ -132,13 +132,13 @@ Carefully rewrite and refine the **entire draft** based on all the above criteri
 
 /**
  * Stage 7: Performs a final polish pass to remove meta-commentary from the draft.
- * @param genAI Initialized GoogleGenerativeAI client.
+ * @param genAI Initialized GoogleGenAI client.
  * @param potentiallyUnpolishedDraft The draft potentially containing LLM notes (output of refineDraft).
  * @returns The polished blog post draft as a Markdown string, or null on failure.
  */
 export async function finalPolish(
   genAI: GoogleGenAI,
-  potentiallyUnpolishedDraft: string
+  potentiallyUnpolishedDraft: string,
 ): Promise<string | null> {
   if (!potentiallyUnpolishedDraft) {
     console.warn("Skipping polish stage due to empty input draft.");
@@ -188,11 +188,11 @@ export async function finalPolish(
       if (potentiallyUnpolishedDraft.length > 50) {
         // Arbitrary threshold
         console.warn(
-          "⚠️ LLM returned an empty polished draft from non-empty input. Check original draft."
+          "⚠️ LLM returned an empty polished draft from non-empty input. Check original draft.",
         );
         // Decide: return original? return null? For safety, let's return original with warning
         console.warn(
-          "   Returning the pre-polish draft due to empty polish result."
+          "   Returning the pre-polish draft due to empty polish result.",
         );
         return potentiallyUnpolishedDraft;
       } else {
@@ -211,7 +211,7 @@ export async function finalPolish(
     if (cleanedPolishedDraft.length < potentiallyUnpolishedDraft.length * 0.8) {
       // If more than 20% shorter
       console.log(
-        `   Note: Polish stage significantly shortened the content (original: ${potentiallyUnpolishedDraft.length} chars, polished: ${cleanedPolishedDraft.length} chars).`
+        `   Note: Polish stage significantly shortened the content (original: ${potentiallyUnpolishedDraft.length} chars, polished: ${cleanedPolishedDraft.length} chars).`,
       );
     } else {
       console.log("Polish stage completed.");
@@ -220,7 +220,7 @@ export async function finalPolish(
   } catch (error: any) {
     console.error(
       "❌ Error during final polish stage:",
-      error?.message || error
+      error?.message || error,
     );
     const candidate = error.response?.candidates?.[0];
     if (candidate?.finishReason === "SAFETY") {
