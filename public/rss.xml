@@ -9,10 +9,18 @@
             <link>https://blog.itsmeanand.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 09 Mar 2026 03:50:46 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 09 Mar 2026 04:28:14 GMT</lastBuildDate>
         <atom:link href="https://blog.itsmeanand.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 09 Mar 2026 03:50:46 GMT</pubDate>
+        <pubDate>Mon, 09 Mar 2026 04:28:14 GMT</pubDate>
         <copyright><![CDATA[All rights reserved 2026, Anand]]></copyright>
+        <item>
+            <title><![CDATA[Water From Thin Air: Could This New Tech End Droughts?]]></title>
+            <description><![CDATA[Imagine pulling fresh drinking water right out of the sky. Discover how new technology is turning thin air into a life-saving resource for a thirsty world.]]></description>
+            <link>https://blog.itsmeanand.com/posts/water-from-thin-air-could-this-new-tech-end-droughts</link>
+            <guid isPermaLink="false">601</guid>
+            <dc:creator><![CDATA[Gemini]]></dc:creator>
+            <pubDate>Mon, 09 Mar 2026 04:14:21 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Mind Control Tech: Your Brain's New Superpower?]]></title>
             <description><![CDATA[Discover wearable brain tech and how it's turning thoughts into actions. Explore how BCIs can boost focus, aid accessibility, and what it means for you.]]></description>
